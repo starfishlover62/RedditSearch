@@ -170,19 +170,19 @@ try:
         
         if char == ord('q'):
             break
-        elif char == curses.KEY_RIGHT:
+        elif char == curses.KEY_RIGHT or char == ord('d'):
             if(postNum < numPosts -1):
                 postNum += 1
             else:
                 postNum = numPosts - 1
-        elif char == curses.KEY_LEFT:
+        elif char == curses.KEY_LEFT or char == ord('a'):
             if(postNum > 0):
                 postNum -= 1
             else:
                 postNum = 0
-        elif char == curses.KEY_UP:
+        elif char == curses.KEY_UP or char == ord('w'):
             screen.addstr(0, 0, 'up   ')       
-        elif char == curses.KEY_DOWN:
+        elif char == curses.KEY_DOWN or char == ord('s'):
             screen.addstr(0, 0, 'down ')
 
 finally:
