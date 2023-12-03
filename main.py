@@ -150,6 +150,16 @@ try:
     postNum = 0
     lineNum = 0
     browseMode = True
+
+    headers = []
+    ticker = 1
+    for post in posts:
+        age = int(currentTime-post.created_utc)
+        header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
+        for line in header:
+            headers.append(line)
+        ticker += 1
+
     while True:
         screen.clear()
         
@@ -166,13 +176,20 @@ try:
             except TypeError:
                 screen.addstr(curses.LINES,0,"error")
                 break
-
-            screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->  (press q to quit)")
+            
+            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+            screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->")
             screen.refresh()
             char = screen.getch()
             
             if char == ord('q'):
-                break
+                browseMode = True
+                continue
+
+
+
+
+            # Rework to scroll through one post, probably should scroll up and down? Maybe left/right could change posts
             elif char == curses.KEY_RIGHT or char == ord('d'):
                 if(postNum < numPosts -1):
                     postNum += 1
@@ -188,14 +205,7 @@ try:
             elif char == curses.KEY_DOWN or char == ord('s'):
                 screen.addstr(0, 0, 'down ')
         else:
-            headers = []
-            ticker = 1
-            for post in posts:
-                age = int(currentTime-post.created_utc)
-                header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
-                for line in header:
-                    headers.append(line)
-                ticker += 1
+            
 
             ticker = 0
             for i in range(lineNum,(lineNum+curses.LINES-1)):
@@ -243,6 +253,17 @@ try:
                 # Undo displaying input and requiring enter be pressed
                 curses.noecho()
                 curses.cbreak()
+
+                val = 0
+                try:
+                    val = int(string)
+                except ValueError:
+                    continue
+
+                val -= 1
+                if(val >= 0 and val < numPosts):
+                    browseMode = False
+                    postNum = val
 
             
 
