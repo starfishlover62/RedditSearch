@@ -223,18 +223,24 @@ try:
             elif char == ord('e'):
                 screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
                 screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-                c = screen.getch()
+                c = screen.getch() # Allows immediate exit if they press q
                 if c == ord('q'):
                     continue
+
+                # Otherwise update prompt
                 screen.addstr(curses.LINES-1,0,"")
                 screen.clrtoeol()
                 screen.refresh()
                 screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
                 screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+
+                # Display what they type, and require they press enter
                 curses.echo()
                 curses.nocbreak()
-                curses.ungetch(c)
+                curses.ungetch(c) # Adds the first character back to the buffer
                 string = screen.getstr()
+
+                # Undo displaying input and requiring enter be pressed
                 curses.noecho()
                 curses.cbreak()
 
