@@ -190,9 +190,9 @@ try:
         else:
             headers = []
             ticker = 1
-            for item in posts:
+            for post in posts:
                 age = int(currentTime-post.created_utc)
-                header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80))
+                header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
                 for line in header:
                     headers.append(line)
                 ticker += 1
@@ -203,7 +203,7 @@ try:
                 ticker += 1
             
             screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
-            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} --> ")
+            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
             screen.refresh()
             char = screen.getch()
 
