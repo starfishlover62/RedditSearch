@@ -94,15 +94,21 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     for item in stringList:
         if(item != None):
-            tempStr = tabulate(item,textBoxWidth,leftPadding+1)
-            listStrings = tempStr.splitlines()
-            # print(listStrings)
-            for line in listStrings:
-                line = "|" + line[1:]
-                if(len(line) < boxWidth - 1):
-                    line += spacesString((boxWidth-len(line)-1))
-                line += "|\n"
-                boxStr += line
+            if(item == "%separator%"):
+                boxStr += "+"
+                for i in range(boxWidth-2):
+                    boxStr += "-"
+                boxStr += "+\n"
+            else:
+                tempStr = tabulate(item,textBoxWidth,leftPadding+1)
+                listStrings = tempStr.splitlines()
+                # print(listStrings)
+                for line in listStrings:
+                    line = "|" + line[1:]
+                    if(len(line) < boxWidth - 1):
+                        line += spacesString((boxWidth-len(line)-1))
+                    line += "|\n"
+                    boxStr += line
 
     if(boxStr[-1] != "\n" ):
         boxStr += "\n"
