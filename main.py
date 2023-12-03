@@ -3,6 +3,7 @@ import os
 import pprint
 
 import praw
+import curses
 
 
 from termcolor import colored, cprint
@@ -102,7 +103,7 @@ else:
         ticker += 1
         print(f"{ticker}.")
         age = int(currentTime-post.created_utc)
-        functions.enbox([post.title,post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80)
+        print(functions.enbox([post.title,post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80))
         # pprint.pprint(vars(post)) #prints all possible variables for post
 
 
@@ -128,7 +129,7 @@ while(True):
                 continue
 
             if(menu == 1):
-                functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80)
+                print(functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80))
             elif(menu == 2):
                 functions.copyToClipboard(posts[response-1].url)
             elif(menu == 3):
@@ -139,15 +140,47 @@ while(True):
 
     break
       
+screen = curses.initscr()
+curses.noecho()
+curses.cbreak()
+screen.keypad(True)
 
-#         print(post.title)
-#         print(colored(post.link_flair_text, "red"))
-#         print(post.author)
+try:
+    numPosts = len(posts)
+    postNum = 0
+    while True:
+        screen.clear()
+        try:
+            s = functions.enboxList([posts[postNum].title,"%separator%",posts[response-1].selftext],curses.COLS)
+            num = 0
+            for item in s:
+                screen.addstr(num,0,str(item))
+                num += 1
+            screen.addstr(num,0,str(posts[postNum].url))
+        except TypeError:
+            screen.addstr(curses.LINES,0,"error")
+            break
+
+        char = screen.getch()
         
+        if char == ord('q'):
+            break
+        elif char == curses.KEY_RIGHT:
+            if(postNum < numPosts -1):
+                postNum += 1
+            else:
+                postNum = numPosts - 1
+        elif char == curses.KEY_LEFT:
+            if(postNum > 0):
+                postNum -= 1
+            else:
+                postNum = 0
+        elif char == curses.KEY_UP:
+            screen.addstr(0, 0, 'up   ')       
+        elif char == curses.KEY_DOWN:
+            screen.addstr(0, 0, 'down ')
 
-        
-#         print(f"Created: {functions.formatAge(age)} ago")
-#         print(post.url)
-
-    
+finally:
+    curses.nocbreak(); screen.keypad(0); curses.echo()
+    curses.endwin()
 
