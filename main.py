@@ -202,7 +202,8 @@ try:
                 screen.addstr(ticker,0,headers[i])
                 ticker += 1
             
-            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->  (press q to quit) {len(headers)}")
+            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
+            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} --> ")
             screen.refresh()
             char = screen.getch()
 
@@ -219,6 +220,24 @@ try:
                     lineNum += 1
                 else:
                     lineNum = len(headers) - curses.LINES + 1
+            elif char == ord('e'):
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                c = screen.getch()
+                if c == ord('q'):
+                    continue
+                screen.addstr(curses.LINES-1,0,"")
+                screen.clrtoeol()
+                screen.refresh()
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                curses.echo()
+                curses.nocbreak()
+                curses.ungetch(c)
+                string = screen.getstr()
+                curses.noecho()
+                curses.cbreak()
+
             
 
 finally:
