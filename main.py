@@ -150,17 +150,22 @@ try:
     postNum = 0
     while True:
         screen.clear()
+        
         try:
-            s = functions.enboxList([posts[postNum].title,"%separator%",posts[response-1].selftext],curses.COLS)
+            s = functions.enboxList([posts[postNum].title,"%separator%",posts[postNum].selftext],curses.COLS)
             num = 0
             for item in s:
                 screen.addstr(num,0,str(item))
                 num += 1
+                if(num >= curses.LINES - 3): # Buggy, need better solution (error is thrown if more than 24 lines)
+                    break
             screen.addstr(num,0,str(posts[postNum].url))
         except TypeError:
             screen.addstr(curses.LINES,0,"error")
             break
 
+        screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->  (press q to quit)")
+        screen.refresh()
         char = screen.getch()
         
         if char == ord('q'):
