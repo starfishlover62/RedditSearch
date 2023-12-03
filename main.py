@@ -148,42 +148,78 @@ screen.keypad(True)
 try:
     numPosts = len(posts)
     postNum = 0
+    lineNum = 0
+    browseMode = True
     while True:
         screen.clear()
         
-        try:
-            s = functions.enboxList([posts[postNum].title,"%separator%",posts[postNum].selftext],curses.COLS)
-            num = 0
-            for item in s:
-                screen.addstr(num,0,str(item))
-                num += 1
-                if(num >= curses.LINES - 3): # Buggy, need better solution (error is thrown if more than 24 lines)
-                    break
-            screen.addstr(num,0,str(posts[postNum].url))
-        except TypeError:
-            screen.addstr(curses.LINES,0,"error")
-            break
+        if(not browseMode):
+            try:
+                s = functions.enboxList([posts[postNum].title,"%separator%",posts[postNum].selftext],curses.COLS)
+                num = 0
+                for item in s:
+                    screen.addstr(num,0,str(item))
+                    num += 1
+                    if(num >= curses.LINES - 3): # Buggy, need better solution (error is thrown if more than 24 lines)
+                        break
+                screen.addstr(num,0,str(posts[postNum].url))
+            except TypeError:
+                screen.addstr(curses.LINES,0,"error")
+                break
 
-        screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->  (press q to quit)")
-        screen.refresh()
-        char = screen.getch()
-        
-        if char == ord('q'):
-            break
-        elif char == curses.KEY_RIGHT or char == ord('d'):
-            if(postNum < numPosts -1):
-                postNum += 1
-            else:
-                postNum = numPosts - 1
-        elif char == curses.KEY_LEFT or char == ord('a'):
-            if(postNum > 0):
-                postNum -= 1
-            else:
-                postNum = 0
-        elif char == curses.KEY_UP or char == ord('w'):
-            screen.addstr(0, 0, 'up   ')       
-        elif char == curses.KEY_DOWN or char == ord('s'):
-            screen.addstr(0, 0, 'down ')
+            screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->  (press q to quit)")
+            screen.refresh()
+            char = screen.getch()
+            
+            if char == ord('q'):
+                break
+            elif char == curses.KEY_RIGHT or char == ord('d'):
+                if(postNum < numPosts -1):
+                    postNum += 1
+                else:
+                    postNum = numPosts - 1
+            elif char == curses.KEY_LEFT or char == ord('a'):
+                if(postNum > 0):
+                    postNum -= 1
+                else:
+                    postNum = 0
+            elif char == curses.KEY_UP or char == ord('w'):
+                screen.addstr(0, 0, 'up   ')       
+            elif char == curses.KEY_DOWN or char == ord('s'):
+                screen.addstr(0, 0, 'down ')
+        else:
+            headers = []
+            ticker = 1
+            for item in posts:
+                age = int(currentTime-post.created_utc)
+                header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80))
+                for line in header:
+                    headers.append(line)
+                ticker += 1
+
+            ticker = 0
+            for i in range(lineNum,(lineNum+curses.LINES-1)):
+                screen.addstr(ticker,0,headers[i])
+                ticker += 1
+            
+            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->  (press q to quit) {len(headers)}")
+            screen.refresh()
+            char = screen.getch()
+
+            
+            if char == ord('q'):
+                break
+            elif char == curses.KEY_UP or char == ord('w'):
+                if(lineNum > 0):
+                    lineNum -= 1
+                else:
+                    lineNum = 0      
+            elif char == curses.KEY_DOWN or char == ord('s'):
+                if(lineNum < len(headers) - curses.LINES + 1):
+                    lineNum += 1
+                else:
+                    lineNum = len(headers) - curses.LINES + 1
+            
 
 finally:
     curses.nocbreak(); screen.keypad(0); curses.echo()
