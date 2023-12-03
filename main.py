@@ -1,4 +1,5 @@
 import sys
+import os
 import pprint
 
 import praw
@@ -8,6 +9,7 @@ from termcolor import colored, cprint
 
 import functions
 import config
+
 
 
 # Read-only instance
@@ -61,7 +63,7 @@ for sub in subs:
         #print(f"Created: ({int(currentTime-post.created_utc)}s ago)")
         #print(post.author_flair_text)
 
-        #pprint.pprint(vars(post)) #prints all possible variables for post
+        
         # print()
     # print()
     print()
@@ -90,16 +92,61 @@ else:
     cprint("Posts matching filters:","yellow")
     
     currentSubreddit = ""
+    ticker = 0
     for post in posts:
         if(post.subreddit_name_prefixed != currentSubreddit):
             currentSubreddit = post.subreddit_name_prefixed
             print()
             cprint(currentSubreddit,"green")
             print()
-        
-        print()
+        ticker += 1
+        print(f"{ticker}.")
         age = int(currentTime-post.created_utc)
         functions.enbox([post.title,post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80)
+        # pprint.pprint(vars(post)) #prints all possible variables for post
+
+
+while(True):
+    response = input("Enter the number of a post above for more options: ")
+    if(response.lower() == 'r'):
+        print("Refresh command")
+    else:
+        try:
+            response = int(response)
+        except ValueError:
+            print("Invalid input")
+            continue
+
+        if(response <= 0 or response > len(posts)):
+            print("The value entered is out of bounds.")
+            continue
+
+        print("Would you like to: ")
+        print("1. Display post")
+        print("2. Copy post URL")
+        print("3. Display post URL")
+        print("4. Copy URL to message user")
+        menu = input("Enter 1-4: ")
+        try:
+            menu = int(menu)
+        except ValueError:
+            print("Invalid input")
+            continue
+
+        if(menu <= 0 or menu > 4):
+            print("The value entered is out of bounds.")
+            continue
+
+        if(menu == 1):
+            functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80)
+        elif(menu == 2):
+            functions.copyToClipboard(posts[response-1].url)
+        elif(menu == 3):
+            print(posts[response-1].url)
+        elif(menu == 4):
+            print("Function to copy chat url")
+    break
+      
 
 #         print(post.title)
 #         print(colored(post.link_flair_text, "red"))
