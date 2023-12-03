@@ -121,30 +121,22 @@ while(True):
             print("The value entered is out of bounds.")
             continue
 
-        print("Would you like to: ")
-        print("1. Display post")
-        print("2. Copy post URL")
-        print("3. Display post URL")
-        print("4. Copy URL to message user")
-        menu = input("Enter 1-4: ")
-        try:
-            menu = int(menu)
-        except ValueError:
-            print("Invalid input")
-            continue
+        while(True):
+            print("menu")
+            menu = functions.getInput("Would you like to:\n1. Display post\n2. Copy post URL\n3. Display post URL\n4. Copy URL to message user",1,4,3)
+            if(menu == -1):
+                continue
 
-        if(menu <= 0 or menu > 4):
-            print("The value entered is out of bounds.")
-            continue
+            if(menu == 1):
+                functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80)
+            elif(menu == 2):
+                functions.copyToClipboard(posts[response-1].url)
+            elif(menu == 3):
+                print(posts[response-1].url)
+            elif(menu == 4):
+                print("Function to copy chat url")
+            break
 
-        if(menu == 1):
-            functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80)
-        elif(menu == 2):
-            functions.copyToClipboard(posts[response-1].url)
-        elif(menu == 3):
-            print(posts[response-1].url)
-        elif(menu == 4):
-            print("Function to copy chat url")
     break
       
 

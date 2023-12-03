@@ -123,3 +123,19 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
 def copyToClipboard(string):
     pyperclip.copy(string)
+
+def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
+    if(lowerBound < 0  or upperBound < 0):
+        return -1
+    attempts = 0
+    if(numAttempts <= 0):
+        attempts = numAttempts - 1
+    while(attempts < numAttempts):
+        try:
+            value = int(input(f"{prompt}\n"))
+        except ValueError:
+            attempts += 1
+            continue
+        return value
+    return -1
+
