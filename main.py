@@ -1,0 +1,114 @@
+import sys
+import pprint
+
+import praw
+
+
+from termcolor import colored, cprint
+
+import functions
+import config
+
+
+# Read-only instance
+reddit_read_only = praw.Reddit(client_id=config.client_id,         # your client id
+                               client_secret=config.client_secret,      # your client secret
+                               user_agent=config.client_secret)        # your user agent
+
+subs = config.subReddits
+numPostsPerSub = 5
+
+desiredFlair = config.desiredFlair # Posts with at least one of these flairs will be kept
+desiredTitle = config.desiredTitle # Posts with at least one of these titles will be kept
+posts = []
+
+postAgeLimit = 86400 * 2 # 2 days old
+
+lowerAgeBound = 18
+upperAgeBound = 23
+
+numScraped = 0
+for sub in subs:
+    #print(f"{sub}:")
+    subreddit = reddit_read_only.subreddit(sub)
+    #pprint.pprint(vars(subreddit)) #prints all possible variables for subreddit
+
+
+    currentTime = functions.currentTimestamp()
+    for post in subreddit.new(limit = numPostsPerSub):
+        numScraped += 1
+        #print(post.subreddit_name_prefixed)
+        needToSearchFlair = True;
+
+        title = post.title
+        for t in desiredTitle:
+            if(title != None and t.lower() in title.lower()):
+                # print(f"{colored(t,'red')} found in {title}")
+                posts.append(post)
+                needToSearchFlair = False;
+                break
+
+        if(needToSearchFlair):
+            flair = post.link_flair_text
+            for f in desiredFlair:
+                if(flair != None and f.lower() in flair.lower()):
+                    # print(f"{f} found in {flair}")
+                    posts.append(post)
+                    break
+
+
+
+        #print(f"Created: ({int(currentTime-post.created_utc)}s ago)")
+        #print(post.author_flair_text)
+
+        #pprint.pprint(vars(post)) #prints all possible variables for post
+        # print()
+    # print()
+    print()
+
+# Displays how many posts were searched through, and how many matched the criteria
+print(f"Scraped {numScraped} post(s). Found {len(posts)} post(s) matching the criteria")
+
+if (not posts): # If no posts were found matching the criteria
+    
+    # Lists all the flairs in desiredFlairs
+    flairs = ""
+    for flair in desiredFlair:
+        flairs += flair + ", "
+    flairs = flairs.removesuffix(", ")
+    
+    # Lists all the titles in desiredTitles
+    titles = ""
+    for title in desiredTitle:
+        titles += title + ", "
+    titles = titles.removesuffix(", ")
+
+    # Prints information
+    print(f"No posts were found containing the flairs: {flairs} or containing: {titles} in the title")
+else:
+    print()
+    cprint("Posts matching filters:","yellow")
+    
+    currentSubreddit = ""
+    for post in posts:
+        if(post.subreddit_name_prefixed != currentSubreddit):
+            currentSubreddit = post.subreddit_name_prefixed
+            print()
+            cprint(currentSubreddit,"green")
+            print()
+        
+        print()
+        age = int(currentTime-post.created_utc)
+        functions.enbox([post.title,post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80)
+
+#         print(post.title)
+#         print(colored(post.link_flair_text, "red"))
+#         print(post.author)
+        
+
+        
+#         print(f"Created: {functions.formatAge(age)} ago")
+#         print(post.url)
+
+    
+
