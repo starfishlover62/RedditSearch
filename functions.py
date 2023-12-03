@@ -118,7 +118,51 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
         boxStr += "-"
     boxStr += "+"
 
-    print(boxStr)
+    return boxStr
+
+
+def enboxList(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0):
+    boxWidth = terminalWidth - (leftMargin + rightMargin)
+    textBoxWidth = boxWidth - (leftPadding + rightPadding)
+
+    s = []
+
+    boxStr = "+"
+    for i in range(boxWidth-2):
+        boxStr += "-"
+    boxStr += "+"
+    s.append(boxStr)
+    boxStr = ""
+
+    for item in stringList:
+        if(item != None):
+            if(item == "%separator%"):
+                boxStr += "+"
+                for i in range(boxWidth-2):
+                    boxStr += "-"
+                boxStr += "+"
+                s.append(boxStr)
+                boxStr = ""
+            else:
+                tempStr = tabulate(item,textBoxWidth,leftPadding+1)
+                listStrings = tempStr.splitlines()
+                # print(listStrings)
+                for line in listStrings:
+                    line = "|" + line[1:]
+                    if(len(line) < boxWidth - 1):
+                        line += spacesString((boxWidth-len(line)-1))
+                    line += "|"
+                    s.append(line)
+
+    
+    boxStr += "+"
+    for i in range(boxWidth-2):
+        boxStr += "-"
+    boxStr += "+"
+    s.append(boxStr)
+    boxStr = ""
+
+    return s
 
 
 def copyToClipboard(string):
