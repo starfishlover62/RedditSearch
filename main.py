@@ -5,6 +5,7 @@ import pprint
 import praw
 import curses
 import webbrowser
+import configparser
 
 
 from termcolor import colored, cprint
@@ -131,11 +132,16 @@ else:
 #             break
 
 #     break
+
+
+
+
+# Beginning of the curses window
       
 screen = curses.initscr()
-curses.noecho()
-curses.cbreak()
-screen.keypad(True)
+curses.noecho() # Does not display what user types
+curses.cbreak() # User does not have to press enter for the input buffer to be read
+screen.keypad(True) # Converts keys like arrow keys to a specific value
 
 try:
     numPosts = len(posts)
