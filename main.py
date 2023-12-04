@@ -107,38 +107,38 @@ else:
         # pprint.pprint(vars(post)) #prints all possible variables for post
 
 
-while(True):
-    response = input("Enter the number of a post above for more options: ")
-    if(response.lower() == 'r'):
-        print("Refresh command")
-    else:
-        try:
-            response = int(response)
-        except ValueError:
-            print("Invalid input")
-            continue
+# while(True):
+#     response = input("Enter the number of a post above for more options: ")
+#     if(response.lower() == 'r'):
+#         print("Refresh command")
+#     else:
+#         try:
+#             response = int(response)
+#         except ValueError:
+#             print("Invalid input")
+#             continue
 
-        if(response <= 0 or response > len(posts)):
-            print("The value entered is out of bounds.")
-            continue
+#         if(response <= 0 or response > len(posts)):
+#             print("The value entered is out of bounds.")
+#             continue
 
-        while(True):
-            print("menu")
-            menu = functions.getInput("Would you like to:\n1. Display post\n2. Copy post URL\n3. Display post URL\n4. Copy URL to message user",1,4,3)
-            if(menu == -1):
-                continue
+#         while(True):
+#             print("menu")
+#             menu = functions.getInput("Would you like to:\n1. Display post\n2. Copy post URL\n3. Display post URL\n4. Copy URL to message user",1,4,3)
+#             if(menu == -1):
+#                 continue
 
-            if(menu == 1):
-                print(functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80))
-            elif(menu == 2):
-                functions.copyToClipboard(posts[response-1].url)
-            elif(menu == 3):
-                print(posts[response-1].url)
-            elif(menu == 4):
-                print("Function to copy chat url")
-            break
+#             if(menu == 1):
+#                 print(functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80))
+#             elif(menu == 2):
+#                 functions.copyToClipboard(posts[response-1].url)
+#             elif(menu == 3):
+#                 print(posts[response-1].url)
+#             elif(menu == 4):
+#                 print("Function to copy chat url")
+#             break
 
-    break
+#     break
       
 screen = curses.initscr()
 curses.noecho()
