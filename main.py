@@ -160,56 +160,30 @@ try:
             headers.append(line)
         ticker += 1
 
+    lessThanFull = False
+    if(len(headers) < curses.LINES - 2):
+        lessThanFull = True
+
     while True:
         screen.clear()
         
         if(not browseMode):
-            try:
-                s = functions.enboxList([posts[postNum].title,"%separator%",posts[postNum].selftext],curses.COLS)
-                num = 0
-                for item in s:
-                    screen.addstr(num,0,str(item))
-                    num += 1
-                    if(num >= curses.LINES - 3): # Buggy, need better solution (error is thrown if more than 24 lines)
-                        break
-                screen.addstr(num,0,str(posts[postNum].url))
-            except TypeError:
-                screen.addstr(curses.LINES,0,"error")
-                break
-            
-            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-            screen.addstr(curses.LINES-1,0,f"<-- Post {postNum+1} -->")
-            screen.refresh()
-            char = screen.getch()
-            
-            if char == ord('q'):
-                browseMode = True
-                continue
+            functions.viewPost(posts[postNum],screen)
+            browseMode = True
 
-
-
-
-            # Rework to scroll through one post, probably should scroll up and down? Maybe left/right could change posts
-            elif char == curses.KEY_RIGHT or char == ord('d'):
-                if(postNum < numPosts -1):
-                    postNum += 1
-                else:
-                    postNum = numPosts - 1
-            elif char == curses.KEY_LEFT or char == ord('a'):
-                if(postNum > 0):
-                    postNum -= 1
-                else:
-                    postNum = 0
-            elif char == curses.KEY_UP or char == ord('w'):
-                screen.addstr(0, 0, 'up   ')       
-            elif char == curses.KEY_DOWN or char == ord('s'):
-                screen.addstr(0, 0, 'down ')
         else:
             
 
             ticker = 0
-            for i in range(lineNum,(lineNum+curses.LINES-1)):
+            end = len(headers)
+            if(lineNum+curses.LINES-1 < end):
+                end = lineNum+curses.LINES-2
+
+            for i in range(lineNum,end):
+                # print(i)
+                # screen.getch()
                 screen.addstr(ticker,0,headers[i])
+                
                 ticker += 1
             
             screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
@@ -220,17 +194,18 @@ try:
             
             if char == ord('q'):
                 break
-            elif char == curses.KEY_UP or char == ord('w'):
-                if(lineNum > 0):
-                    lineNum -= 1
-                else:
-                    lineNum = 0      
-            elif char == curses.KEY_DOWN or char == ord('s'):
-                if(lineNum < len(headers) - curses.LINES + 1):
-                    lineNum += 1
-                else:
-                    lineNum = len(headers) - curses.LINES + 1
-            elif char == ord('e'):
+            if(not lessThanFull):
+                if char == curses.KEY_UP or char == ord('w'):
+                    if(lineNum > 0):
+                        lineNum -= 1
+                    else:
+                        lineNum = 0      
+                elif char == curses.KEY_DOWN or char == ord('s'):
+                    if(lineNum < len(headers) - curses.LINES + 2):
+                        lineNum += 1
+                    else:
+                        lineNum = len(headers) - curses.LINES + 2
+            if char == ord('e'):
                 screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
                 screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
                 c = screen.getch() # Allows immediate exit if they press q
