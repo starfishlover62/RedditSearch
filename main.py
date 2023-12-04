@@ -4,6 +4,7 @@ import pprint
 
 import praw
 import curses
+import webbrowser
 
 
 from termcolor import colored, cprint
@@ -59,15 +60,6 @@ for sub in subs:
                     posts.append(post)
                     break
 
-
-
-        #print(f"Created: ({int(currentTime-post.created_utc)}s ago)")
-        #print(post.author_flair_text)
-
-        
-        # print()
-    # print()
-    print()
 
 # Displays how many posts were searched through, and how many matched the criteria
 print(f"Scraped {numScraped} post(s). Found {len(posts)} post(s) matching the criteria")
