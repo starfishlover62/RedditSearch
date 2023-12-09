@@ -12,6 +12,7 @@ from termcolor import colored, cprint
 
 import functions
 import config
+import search
 
 
 
@@ -21,6 +22,7 @@ reddit_read_only = praw.Reddit(client_id=config.client_id,         # your client
                                user_agent=config.client_secret)        # your user agent
 
 subs = config.subReddits
+searchesPath = config.searches_file
 numPostsPerSub = 5
 
 desiredFlair = config.desiredFlair # Posts with at least one of these flairs will be kept
@@ -33,6 +35,10 @@ lowerAgeBound = 18
 upperAgeBound = 23
 
 numScraped = 0
+
+
+# Gets the matching posts from the search
+"""
 for sub in subs:
     #print(f"{sub}:")
     subreddit = reddit_read_only.subreddit(sub)
@@ -99,144 +105,186 @@ else:
         print(functions.enbox([post.title,post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],80))
         # pprint.pprint(vars(post)) #prints all possible variables for post
 
+"""
 
-# while(True):
-#     response = input("Enter the number of a post above for more options: ")
-#     if(response.lower() == 'r'):
-#         print("Refresh command")
-#     else:
-#         try:
-#             response = int(response)
-#         except ValueError:
-#             print("Invalid input")
-#             continue
+"""
+while(True):
+    response = input("Enter the number of a post above for more options: ")
+    if(response.lower() == 'r'):
+        print("Refresh command")
+    else:
+        try:
+            response = int(response)
+        except ValueError:
+            print("Invalid input")
+            continue
 
-#         if(response <= 0 or response > len(posts)):
-#             print("The value entered is out of bounds.")
-#             continue
+        if(response <= 0 or response > len(posts)):
+            print("The value entered is out of bounds.")
+            continue
 
-#         while(True):
-#             print("menu")
-#             menu = functions.getInput("Would you like to:\n1. Display post\n2. Copy post URL\n3. Display post URL\n4. Copy URL to message user",1,4,3)
-#             if(menu == -1):
-#                 continue
+        while(True):
+            print("menu")
+            menu = functions.getInput("Would you like to:\n1. Display post\n2. Copy post URL\n3. Display post URL\n4. Copy URL to message user",1,4,3)
+            if(menu == -1):
+                continue
 
-#             if(menu == 1):
-#                 print(functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80))
-#             elif(menu == 2):
-#                 functions.copyToClipboard(posts[response-1].url)
-#             elif(menu == 3):
-#                 print(posts[response-1].url)
-#             elif(menu == 4):
-#                 print("Function to copy chat url")
-#             break
+            if(menu == 1):
+                print(functions.enbox([posts[response-1].title,"%separator%",posts[response-1].selftext],80))
+            elif(menu == 2):
+                functions.copyToClipboard(posts[response-1].url)
+            elif(menu == 3):
+                print(posts[response-1].url)
+            elif(menu == 4):
+                print("Function to copy chat url")
+            break
 
-#     break
+    break
+"""
 
 
 
 
 # Beginning of the curses window
-      
+
+
+#"""
+# Initialization work
 screen = curses.initscr()
 curses.noecho() # Does not display what user types
 curses.cbreak() # User does not have to press enter for the input buffer to be read
 screen.keypad(True) # Converts keys like arrow keys to a specific value
 
+minTermLines = 24
+minTermCols = 80
+if(curses.LINES < minTermLines or curses.COLS < minTermCols):
+    curses.nocbreak(); screen.keypad(0); curses.echo()
+    curses.endwin()
+    print(f"The current terminal size {curses.LINES}x{curses.COLS} is too small. The minimum size supported is {minTermLines}x{minTermCols}")
+    exit()
+
+searches = []
 try:
-    numPosts = len(posts)
-    postNum = 0
-    lineNum = 0
-    browseMode = True
+    searches = functions.getSearches(searchesPath)
+except FileNotFoundError:
+    searches = []
 
-    headers = []
-    ticker = 1
-    for post in posts:
-        age = int(currentTime-post.created_utc)
-        header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
-        for line in header:
-            headers.append(line)
-        ticker += 1
+numPosts = len(posts)
+postNum = 0
+lineNum = 0
+browseMode = True
+choosingSearches = True
+searchIndex = 0
 
-    lessThanFull = False
-    if(len(headers) < curses.LINES - 2):
-        lessThanFull = True
+headers = []
+ticker = 1
+for post in posts:
+    age = int(functions.currentTime()-post.created_utc)
+    header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
+    for line in header:
+        headers.append(line)
+    ticker += 1
+
+lessThanFull = False
+if(len(headers) < curses.LINES - 2):
+    lessThanFull = True
+      
+
+
+try:
+    
 
     while True:
         screen.clear()
+
+        if(choosingSearches):
+            if(searches):
+                counter = 0
+                for item in searches:
+                    screen.addstr(counter,0,item.name)
+                    counter = counter + 1
+            else:
+                screen.addstr(0,0,"No searches found. Press e to create a new search.")
+                screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
+                screen.addstr(2,0,f"The current searches file is {searchesPath}. Is this correct?")
+                screen.addstr(3,0,f"If not, edit the value of searches_file in config.py")
         
-        if(not browseMode):
-            functions.viewPost(posts[postNum],screen)
-            browseMode = True
+        char = screen.getch()  
+        if char == ord('q'):
+            break
+        
+        # elif(not browseMode):
+        #     functions.viewPost(posts[postNum],screen)
+        #     browseMode = True
 
-        else:
+        # else:
             
 
-            ticker = 0
-            end = len(headers)
-            if(lineNum+curses.LINES-1 < end):
-                end = lineNum+curses.LINES-2
+        #     ticker = 0
+        #     end = len(headers)
+        #     if(lineNum+curses.LINES-1 < end):
+        #         end = lineNum+curses.LINES-2
 
-            for i in range(lineNum,end):
-                # print(i)
-                # screen.getch()
-                screen.addstr(ticker,0,headers[i])
+        #     for i in range(lineNum,end):
+        #         # print(i)
+        #         # screen.getch()
+        #         screen.addstr(ticker,0,headers[i])
                 
-                ticker += 1
+        #         ticker += 1
             
-            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
-            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
-            screen.refresh()
-            char = screen.getch()
+        #     screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
+        #     screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
+        #     screen.refresh()
+        #     char = screen.getch()
 
             
-            if char == ord('q'):
-                break
-            if(not lessThanFull):
-                if char == curses.KEY_UP or char == ord('w'):
-                    if(lineNum > 0):
-                        lineNum -= 1
-                    else:
-                        lineNum = 0      
-                elif char == curses.KEY_DOWN or char == ord('s'):
-                    if(lineNum < len(headers) - curses.LINES + 2):
-                        lineNum += 1
-                    else:
-                        lineNum = len(headers) - curses.LINES + 2
-            if char == ord('e'):
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-                c = screen.getch() # Allows immediate exit if they press q
-                if c == ord('q'):
-                    continue
+        #     if char == ord('q'):
+        #         break
+        #     if(not lessThanFull):
+        #         if char == curses.KEY_UP or char == ord('w'):
+        #             if(lineNum > 0):
+        #                 lineNum -= 1
+        #             else:
+        #                 lineNum = 0      
+        #         elif char == curses.KEY_DOWN or char == ord('s'):
+        #             if(lineNum < len(headers) - curses.LINES + 2):
+        #                 lineNum += 1
+        #             else:
+        #                 lineNum = len(headers) - curses.LINES + 2
+        #     if char == ord('e'):
+        #         screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+        #         screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+        #         c = screen.getch() # Allows immediate exit if they press q
+        #         if c == ord('q'):
+        #             continue
 
-                # Otherwise update prompt
-                screen.addstr(curses.LINES-1,0,"")
-                screen.clrtoeol()
-                screen.refresh()
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+        #         # Otherwise update prompt
+        #         screen.addstr(curses.LINES-1,0,"")
+        #         screen.clrtoeol()
+        #         screen.refresh()
+        #         screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
+        #         screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
 
-                # Display what they type, and require they press enter
-                curses.echo()
-                curses.nocbreak()
-                curses.ungetch(c) # Adds the first character back to the buffer
-                string = screen.getstr()
+        #         # Display what they type, and require they press enter
+        #         curses.echo()
+        #         curses.nocbreak()
+        #         curses.ungetch(c) # Adds the first character back to the buffer
+        #         string = screen.getstr()
 
-                # Undo displaying input and requiring enter be pressed
-                curses.noecho()
-                curses.cbreak()
+        #         # Undo displaying input and requiring enter be pressed
+        #         curses.noecho()
+        #         curses.cbreak()
 
-                val = 0
-                try:
-                    val = int(string)
-                except ValueError:
-                    continue
+        #         val = 0
+        #         try:
+        #             val = int(string)
+        #         except ValueError:
+        #             continue
 
-                val -= 1
-                if(val >= 0 and val < numPosts):
-                    browseMode = False
-                    postNum = val
+        #         val -= 1
+        #         if(val >= 0 and val < numPosts):
+        #             browseMode = False
+        #             postNum = val
 
             
 
@@ -244,3 +292,4 @@ finally:
     curses.nocbreak(); screen.keypad(0); curses.echo()
     curses.endwin()
 
+#"""
