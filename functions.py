@@ -51,6 +51,20 @@ def getNumPosts(reddit, searchCriteria, numPosts = 20):
 
     return posts
 
+def saveSearches(searches, filepath = "searches.json"):
+    dumpStr = '{"searches":['
+    for item in searches:
+        dumpStr.append("{")
+        dumpStr.append(f'name:"{item.name}",')
+        dumpStr.append(f'"lastSearchTime":{item.lastSearchTime},')
+        dumpStr.append(f'"subreddits":[')
+        for sub in item.subreddits:
+            dumpStr.append(f'"name":{sub.subreddit},')
+            for i in sub.titleWL:
+                dumpStr.append(f'')
+    with open(filepath,"w") as write:
+        json.dump(searches,filepath,indent=2)
+
 
 """
 Return values:

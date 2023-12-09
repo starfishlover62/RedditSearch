@@ -15,11 +15,14 @@ import config
 import search
 
 
+if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
+    print("Either the client id, client secret, or user agent are not specified. Please enter these values in config.py")
+    exit()
 
 # Read-only instance
 reddit_read_only = praw.Reddit(client_id=config.client_id,         # your client id
                                client_secret=config.client_secret,      # your client secret
-                               user_agent=config.client_secret)        # your user agent
+                               user_agent=config.user_agent)        # your user agent
 
 subs = config.subReddits
 searchesPath = config.searches_file
@@ -176,20 +179,19 @@ browseMode = True
 choosingSearches = True
 searchIndex = 0
 
-headers = []
-ticker = 1
-for post in posts:
-    age = int(functions.currentTime()-post.created_utc)
-    header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
-    for line in header:
-        headers.append(line)
-    ticker += 1
+# headers = []
+# ticker = 1
+# for post in posts:
+#     age = int(functions.currentTimestamp()-post.created_utc)
+#     header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
+#     for line in header:
+#         headers.append(line)
+#     ticker += 1
 
-lessThanFull = False
-if(len(headers) < curses.LINES - 2):
-    lessThanFull = True
+# lessThanFull = False
+# if(len(headers) < curses.LINES - 2):
+#     lessThanFull = True
       
-
 
 try:
     
@@ -199,92 +201,100 @@ try:
 
         if(choosingSearches):
             if(searches):
-                counter = 0
-                for item in searches:
-                    screen.addstr(counter,0,item.name)
-                    counter = counter + 1
+                searchIndex = functions.getSearch(screen, searches)
+                if(searchIndex == -1):
+                    break
+                choosingSearches = False
+                # If older than 7 days
+                if(functions.currentTimestamp() - searches[searchIndex].lastSearchTime > 604800):
+                    time = functions.currentTimestamp()
+                    posts = functions.getNumPosts(reddit_read_only,searches[searchIndex],50)
+                    searches[searchIndex].lastSearchTime = time
+                    functions.saveSearches(searches,searchesPath)
+                    
+
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
                 screen.addstr(2,0,f"The current searches file is {searchesPath}. Is this correct?")
-                screen.addstr(3,0,f"If not, edit the value of searches_file in config.py")
+                screen.addstr(3,0,"If not, edit the value of searches_file in config.py")
         
         char = screen.getch()  
         if char == ord('q'):
             break
         
-        # elif(not browseMode):
-        #     functions.viewPost(posts[postNum],screen)
-        #     browseMode = True
+        elif(not browseMode):
+            functions.viewPost(posts[postNum],screen)
+            browseMode = True
 
-        # else:
+        else:
             
 
-        #     ticker = 0
-        #     end = len(headers)
-        #     if(lineNum+curses.LINES-1 < end):
-        #         end = lineNum+curses.LINES-2
+            ticker = 0
+            end = len(headers)
+            if(lineNum+curses.LINES-1 < end):
+                end = lineNum+curses.LINES-2
 
-        #     for i in range(lineNum,end):
-        #         # print(i)
-        #         # screen.getch()
-        #         screen.addstr(ticker,0,headers[i])
+            for i in range(lineNum,end):
+                # print(i)
+                # screen.getch()
+                screen.addstr(ticker,0,headers[i])
                 
-        #         ticker += 1
+                ticker += 1
             
-        #     screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
-        #     screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
-        #     screen.refresh()
-        #     char = screen.getch()
+            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
+            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
+            screen.refresh()
+            char = screen.getch()
 
             
-        #     if char == ord('q'):
-        #         break
-        #     if(not lessThanFull):
-        #         if char == curses.KEY_UP or char == ord('w'):
-        #             if(lineNum > 0):
-        #                 lineNum -= 1
-        #             else:
-        #                 lineNum = 0      
-        #         elif char == curses.KEY_DOWN or char == ord('s'):
-        #             if(lineNum < len(headers) - curses.LINES + 2):
-        #                 lineNum += 1
-        #             else:
-        #                 lineNum = len(headers) - curses.LINES + 2
-        #     if char == ord('e'):
-        #         screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-        #         screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-        #         c = screen.getch() # Allows immediate exit if they press q
-        #         if c == ord('q'):
-        #             continue
+            if char == ord('q'):
+                break
+            if(not lessThanFull):
+                if char == curses.KEY_UP or char == ord('w'):
+                    if(lineNum > 0):
+                        lineNum -= 1
+                    else:
+                        lineNum = 0      
+                elif char == curses.KEY_DOWN or char == ord('s'):
+                    if(lineNum < len(headers) - curses.LINES + 2):
+                        lineNum += 1
+                    else:
+                        lineNum = len(headers) - curses.LINES + 2
+            if char == ord('e'):
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                c = screen.getch() # Allows immediate exit if they press q
+                if c == ord('q'):
+                    continue
 
-        #         # Otherwise update prompt
-        #         screen.addstr(curses.LINES-1,0,"")
-        #         screen.clrtoeol()
-        #         screen.refresh()
-        #         screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-        #         screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                # Otherwise update prompt
+                screen.addstr(curses.LINES-1,0,"")
+                screen.clrtoeol()
+                screen.refresh()
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
 
-        #         # Display what they type, and require they press enter
-        #         curses.echo()
-        #         curses.nocbreak()
-        #         curses.ungetch(c) # Adds the first character back to the buffer
-        #         string = screen.getstr()
+                # Display what they type, and require they press enter
+                curses.echo()
+                curses.nocbreak()
+                curses.ungetch(c) # Adds the first character back to the buffer
+                string = screen.getstr()
 
-        #         # Undo displaying input and requiring enter be pressed
-        #         curses.noecho()
-        #         curses.cbreak()
+                # Undo displaying input and requiring enter be pressed
+                curses.noecho()
+                curses.cbreak()
 
-        #         val = 0
-        #         try:
-        #             val = int(string)
-        #         except ValueError:
-        #             continue
+                val = 0
+                try:
+                    val = int(string)
+                except ValueError:
+                    continue
 
-        #         val -= 1
-        #         if(val >= 0 and val < numPosts):
-        #             browseMode = False
-        #             postNum = val
+                val -= 1
+                if(val >= 0 and val < numPosts):
+                    browseMode = False
+                    postNum = val
 
             
 
