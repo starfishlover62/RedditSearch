@@ -4,9 +4,136 @@ import math
 import pyperclip
 import curses
 import webbrowser
+import search
+import json
+
+
 
 def currentTimestamp():
     return datetime.datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
+
+
+def getSearches(JSONPath):
+    searches = []
+    with open(JSONPath,"r") as read:
+        data = json.load(read)
+        s = data["searches"]
+        read.close()
+
+        for item in s:
+            subs = item["subreddits"]
+            subSearches = []
+            for i in subs:
+                name = i["name"]
+                titleWL = i["whiteListTitle"]
+                titleBL = i["blackListTitle"]
+                flairWL = i["whiteListFlair"]
+                flairBL = i["blackListFlair"]
+                postWL = i["whiteListPost"]
+                postBL = i["blackListPost"]
+                subSearches.append(search.subSearch(name,titleWL,titleBL,flairWL,flairBL,postWL,postBL))
+
+            searches.append(search.search(item["name"],item["lastSearchTime"],subSearches))
+    
+    return searches
+
+"""
+reddit is the reddit instance, searchCriteria is a search object, and numPosts is the number of posts to fetch per subreddit in
+searchCriteria
+
+"""
+def getNumPosts(reddit, searchCriteria, numPosts = 20):
+    posts = []
+    for sub in searchCriteria.subreddits:
+        subreddit = reddit.subreddit(sub.subreddit)
+        for post in subreddit.new(limit=numPosts):
+            posts.append(post)
+
+    return posts
+
+
+"""
+Return values:
+    -2 searches is empty
+    -1 user pressed q to quit
+    >=0 the index of the searches list that was chosen
+
+"""
+def getSearch(screen, searches):
+    counter = 0
+    if(searches):
+        char = 0
+        lineNum = 0
+        while(char != ord('q')):
+            screen.clear()
+            screen.refresh()
+            ticker = 0
+            end = len(searches)
+            if(lineNum+curses.LINES-1 < end):
+                end = lineNum+curses.LINES-2
+
+            for i in range(lineNum,end):
+                screen.addstr(ticker,0,f"{ticker+1}. {searches[i].name}")
+                ticker += 1
+            
+            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
+            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
+            screen.refresh()
+            char = screen.getch()
+            if(char == ord('q')):
+                return -1
+            if(len(searches) > curses.LINES - 2):
+
+                if char == curses.KEY_UP or char == ord('w'):
+                    if(lineNum > 0):
+                        lineNum -= 1
+                    else:
+                        lineNum = 0      
+                elif char == curses.KEY_DOWN or char == ord('s'):
+                    if(lineNum < len(searches) - curses.LINES + 2):
+                        lineNum += 1
+                    else:
+                        lineNum = len(searches) - curses.LINES + 2
+            if char == ord('e'):
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                c = screen.getch() # Allows immediate exit if they press q
+                if c == ord('q'):
+                    continue
+
+                # Otherwise update prompt
+                screen.addstr(curses.LINES-1,0,"")
+                screen.clrtoeol()
+                screen.refresh()
+                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
+                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+
+                # Display what they type, and require they press enter
+                curses.echo()
+                curses.nocbreak()
+                curses.ungetch(c) # Adds the first character back to the buffer
+                string = screen.getstr()
+
+                # Undo displaying input and requiring enter be pressed
+                curses.noecho()
+                curses.cbreak()
+
+                val = 0
+                try:
+                    val = int(string)
+                except ValueError:
+                    continue
+
+                val -= 1
+                if(val >= 0 and val < len(searches)):
+                    screen.clear()
+                    screen.refresh()
+                    return val
+        return -1
+    else:
+        return -2
+            
+
 
 
 
