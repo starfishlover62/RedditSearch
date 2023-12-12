@@ -1,4 +1,5 @@
 import curses
+from formatString import placeString
 class ScrollingList:
     def __init__(self, screen, stringList, line = 0, tooltip = None):
         self.screen = screen
@@ -40,15 +41,32 @@ class ToolTip:
             self.addRow(item)
     
     def addRow(self, row):
-        self.rows.append(row)
-        index = 0
-        for item in self.rows:
-            if (item.y > row.y):
-                temp = item
-                self.rows[index] = self.rows[-1]
-                self.rows[-1] = temp
-                break
-            index = index +1
+        index = -1
+        sharedRow = False
+        if(len(self.rows) == 0):
+            self.rows.append(row)
+        else:
+            for item in self.rows:
+                if(item.y == row.y):
+                    if(row.x < item.x):
+                        item.string = row.string[:row.x + len(row.content)] + item.string[row.x + len(row.content):]
+                    else:
+                        item.string = item.string[:row.x] + row.string[row.x:row.x+len(row.content)] + item.string[row.x+len(row.content):]
+                    sharedRow = True
+                    break
+                elif (item.y > row.y):
+                    if(index == -1):
+                        index = 1
+                    else:
+                        index = index +1
+                
+                    
+            if(not sharedRow):
+                if(not index == -1):
+                    self.rows.insert(index,row)
+                else:
+                    self.rows.append(row)
+
         
     def returnRows(self):
         return self.rows
@@ -64,8 +82,9 @@ class ToolTip:
         return len(self.rows)
 
 class Row:
-    def __init__(self, y, x, string):
+    def __init__(self, y, x, string,length=80):
         self.y = y
         self.x = x
-        self.string = string
+        self.content = string
+        self.string = placeString(string,length,self.x)
     
