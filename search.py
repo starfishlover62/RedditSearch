@@ -1,12 +1,12 @@
-class subSearch:
+class subredditSearch:
     def __init__(self,sub,titleWL,titleBL,flairWL,flairBL,postWL,postBL):
-        self.subreddit = sub
-        self.whiteListTitle = titleWL
-        self.blackListTitle = titleBL
-        self.whiteListFlair = flairWL
-        self.blackListFlair = flairBL
-        self.whiteListPost = postWL
-        self.blackListPost = postBL
+        self.name = sub
+        self.titleWL = titleWL
+        self.titleBL = titleBL
+        self.flairWL = flairWL
+        self.flairBL = flairBL
+        self.postWL = postWL
+        self.postBL = postBL
 
 
 class search:
