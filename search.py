@@ -1,5 +1,5 @@
-class subredditSearch:
-    def __init__(self,sub,titleWL,titleBL,flairWL,flairBL,postWL,postBL):
+class SubredditSearch:
+    def __init__(self,sub,titleWL=None,titleBL=None,flairWL=None,flairBL=None,postWL=None,postBL=None):
         self.name = sub
         self.titleWL = titleWL
         self.titleBL = titleBL
@@ -9,7 +9,7 @@ class subredditSearch:
         self.postBL = postBL
 
 
-class search:
+class Search:
     def __init__(self,name,lastSearchTime,subreddits):
         self.name = name
         self.lastSearchTime = lastSearchTime
