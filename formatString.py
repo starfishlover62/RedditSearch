@@ -89,45 +89,8 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
     return addString
 
 
+
 def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0):
-    boxWidth = terminalWidth - (leftMargin + rightMargin)
-    textBoxWidth = boxWidth - (leftPadding + rightPadding)
-
-    boxStr = "+"
-    for i in range(boxWidth-2):
-        boxStr += "-"
-    boxStr += "+\n"
-
-    for item in stringList:
-        if(item != None):
-            if(item == "%separator%"):
-                boxStr += "+"
-                for i in range(boxWidth-2):
-                    boxStr += "-"
-                boxStr += "+\n"
-            else:
-                tempStr = tabulate(item,textBoxWidth,leftPadding+1)
-                listStrings = tempStr.splitlines()
-                # print(listStrings)
-                for line in listStrings:
-                    line = "|" + line[1:]
-                    if(len(line) < boxWidth - 1):
-                        line += spacesString((boxWidth-len(line)-1))
-                    line += "|\n"
-                    boxStr += line
-
-    if(boxStr[-1] != "\n" ):
-        boxStr += "\n"
-    
-    boxStr += "+"
-    for i in range(boxWidth-2):
-        boxStr += "-"
-    boxStr += "+"
-
-    return boxStr
-
-
-def enboxList(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0):
     boxWidth = terminalWidth - (leftMargin + rightMargin)
     textBoxWidth = boxWidth - (leftPadding + rightPadding)
 
