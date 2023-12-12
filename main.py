@@ -15,7 +15,8 @@ import functions
 import config
 import search
 import dump
-
+import constants
+import formatString
 
 if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
     print("Either the client id, client secret, or user agent are not specified. Please enter these values in config.py")
@@ -203,16 +204,35 @@ try:
 
         if(choosingSearches):
             if(searches):
-                searchIndex = functions.getSearch(screen, searches)
+                searchIndex = functions.getSearchNum(screen, searches)
                 if(searchIndex == -1):
                     break
                 choosingSearches = False
+                
+                currentTime = functions.currentTimestamp()
+                searchTime = searches[searchIndex].lastSearchTime
+
                 # If older than 7 days
-                if(searches[searchIndex].lastSearchTime == None or functions.currentTimestamp() - searches[searchIndex].lastSearchTime > 604800):
-                    time = functions.currentTimestamp()
-                    posts = functions.getNumPosts(reddit_read_only,searches[searchIndex],50)
-                    searches[searchIndex].lastSearchTime = math.floor(time)
-                    dump.saveSearches(searches,searchesPath)
+                if(searchTime == None):
+                    screen.clear()
+                    screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
+                    screen.addstr(1,0,"Press q to quit or any other key to continue")
+                    char = screen.getch()  
+                    if char == ord('q'):
+                        break
+                elif(currentTime - searchTime > constants.DAY * 7):
+
+                    screen.clear()
+                    screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime)} ago.")
+                    screen.addstr(1,0,"Press q to quit,")
+                    screen.addstr(2,0,"y to perform the search any ways,")
+                    screen.addstr(3,0,"or n to perform search on posts from the last week")
+
+                    char = screen.getch()  
+                    if char == ord('q'):
+                        break
+                    elif not char == ord('y'):
+                        searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
                     
 
             else:
