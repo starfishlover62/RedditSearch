@@ -158,7 +158,7 @@ def getSearchNum(screen, searches):
 def performSearch(reddit,search):
     posts = []
     for sub in search.subreddits:
-        subreddit = reddit.subreddit(sub.subreddit)
+        subreddit = reddit.subreddit(sub)
         for post in subreddit.new(limit=None):
             if(post.created_utc < search.lastSearchTime):
                 break
