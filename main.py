@@ -212,35 +212,39 @@ try:
                 currentTime = functions.currentTimestamp()
                 searchTime = searches[searchIndex].lastSearchTime
 
-                # If older than 7 days
+                # If search has never been performed
                 if(searchTime == None):
                     screen.clear()
                     screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
                     screen.addstr(1,0,"Press q to quit or any other key to continue")
+                    screen.refresh()
                     char = screen.getch()  
                     if char == ord('q'):
                         break
-                elif(currentTime - searchTime > constants.DAY * 7):
 
+                # If search was last performed over a week ago
+                elif(currentTime - searchTime > constants.DAY * 7):
                     screen.clear()
                     screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime)} ago.")
                     screen.addstr(1,0,"Press q to quit,")
                     screen.addstr(2,0,"y to perform the search any ways,")
                     screen.addstr(3,0,"or n to perform search on posts from the last week")
+                    screen.refresh()
 
                     char = screen.getch()  
                     if char == ord('q'):
                         break
                     elif not char == ord('y'):
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
-                    
-
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
                 screen.addstr(2,0,f"The current searches file is {searchesPath}. Is this correct?")
                 screen.addstr(3,0,"If not, edit the value of searches_file in config.py")
-        
+
+            # Clears screen after search choosing process
+            screen.clear()
+            screen.refresh()
         char = screen.getch()  
         if char == ord('q'):
             break
