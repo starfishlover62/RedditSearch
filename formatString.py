@@ -49,6 +49,14 @@ def placeString(string,length,start = 0):
     s = s.replace("0"," ")
     s = s[:start] + string + s[start+len(string):]
     return s
+
+def combineStrings(stringA,stringB,length,startA,startB):
+    if(startB < startA):
+        return combineStrings(stringB,stringA,length,startB,startA)
+    stringA = placeString(stringA,length,startA)
+    string = stringA[:startB] + stringB + stringA[startB+len(stringB):]
+    return string
+
     
 def spacesString(spaces):
     st = ""
