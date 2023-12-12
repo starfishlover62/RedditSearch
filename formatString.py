@@ -39,6 +39,8 @@ def formatAge(age):
     else:
         return "just now"
     
+
+# Places string at location start, and fills with spaces until it is size length
 def placeString(string,length,start = 0):
     if(len(string)>=length):
         return string
