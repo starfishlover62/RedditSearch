@@ -90,11 +90,11 @@ def getSearchNum(screen, searches):
                 return -1
             
             elif(char == curses.KEY_UP or char == ord('w')):
-                page.scrollUp()
+                lineNum = page.scrollUp()
                 toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
             
             elif(char == curses.KEY_DOWN or char == ord('s')):
-                page.scrollDown()
+                lineNum = page.scrollDown()
                 toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
             
             elif char == ord('e'):
@@ -157,14 +157,19 @@ def getSearchNum(screen, searches):
 
 def performSearch(reddit,search):
     posts = []
+    ticker = 1
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
+            print(ticker)
+            if(post.created_utc == None):
+                continue
             if(post.created_utc < search.lastSearchTime):
                 break
             else:
                 if(filterPost(post,sub)):
                     posts.append(post)
+            ticker = ticker + 1
     
     return posts
 
@@ -212,8 +217,44 @@ def filterPost(post,subReddit):
     return False
 
 
-def enableScrolling(stringList):
-    return True
+def getHeaders(posts):
+    headers = []
+    ticker = 1
+    if (not posts == None):
+        for post in posts:
+            # Age
+            age = post.created_utc
+            if(not age == None):
+                age = int(currentTimestamp() - age)
+            else:
+                age = 0
+
+            # Title
+            title = post.title
+            if(title == None):
+                title = "<NO TITLE>"
+            
+            # Flair
+            flair = post.link_flair_text
+            if(flair == None):
+                flair = "<NO FLAIR>"
+            
+            # Author
+            author = post.author
+            if(author == None):
+                author = "deleted"
+            else:
+                author = author.name
+
+            try:
+                headers += (formatString.enbox([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {formatString.formatAge(age)} ago"],curses.COLS))
+            except AttributeError:
+                continue
+            ticker += 1
+    return headers
+
+
+
 
 
 def copyToClipboard(string):
@@ -237,38 +278,34 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
 
 def viewPost(post,screen):
     age = f"Created {formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
-    stringList = formatString.enboxList([post.title,age,"%separator%",post.selftext,"%separator%",post.url],curses.COLS)
-    postLessThanFull = False
-    if(len(stringList) < curses.LINES - 2):
-        postLessThanFull = True
+    stringList = formatString.enbox([post.title,age,"%separator%",post.selftext,"%separator%",post.url],curses.COLS)
     
-    postLineNum = 0
+    lineNum = 0
 
-    page = scroll.ScrollingList(screen,stringList,0,[scroll.Row(curses.LINES-1,curses.COLS-38,"(press h for help)  (press q to exit)",curses.COLS)])
+    toolTip = scroll.ToolTip([formatString.combineStrings(f"<-- Line 1 -- >","(press q to quit)",80,0,curses.COLS-18)])
+
+    page = scroll.ScrollingList(screen,stringList,0,toolTip)
             
     while(True):
         screen.clear()
+        toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
         ticker = 0
         for item in page.getLines():
             screen.addstr(ticker,0,f"{item}")
             ticker = ticker + 1
 
-        if(postLessThanFull or postLineNum == len(stringList) - curses.LINES + 3):
-            screen.addstr(curses.LINES-1,0,f"<-- (end) -->")
-        else:
-            screen.addstr(curses.LINES-1,0,f"<-- Line {postLineNum+1} -->")
+        
 
         screen.refresh()
         char = screen.getch()
         
         if char == ord('q'):
             break
-        elif(char == ord('s')):
-            page.scrollDown()
-        elif(char == ord('w')):
-            page.scrollUp()
+        elif(char == curses.KEY_DOWN or char == ord('s')):
+            lineNum = page.scrollDown()
+        elif(char == curses.KEY_UP or char == ord('w')):
+            lineNum = page.scrollUp()
         elif char == ord('h'):
-            screen.addstr(3,0,"yo")
             while(True):
                 screen.clear()
                 helpPage = scroll.ScrollingList(screen,["Press the button in () to execute its command",
