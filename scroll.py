@@ -1,6 +1,10 @@
 import curses
 from formatString import placeString
 class ScrollingList:
+    """Represents a list that can be scrolled through. Useful for displaying a large amount of related data.
+     Requires a list of strings, a curses window object, as well optionally a starting line number and/or a 
+     ToolTip object.
+    """
     def __init__(self, screen, stringList, line = 0, tooltip = None):
         self.updateStrings(screen,stringList,line,tooltip)
     
@@ -16,6 +20,9 @@ class ScrollingList:
         self.maxLine = len(self.lines) - self.maxLine
     
     def scrollDown(self, numLines = 1):
+        """Moves the lines that will be shown down by numLines.
+         Returns the current line number
+        """
         if(self.currentLine + numLines > self.maxLine):
             self.currentLine = self.maxLine
         else:
@@ -57,6 +64,9 @@ class ScrollingList:
 
 
 class ToolTip:
+    """ Represents the tooltip that is anchored to the bottom of a scrolling list. Items will be displayed
+     in the order that they are added. Those added first will be above those added later
+    """
     def __init__(self,lines):
         self.replace(lines)
 
