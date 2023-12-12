@@ -6,6 +6,8 @@ import curses
 import webbrowser
 import search
 import json
+import dump
+import constants
 
 
 
@@ -51,19 +53,7 @@ def getNumPosts(reddit, searchCriteria, numPosts = 20):
 
     return posts
 
-def saveSearches(searches, filepath = "searches.json"):
-    dumpStr = '{"searches":['
-    for item in searches:
-        dumpStr.append("{")
-        dumpStr.append(f'name:"{item.name}",')
-        dumpStr.append(f'"lastSearchTime":{item.lastSearchTime},')
-        dumpStr.append(f'"subreddits":[')
-        for sub in item.subreddits:
-            dumpStr.append(f'"name":{sub.subreddit},')
-            for i in sub.titleWL:
-                dumpStr.append(f'')
-    with open(filepath,"w") as write:
-        json.dump(searches,filepath,indent=2)
+
 
 
 """
@@ -153,43 +143,37 @@ def getSearch(screen, searches):
 
 def formatAge(age):
     # time constants
-    SECONDS_PER_MINUTE = 60
-    SECONDS_PER_HOUR = 3600 # 3,600
-    SECONDS_PER_DAY = 86400 # 86,400
-    SECONDS_PER_MONTH = 2592000 # 2,592,000  (30 days in a month)
-    SECONDS_PER_YEAR = 31536000 # 31,536,000
+
     try:
         age + 1
     except TypeError:
         return f"{age}"
-    
-    formattedAge = ""
 
     ticker = 0
 
-    if(age > SECONDS_PER_YEAR):
-        while(age > SECONDS_PER_YEAR):
-            age -= SECONDS_PER_YEAR
+    if(age > constants.YEAR):
+        while(age > constants.YEAR):
+            age -= constants.YEAR
             ticker += 1
         return f"{ticker} year(s)"
-    elif(age > SECONDS_PER_MONTH):
-        while(age > SECONDS_PER_MONTH):
-            age -= SECONDS_PER_MONTH
+    elif(age > constants.MONTH):
+        while(age > constants.MONTH):
+            age -= constants.MONTH
             ticker += 1
         return f"{ticker} month(s)"
-    elif(age > SECONDS_PER_DAY):
-        while(age > SECONDS_PER_DAY):
-            age -= SECONDS_PER_DAY
+    elif(age > constants.DAY):
+        while(age > constants.DAY):
+            age -= constants.DAY
             ticker += 1
         return f"{ticker} day(s)"
-    elif(age > SECONDS_PER_HOUR):
-        while(age > SECONDS_PER_HOUR):
-            age -= SECONDS_PER_HOUR
+    elif(age > constants.HOUR):
+        while(age > constants.HOUR):
+            age -= constants.HOUR
             ticker += 1
         return f"{ticker} hour(s)"
-    elif(age > SECONDS_PER_MINUTE):
-        while(age > SECONDS_PER_MINUTE):
-            age -= SECONDS_PER_MINUTE
+    elif(age > constants.MINUTE):
+        while(age > constants.MINUTE):
+            age -= constants.MINUTE
             ticker += 1
         return f"{ticker} minute(s)"
     else:
