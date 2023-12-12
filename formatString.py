@@ -39,6 +39,15 @@ def formatAge(age):
     else:
         return "just now"
     
+def placeString(string,length,start = 0):
+    if(len(string)>=length):
+        return string
+    s = ""
+    s = s.zfill(length)
+    s = s.replace("0"," ")
+    s = s[:start] + string + s[start+len(string):]
+    return s
+    
 def spacesString(spaces):
     st = ""
     for i in range(spaces):
