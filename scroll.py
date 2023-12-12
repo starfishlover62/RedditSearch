@@ -2,24 +2,25 @@ import curses
 from formatString import placeString
 class ScrollingList:
     def __init__(self, screen, stringList, line = 0, tooltip = None):
+        self.updateStrings(screen,stringList,line,tooltip)
+    
+    def updateStrings(self,screen,stringList,line = 0, tooltip = None):
         self.screen = screen
         self.lines = stringList
         self.currentLine = line
         self.tooltip = tooltip
         self.maxLine = curses.LINES
-        print(self.maxLine)
         if(not self.tooltip == None):
             self.maxLine -= self.tooltip.height()
         
-        print(f"{len(self.lines)} - {self.maxLine}")
         self.maxLine = len(self.lines) - self.maxLine
-        print(self.maxLine)
     
     def scrollDown(self, numLines = 1):
         if(self.currentLine + numLines > self.maxLine):
             self.currentLine = self.maxLine
         else:
             self.currentLine += numLines
+        return self.currentLine
         
     
     def scrollUp(self, numLines = 1):
@@ -27,6 +28,7 @@ class ScrollingList:
             self.currentLine = 0
         else:
             self.currentLine = self.currentLine - numLines
+        return self.currentLine
     
     def getLines(self):
         lines = []
@@ -50,6 +52,7 @@ class ScrollingList:
     def updateTooltip(self,tooltip):
         if(not tooltip == None):
             self.tooltip = tooltip
+            self.maxLine -= self.tooltip.height()
         
 
 
