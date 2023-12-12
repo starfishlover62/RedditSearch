@@ -1,6 +1,4 @@
 import json
-import search
-
 
 
 def serializeSub(sub):
@@ -35,3 +33,10 @@ def serializeSeaches(searches):
     string = string.replace("None","null")
 
     return string
+
+
+def saveSearches(searches, filepath = "searches.json"):
+    dumpStr = serializeSeaches(searches)
+    parsed = json.loads(dumpStr)
+    with open(filepath,"w") as write:
+        json.dump(parsed,write,indent=2)
