@@ -6,6 +6,7 @@ import praw
 import curses
 import webbrowser
 import configparser
+import math
 
 
 from termcolor import colored, cprint
@@ -13,6 +14,7 @@ from termcolor import colored, cprint
 import functions
 import config
 import search
+import dump
 
 
 if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
@@ -206,11 +208,11 @@ try:
                     break
                 choosingSearches = False
                 # If older than 7 days
-                if(functions.currentTimestamp() - searches[searchIndex].lastSearchTime > 604800):
+                if(searches[searchIndex].lastSearchTime == None or functions.currentTimestamp() - searches[searchIndex].lastSearchTime > 604800):
                     time = functions.currentTimestamp()
                     posts = functions.getNumPosts(reddit_read_only,searches[searchIndex],50)
-                    searches[searchIndex].lastSearchTime = time
-                    functions.saveSearches(searches,searchesPath)
+                    searches[searchIndex].lastSearchTime = math.floor(time)
+                    dump.saveSearches(searches,searchesPath)
                     
 
             else:
