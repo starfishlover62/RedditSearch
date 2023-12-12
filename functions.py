@@ -158,7 +158,7 @@ def getSearchNum(screen, searches):
 def performSearch(reddit,search):
     posts = []
     for sub in search.subreddits:
-        subreddit = reddit.subreddit(sub)
+        subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
             if(post.created_utc < search.lastSearchTime):
                 break
@@ -169,7 +169,47 @@ def performSearch(reddit,search):
     return posts
 
 def filterPost(post,subReddit):
-    return True
+
+    # Easier reference to post contents
+    title = post.title
+    flair = post.link_flair_text
+    content = post.selftext
+
+    # Check blacklists
+
+    if(not title == None and not subReddit.titleBL == None):
+        for t in subReddit.titleBL:
+            if(t.lower() in title.lower()):
+                return False
+            
+    if(not flair == None and not subReddit.flairBL == None):
+        for f in subReddit.flairBL:
+            if(f.lower() in flair.lower()):
+                return False
+    
+    if(not content == None and not subReddit.postBL == None):
+        for c in subReddit.postBL:
+            if(c.lower() in content.lower()):
+                return False
+            
+    # Check whitelists
+
+    if(not title == None and not subReddit.titleWL == None):
+        for t in subReddit.titleWL:
+            if(t.lower() in title.lower()):
+                return True
+            
+    if(not flair == None and not subReddit.flairWL == None):
+        for f in subReddit.flairWL:
+            if(f.lower() in flair.lower()):
+                return True
+    
+    if(not content == None and not subReddit.postWL == None):
+        for c in subReddit.postWL:
+            if(c.lower() in content.lower()):
+                return True
+    
+    return False
 
 
 def enableScrolling(stringList):
