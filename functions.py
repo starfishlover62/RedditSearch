@@ -8,6 +8,7 @@ import search
 import json
 import dump
 import formatString
+import scroll
 
 
 
@@ -33,9 +34,9 @@ def getSearches(JSONPath):
                 flairBL = i["blackListFlair"]
                 postWL = i["whiteListPost"]
                 postBL = i["blackListPost"]
-                subSearches.append(search.subSearch(name,titleWL,titleBL,flairWL,flairBL,postWL,postBL))
+                subSearches.append(search.SubredditSearch(name,titleWL,titleBL,flairWL,flairBL,postWL,postBL))
 
-            searches.append(search.search(item["name"],item["lastSearchTime"],subSearches))
+            searches.append(search.Search(item["name"],item["lastSearchTime"],subSearches))
     
     return searches
 
@@ -63,56 +64,68 @@ Return values:
     >=0 the index of the searches list that was chosen
 
 """
-def getSearch(screen, searches):
-    counter = 0
+def getSearchNum(screen, searches):
     if(searches):
-        char = 0
+        ls = []
+        ticker = 1
+        for item in searches:
+            ls.append(f"{ticker}. {item.name}")
+            ticker = ticker + 1
+        
+        toolTip = scroll.ToolTip(formatString.combineStrings("<-- Line 1 -- >","(press q to quit)",80,0,curses.COLS-18))
+        page = scroll.ScrollingList(screen,ls,0,toolTip)
         lineNum = 0
-        while(char != ord('q')):
+        while(True):
             screen.clear()
-            screen.refresh()
-            ticker = 0
-            end = len(searches)
-            if(lineNum+curses.LINES-1 < end):
-                end = lineNum+curses.LINES-2
-
-            for i in range(lineNum,end):
-                screen.addstr(ticker,0,f"{ticker+1}. {searches[i].name}")
-                ticker += 1
             
-            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
-            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
+            ticker = 0
+            for item in page.getLines():
+                screen.addstr(ticker,0,f"{item}")
+                ticker = ticker + 1
+            
+
             screen.refresh()
             char = screen.getch()
             if(char == ord('q')):
                 return -1
-            if(len(searches) > curses.LINES - 2):
+            
+            elif(char == curses.KEY_UP or char == ord('w')):
+                page.scrollUp()
+                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+            
+            elif(char == curses.KEY_DOWN or char == ord('s')):
+                page.scrollDown()
+                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+            
+            elif char == ord('e'):
+                # Updates prompt
+                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
+                screen.clear()
+            
+                ticker = 0
+                for item in page.getLines():
+                    screen.addstr(ticker,0,f"{item}")
+                    ticker = ticker + 1
+                
 
-                if char == curses.KEY_UP or char == ord('w'):
-                    if(lineNum > 0):
-                        lineNum -= 1
-                    else:
-                        lineNum = 0      
-                elif char == curses.KEY_DOWN or char == ord('s'):
-                    if(lineNum < len(searches) - curses.LINES + 2):
-                        lineNum += 1
-                    else:
-                        lineNum = len(searches) - curses.LINES + 2
-            if char == ord('e'):
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-                c = screen.getch() # Allows immediate exit if they press q
-                if c == ord('q'):
-                    continue
-
-                # Otherwise update prompt
-                screen.addstr(curses.LINES-1,0,"")
-                screen.clrtoeol()
                 screen.refresh()
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                screen.addstr(curses.LINES-1,39,"") # Moves cursor to end of prompt
+    
 
                 # Display what they type, and require they press enter
+                c = screen.getch() # Allows immediate exit if they press q
+                if c == ord('q'):
+                    toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+                    continue
+                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter: ","(enter q to quit)",80,0,curses.COLS-18)])
+                ticker = 0
+                for item in page.getLines():
+                    screen.addstr(ticker,0,f"{item}")
+                    ticker = ticker + 1
+                
+
+                screen.refresh()
+                screen.addstr(curses.LINES-1,39,"") # Moves cursor to end of prompt
                 curses.echo()
                 curses.nocbreak()
                 curses.ungetch(c) # Adds the first character back to the buffer
@@ -122,26 +135,45 @@ def getSearch(screen, searches):
                 curses.noecho()
                 curses.cbreak()
 
+                # Ensures that their input is an integer
                 val = 0
                 try:
                     val = int(string)
                 except ValueError:
+                    
                     continue
+                
 
                 val -= 1
                 if(val >= 0 and val < len(searches)):
                     screen.clear()
                     screen.refresh()
                     return val
+                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
         return -1
     else:
         return -2
             
 
+def performSearch(reddit,search):
+    posts = []
+    for sub in search.subreddits:
+        subreddit = reddit.subreddit(sub.subreddit)
+        for post in subreddit.new(limit=None):
+            if(post.created_utc < search.lastSearchTime):
+                break
+            else:
+                if(filterPost(post,sub)):
+                    posts.append(post)
+    
+    return posts
+
+def filterPost(post,subReddit):
+    return True
 
 
-
-
+def enableScrolling(stringList):
+    return True
 
 
 def copyToClipboard(string):
@@ -171,21 +203,15 @@ def viewPost(post,screen):
         postLessThanFull = True
     
     postLineNum = 0
+
+    page = scroll.ScrollingList(screen,stringList,0,[scroll.Row(curses.LINES-1,curses.COLS-38,"(press h for help)  (press q to exit)",curses.COLS)])
             
     while(True):
         screen.clear()
         ticker = 0
-        end = len(stringList)
-        if(postLineNum+curses.LINES-2 < end):
-            end = postLineNum+curses.LINES-2
-
-        for i in range(postLineNum,end):
-            screen.addstr(ticker,0,stringList[i])
-            
-            ticker += 1
-
-
-        screen.addstr(curses.LINES-1,curses.COLS-38,"(press h for help)  (press q to exit)")
+        for item in page.getLines():
+            screen.addstr(ticker,0,f"{item}")
+            ticker = ticker + 1
 
         if(postLessThanFull or postLineNum == len(stringList) - curses.LINES + 3):
             screen.addstr(curses.LINES-1,0,f"<-- (end) -->")
@@ -197,33 +223,38 @@ def viewPost(post,screen):
         
         if char == ord('q'):
             break
+        elif(char == ord('s')):
+            page.scrollDown()
+        elif(char == ord('w')):
+            page.scrollUp()
+        elif char == ord('h'):
+            screen.addstr(3,0,"yo")
+            while(True):
+                screen.clear()
+                helpPage = scroll.ScrollingList(screen,["Press the button in () to execute its command",
+                                                        "(w) or (up arrow) scroll up",
+                                                        "(s) or (down arrow) scroll down",
+                                                        "(h) Displays this menu",
+                                                        "(o) Opens the post in a new tab of the default web browser",
+                                                        "(c) Copies the post url to the clipboard",
+                                                        "(u) Prints the post url to the screen (You will have to manually copy it)",
+                                                        "(a) Opens the author's page in a new tab of the default web browser",
+                                                        "(q) returns to the previous screen",
+                                                        "Press any key to exit this screen"],0,None)
+                
+                ticker = 0
+                for item in helpPage.getLines():
+                    screen.addstr(ticker,0,f"{item}")
+                    ticker = ticker + 1
+                screen.refresh()
+                char = screen.getch()
+                if char == ord('q'):
+                    break
+                elif(char == ord('s')):
+                    helpPage.scrollDown()
+                elif(char == ord('w')):
+                    helpPage.scrollUp()
 
-        if(not postLessThanFull):
-            if char == curses.KEY_UP or char == ord('w'):
-                    if(postLineNum > 0):
-                        postLineNum -= 1
-                    else:
-                        postLineNum = 0      
-            elif char == curses.KEY_DOWN or char == ord('s'):
-                if(postLineNum < len(stringList) - curses.LINES + 2):
-                    postLineNum += 1
-                else:
-                    postLineNum = len(stringList) - curses.LINES + 2
-        
-        if char == ord('h'):
-            screen.clear()
-            screen.addstr(0,0,"Press the button in () to execute its command")
-            screen.addstr(1,0,"(w) or (up arrow) scroll up")
-            screen.addstr(2,0,"(s) or (down arrow) scroll down")
-            screen.addstr(3,0,"(h) Displays this menu")
-            screen.addstr(4,0,"(o) Opens the post in a new tab of the default web browser")
-            screen.addstr(5,0,"(c) Copies the post url to the clipboard")
-            screen.addstr(6,0,"(u) Prints the post url to the screen (You will have to manually copy it)")
-            screen.addstr(7,0,"(a) Opens the author's page in a new tab of the default web browser")
-            screen.addstr(8,0,"(q) returns to the previous screen")
-            screen.addstr(9,0,"Press any key to exit this screen")
-            screen.refresh()
-            screen.getch()
         elif char == ord('o'):
             webbrowser.open_new_tab(post.url)
         elif char == ord('c'):
