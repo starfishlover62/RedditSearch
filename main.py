@@ -17,6 +17,7 @@ import search
 import dump
 import constants
 import formatString
+import scroll
 
 if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
     print("Either the client id, client secret, or user agent are not specified. Please enter these values in config.py")
@@ -182,21 +183,17 @@ browseMode = True
 choosingSearches = True
 searchIndex = 0
 
-# headers = []
-# ticker = 1
-# for post in posts:
-#     age = int(functions.currentTimestamp()-post.created_utc)
-#     header = (functions.enboxList([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {functions.formatAge(age)} ago"],curses.COLS))
-#     for line in header:
-#         headers.append(line)
-#     ticker += 1
 
-# lessThanFull = False
-# if(len(headers) < curses.LINES - 2):
-#     lessThanFull = True
+page = scroll.ScrollingList(screen,[""])
+toolTip = scroll.ToolTip(formatString.combineStrings("<-- Line 1 -- >","(press q to quit)",curses.COLS,0,curses.COLS-18))
+
+
+
+
       
 
 try:
+    
     
 
     while True:
@@ -221,6 +218,7 @@ try:
                     char = screen.getch()  
                     if char == ord('q'):
                         break
+                    searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
 
                 # If search was last performed over a week ago
                 elif(currentTime - searchTime > constants.DAY * 7):
@@ -236,58 +234,56 @@ try:
                         break
                     elif not char == ord('y'):
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
+                
+                posts = functions.performSearch(reddit_read_only,searches[searchIndex])
+                headers = functions.getHeaders(posts)
+                numPosts = len(posts)
+                page.updateStrings(screen,headers,0,toolTip)
+
+                #end of need to change
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
                 screen.addstr(2,0,f"The current searches file is {searchesPath}. Is this correct?")
                 screen.addstr(3,0,"If not, edit the value of searches_file in config.py")
 
+                char = screen.getch()  
+                if char == ord('q'):
+                    break
+
             # Clears screen after search choosing process
             screen.clear()
             screen.refresh()
-        char = screen.getch()  
-        if char == ord('q'):
-            break
+
+        
         
         elif(not browseMode):
             functions.viewPost(posts[postNum],screen)
             browseMode = True
 
         else:
-            
-
             ticker = 0
-            end = len(headers)
-            if(lineNum+curses.LINES-1 < end):
-                end = lineNum+curses.LINES-2
 
-            for i in range(lineNum,end):
-                # print(i)
-                # screen.getch()
-                screen.addstr(ticker,0,headers[i])
-                
-                ticker += 1
+            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+            for item in page.getLines():
+                screen.addstr(ticker,0,f"{item}")
+                ticker = ticker + 1
             
-            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to quit)")
-            screen.addstr(curses.LINES-1,0,f"<-- Line {lineNum + 1} -->")
+            
             screen.refresh()
             char = screen.getch()
 
             
             if char == ord('q'):
                 break
-            if(not lessThanFull):
-                if char == curses.KEY_UP or char == ord('w'):
-                    if(lineNum > 0):
-                        lineNum -= 1
-                    else:
-                        lineNum = 0      
-                elif char == curses.KEY_DOWN or char == ord('s'):
-                    if(lineNum < len(headers) - curses.LINES + 2):
-                        lineNum += 1
-                    else:
-                        lineNum = len(headers) - curses.LINES + 2
-            if char == ord('e'):
+
+            elif(char == curses.KEY_UP or char == ord('w')):
+                lineNum = page.scrollUp()
+            
+            elif(char == curses.KEY_DOWN or char == ord('s')):
+                lineNum = page.scrollDown()
+     
+            elif char == ord('e'):
                 screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
                 screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
                 c = screen.getch() # Allows immediate exit if they press q
