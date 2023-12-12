@@ -30,7 +30,9 @@ class ScrollingList:
     
     def getLines(self):
         numLines = curses.LINES - self.tooltip.height()
-        return self.lines[self.currentLine:self.currentLine+numLines] + self.tooltip.returnLines()
+        lines = self.lines[self.currentLine:self.currentLine+numLines] + self.tooltip.returnLines()
+        lines[-1] = lines[-1][:-1]
+        return lines
         
 
 
@@ -66,6 +68,7 @@ class ToolTip:
                     self.rows.insert(index,row)
                 else:
                     self.rows.append(row)
+
 
         
     def returnRows(self):
