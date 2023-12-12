@@ -235,10 +235,13 @@ try:
                     elif not char == ord('y'):
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
                 
+                time = math.floor(functions.currentTimestamp())
                 posts = functions.performSearch(reddit_read_only,searches[searchIndex])
                 headers = functions.getHeaders(posts)
                 numPosts = len(posts)
                 page.updateStrings(screen,headers,0,toolTip)
+                searches[searchIndex].lastSearchTime = time
+                dump.saveSearches(searches,searchesPath)
 
                 #end of need to change
             else:

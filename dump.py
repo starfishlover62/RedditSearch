@@ -2,7 +2,7 @@ import json
 
 
 def serializeSub(sub):
-    string = f'"name":"{sub.subreddit}", "whiteListTitle":{sub.whiteListTitle}, "blackListTitle":{sub.blackListTitle}, "whiteListFlair":{sub.whiteListFlair}, "blackListFlair":{sub.blackListFlair}, "whiteListPost":{sub.whiteListPost}, "blackListPost":{sub.blackListPost}'
+    string = f'"name":"{sub.name}", "whiteListTitle":{sub.titleWL}, "blackListTitle":{sub.titleBL}, "whiteListFlair":{sub.flairWL}, "blackListFlair":{sub.flairBL}, "whiteListPost":{sub.postWL}, "blackListPost":{sub.postBL}'
     string = "{" + string + "}"
     string = string.replace("'",'"')
     string = string.replace("None","null")
