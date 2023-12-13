@@ -1,0 +1,81 @@
+{
+  "searches": [
+    {
+      "name": "Food",
+      "lastSearchTime": 1680425245,
+      "subreddits": [
+        {
+          "name": "food",
+          "whiteListTitle": [
+            "hotdog",
+            "hamburger"
+          ],
+          "blackListTitle": [
+            "vegetable",
+            "veggies",
+            "fruit",
+            "healthy"
+          ],
+          "whiteListFlair": [
+            "OC",
+            "Recipe In Comments"
+          ],
+          "blackListFlair": [
+            "Vegetarian",
+            "Keto"
+          ],
+          "whiteListPost": [
+            "Delicious",
+            "Gourmet",
+            "Amazing"
+          ],
+          "blackListPost": [
+            "Disgusting",
+            "Gross",
+            "Horrible"
+          ]
+        },
+        {
+          "name": "FoodPorn",
+          "whiteListTitle": [
+            "Italian"
+          ],
+          "blackListTitle": null,
+          "whiteListFlair": null,
+          "blackListFlair": null,
+          "whiteListPost": null,
+          "blackListPost": null
+        }
+      ]
+    },
+    {
+      "name": "cats",
+      "lastSearchTime": null,
+      "subreddits": [
+        {
+          "name": "Aww",
+          "whiteListTitle": [
+            "CAT",
+            "KITTY"
+          ],
+          "blackListTitle": [
+            "DOGGY",
+            "DOGGY",
+            "PUPPY"
+          ],
+          "whiteListFlair": [
+            "CAT",
+            "KITTY"
+          ],
+          "blackListFlair": [
+            "DOGGY",
+            "DOGGY",
+            "PUPPY"
+          ],
+          "whiteListPost": null,
+          "blackListPost": null
+        }
+      ]
+    }
+  ]
+}
