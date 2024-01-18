@@ -155,13 +155,12 @@ def getSearchNum(screen, searches):
         return -2
             
 
-def performSearch(reddit,search):
+def performSearch(reddit,search,screen = None):
     posts = []
-    ticker = 1
+    ticker = 0
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
-            print(ticker)
             if(post.created_utc == None):
                 continue
             if(post.created_utc < search.lastSearchTime):
@@ -170,6 +169,10 @@ def performSearch(reddit,search):
                 if(filterPost(post,sub)):
                     posts.append(post)
             ticker = ticker + 1
+            if(screen != None):
+                screen.clear()
+                screen.addstr(curses.LINES-1,0,f"Posts searched: {ticker} ... {len(posts)} matching filters")
+                screen.refresh()
     
     return posts
 

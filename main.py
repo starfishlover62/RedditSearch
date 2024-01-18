@@ -105,7 +105,12 @@ try:
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
                 
                 time = math.floor(functions.currentTimestamp())
-                posts = functions.performSearch(reddit_read_only,searches[searchIndex])
+                posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+
+                screen.clear()
+                screen.addstr(curses.LINES-1,0,f"Posts found {len(posts)}")
+                screen.refresh()
+                screen.getch()
 
 
 
