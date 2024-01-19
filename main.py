@@ -112,19 +112,24 @@ try:
                 screen.refresh()
                 screen.getch()
 
+                if(len(posts) <= 0):
+                    screen.clear()
+                    screen.addstr(0,0,"No posts found")
+                    screen.addstr(curses.LINES-1,0,"Press any key to exit")
+                    screen.getch()
+                    screen.refresh()
+                    searches[searchIndex].lastSearchTime = time
+                    dump.saveSearches(searches,searchesPath)
+                    break
 
 
-                # Need to do something if posts is empty
+                else:
+                    headers = functions.getHeaders(posts)
+                    numPosts = len(posts)
+                    page.updateStrings(screen,headers,0,toolTip)
+                    searches[searchIndex].lastSearchTime = time
+                    dump.saveSearches(searches,searchesPath)
 
-
-
-                headers = functions.getHeaders(posts)
-                numPosts = len(posts)
-                page.updateStrings(screen,headers,0,toolTip)
-                searches[searchIndex].lastSearchTime = time
-                dump.saveSearches(searches,searchesPath)
-
-                #end of need to change
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
