@@ -44,13 +44,13 @@ try:
 except FileNotFoundError:
     searches = []
 
-numPosts = 0
-postNum = 0
-lineNum = 0
-browseMode = True
-choosingSearches = True
-searchIndex = 0
-posts = []
+numPosts = 0 # Number of posts found meeting criteria
+postNum = 0 # Number of the post to be viewed in full
+lineNum = 0 # Current line number for paginating through post browsing
+browseMode = True # True if browsing through posts, false if reading a specific post
+choosingSearches = True # True if the user has yet to choose a search to perform, false if the search has been chosen
+searchIndex = 0 # Index of the search to be performed
+posts = [] # List of all the posts meeting criteria
 
 
 page = scroll.ScrollingList(screen,[""])
@@ -68,15 +68,19 @@ try:
     while True:
         screen.clear()
 
+        # If the user still has to choose a search to perform
         if(choosingSearches):
+            # If searches were found in the search file
             if(searches):
                 searchIndex = functions.getSearchNum(screen, searches)
+                # If the user indicated that they wanted to quit the program in getSearchNum
                 if(searchIndex == -1):
                     break
-                choosingSearches = False
-                
-                currentTime = functions.currentTimestamp()
-                searchTime = searches[searchIndex].lastSearchTime
+
+                else:
+                    choosingSearches = False
+                    currentTime = functions.currentTimestamp()
+                    searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
 
                 # If search has never been performed
                 if(searchTime == None):
@@ -104,14 +108,11 @@ try:
                     elif not char == ord('y'):
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
                 
+                # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())
                 posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
 
-                screen.clear()
-                screen.addstr(curses.LINES-1,0,f"Posts found {len(posts)}")
-                screen.refresh()
-                screen.getch()
-
+                # If no posts matched the criteria
                 if(len(posts) <= 0):
                     screen.clear()
                     screen.addstr(0,0,"No posts found")
@@ -122,14 +123,15 @@ try:
                     dump.saveSearches(searches,searchesPath)
                     break
 
-
+                # If at least one post matching the criteria was found
                 else:
-                    headers = functions.getHeaders(posts)
+                    headers = functions.getHeaders(posts) # Returns the boxes containing post info
                     numPosts = len(posts)
-                    page.updateStrings(screen,headers,0,toolTip)
-                    searches[searchIndex].lastSearchTime = time
-                    dump.saveSearches(searches,searchesPath)
+                    page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
+                    searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                    dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
 
+            # If no searches were found in the file, or the file does not exist
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
@@ -145,11 +147,12 @@ try:
             screen.refresh()
 
         
-        
+        # Displays a single post
         elif(not browseMode):
             functions.viewPost(posts[postNum],screen)
             browseMode = True
 
+        # Displays post headers for browsing
         else:
             ticker = 0
 
@@ -208,7 +211,7 @@ try:
                     postNum = val
 
             
-
+# Resets the terminal window for normal usage outside of the program
 finally:
     curses.nocbreak(); screen.keypad(0); curses.echo()
     curses.endwin()
