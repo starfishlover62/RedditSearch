@@ -171,7 +171,13 @@ def performSearch(reddit,search,screen = None):
             ticker = ticker + 1
             if(screen != None):
                 screen.clear()
-                screen.addstr(curses.LINES-1,0,f"Posts searched: {ticker} ... {len(posts)} matching filters")
+                if(ticker % 3 == 0):
+                    screen.addstr(curses.LINES-1,0,"Searching .")
+                elif(ticker % 3 == 1):
+                    screen.addstr(curses.LINES-1,0,"Searching ..")
+                if(ticker % 3 == 2):
+                    screen.addstr(curses.LINES-1,0,"Searching ...")
+                screen.addstr(0,0,"")
                 screen.refresh()
     
     return posts
