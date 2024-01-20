@@ -179,7 +179,7 @@ try:
             elif char == ord('e'):
                 toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
-                screen.addstr(curses.LINES-1,40,"")
+                functions.placeCursor(screen,x=40,y=curses.LINES-1)
 
                 # ticker = 0
                 # for item in page.getLines():
@@ -197,7 +197,7 @@ try:
                 # screen.refresh()
                 toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
-                screen.addstr(curses.LINES-1,40,"")
+                functions.placeCursor(screen,x=40,y=curses.LINES-1)
                 # ticker = 0
                 # for item in page.getLines():
                 #     screen.addstr(ticker,0,f"{item}")
