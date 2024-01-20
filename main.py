@@ -154,12 +154,13 @@ try:
 
         # Displays post headers for browsing
         else:
-            ticker = 0
+            # ticker = 0
 
             toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
-            for item in page.getLines():
-                screen.addstr(ticker,0,f"{item}")
-                ticker = ticker + 1
+            page.print()
+            # for item in page.getLines():
+            #     screen.addstr(ticker,0,f"{item}")
+            #     ticker = ticker + 1
             
             
             screen.refresh()
@@ -176,8 +177,15 @@ try:
                 lineNum = page.scrollDown()
      
             elif char == ord('e'):
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
+                page.print()
+
+                # ticker = 0
+                # for item in page.getLines():
+                #     screen.addstr(ticker,0,f"{item}")
+                #     ticker = ticker + 1
+                # screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
+                # screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
                 c = screen.getch() # Allows immediate exit if they press q
                 if c == ord('q'):
                     continue
@@ -186,8 +194,13 @@ try:
                 screen.addstr(curses.LINES-1,0,"")
                 screen.clrtoeol()
                 screen.refresh()
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
+                # ticker = 0
+                # for item in page.getLines():
+                #     screen.addstr(ticker,0,f"{item}")
+                #     ticker = ticker + 1
+                # screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
+                # screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
 
                 # Display what they type, and require they press enter
                 curses.echo()
