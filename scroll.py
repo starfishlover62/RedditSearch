@@ -62,6 +62,9 @@ class ScrollingList:
             self.maxLine -= self.tooltip.height()
 
     def print(self,numLines = None):
+        """
+        Prints the values returned by getLines to the screen. Prints numLines number of lines if specified
+        """
         if(numLines == None or numLines > 0):
             ticker = 0
             self.screen.clear()
