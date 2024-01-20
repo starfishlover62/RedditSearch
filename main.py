@@ -179,6 +179,7 @@ try:
             elif char == ord('e'):
                 toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
+                screen.addstr(curses.LINES-1,40,"")
 
                 # ticker = 0
                 # for item in page.getLines():
@@ -191,10 +192,12 @@ try:
                     continue
 
                 # Otherwise update prompt
-                screen.addstr(curses.LINES-1,0,"")
-                screen.clrtoeol()
-                screen.refresh()
+                # screen.addstr(curses.LINES-1,0,"")
+                # screen.clrtoeol()
+                # screen.refresh()
                 toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
+                page.print()
+                screen.addstr(curses.LINES-1,40,"")
                 # ticker = 0
                 # for item in page.getLines():
                 #     screen.addstr(ticker,0,f"{item}")
