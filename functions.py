@@ -370,3 +370,5 @@ def viewPost(post,screen):
                 char = screen.getch()
 
 
+def placeCursor(screen,x,y):
+    screen.addstr(y,x,"")
