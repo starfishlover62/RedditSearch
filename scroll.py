@@ -72,7 +72,9 @@ class ScrollingList:
                 self.screen.addstr(ticker,0,f"{item}")
                 ticker = ticker + 1
                 if(not numLines == None and ticker >= numLines):
+                    self.screen.refresh()
                     break
+            self.screen.refresh()
         
 
 
