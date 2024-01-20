@@ -154,77 +154,63 @@ try:
 
         # Displays post headers for browsing
         else:
-            # ticker = 0
-
+            # Updates the tooltip, and prints the headers to the screen
             toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
-            page.print()
-            # for item in page.getLines():
-            #     screen.addstr(ticker,0,f"{item}")
-            #     ticker = ticker + 1
+            page.print()           
             
-            
-            screen.refresh()
+            # Gets input from the user
             char = screen.getch()
 
-            
+            # Quits the program
             if char == ord('q'):
                 break
 
+            # Scrolls up if allowed
             elif(char == curses.KEY_UP or char == ord('w')):
                 lineNum = page.scrollUp()
             
+            # Scrolls down if allowed
             elif(char == curses.KEY_DOWN or char == ord('s')):
                 lineNum = page.scrollDown()
      
+            # Allows the user to input a post number
             elif char == ord('e'):
+                # Updates the tooltip and places the cursor for input
                 toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
                 functions.placeCursor(screen,x=40,y=curses.LINES-1)
-
-                # ticker = 0
-                # for item in page.getLines():
-                #     screen.addstr(ticker,0,f"{item}")
-                #     ticker = ticker + 1
-                # screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-                # screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-                c = screen.getch() # Allows immediate exit if they press q
-                if c == ord('q'):
+                c = screen.getch() # Gets the character they type
+                if c == ord('q'): # Immediately exits if they pressed q
                     continue
 
-                # Otherwise update prompt
-                # screen.addstr(curses.LINES-1,0,"")
-                # screen.clrtoeol()
-                # screen.refresh()
-                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
-                page.print()
-                functions.placeCursor(screen,x=40,y=curses.LINES-1)
-                # ticker = 0
-                # for item in page.getLines():
-                #     screen.addstr(ticker,0,f"{item}")
-                #     ticker = ticker + 1
-                # screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-                # screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                else: # Otherwise
+                    # Update prompt to tell them to 'enter q" instead of 'press q"
+                    toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(enter q to exit)",80,0,curses.COLS-18)])
+                    page.print()
+                    functions.placeCursor(screen,x=40,y=curses.LINES-1)
 
-                # Display what they type, and require they press enter
-                curses.echo()
-                curses.nocbreak()
-                curses.ungetch(c) # Adds the first character back to the buffer
-                string = screen.getstr()
+                    # Gets input
+                    curses.echo() # Displays what they type
+                    curses.nocbreak() # Requires that they press enter
+                    curses.ungetch(c) # Adds the first character back to the buffer
+                    string = screen.getstr() # Their input
 
-                # Undo displaying input and requiring enter be pressed
-                curses.noecho()
-                curses.cbreak()
+                    # Undo displaying input and requiring enter be pressed
+                    curses.noecho()
+                    curses.cbreak()
 
-                val = 0
-                try:
-                    val = int(string)
-                except ValueError:
-                    continue
+                    # Attempts to convert their input into an integer.
+                    val = 0
+                    try:
+                        val = int(string)
+                    except ValueError:
+                        continue
 
-                val -= 1
-                if(val >= 0 and val < numPosts):
-                    browseMode = False
-                    postNum = val
+                    # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
+                    val -= 1
+                    if(val >= 0 and val < numPosts):
+                        browseMode = False # Will display post in full on next iteration
+                        postNum = val # Index of the post to be viewed
 
             
 # Resets the terminal window for normal usage outside of the program
