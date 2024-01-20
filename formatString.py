@@ -65,26 +65,37 @@ def spacesString(spaces):
     return st
 
 def tabulate(string, terminalWidth = 80, spaces = 8):
+    # Removes new lines and tabs from the original string
     string = string.replace("\t","")
     string = string.replace("\n","")
+
+    # Creates a string with a number of spaces equal to spaces
     addString = spacesString(spaces)
     ogString = addString
 
     offset = terminalWidth - (spaces)
     for i in range(math.ceil(len(string)/offset)):
-        if(addString != ogString):
+        if(addString != ogString): # Adds a new line and spaces to every line after the first
             addString += "\n" 
             addString += spacesString(spaces)
         nonSpaceFound = False
         for j in range(offset):
             try:
                 if(not nonSpaceFound):
-                    if(string[j + offset*i] != " "):
+                    if(string[j + offset*i] != " "): # Checks character to see if it is something other than a space
                         nonSpaceFound = True
                 if(nonSpaceFound):
-                    addString += string[j + offset*i]
+                    addString += string[j + offset*i] # Adds the characters to the string to be returned
             except IndexError:
                 break
+    
+    # index = 0
+    # nextSpace = 0
+    # charactersInLine = 0
+    # while(index < len(string)):
+    #     if((charactersInLine + (nextSpace - index)) > terminalWidth):
+
+
 
     return addString
 
