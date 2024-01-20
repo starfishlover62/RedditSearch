@@ -96,6 +96,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     s = []
 
+    # Creates the top border of the box
     boxStr = "+"
     for i in range(boxWidth-2):
         boxStr += "-"
@@ -105,6 +106,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     for item in stringList:
         if(item != None):
+            # Creates a separating line in the box
             if(item == "%separator%"):
                 boxStr += "+"
                 for i in range(boxWidth-2):
