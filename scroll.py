@@ -12,12 +12,13 @@ class ScrollingList:
         self.screen = screen
         self.lines = stringList
         self.currentLine = line
-        self.tooltip = tooltip
-        self.maxLine = curses.LINES
-        if(not self.tooltip == None):
-            self.maxLine -= self.tooltip.height()
+        self.updateTooltip(tooltip)
+        # self.tooltip = tooltip
+        # self.maxLine = curses.LINES
+        # if(not self.tooltip == None):
+        #     self.maxLine -= self.tooltip.height()
         
-        self.maxLine = len(self.lines) - self.maxLine
+        # self.maxLine = len(self.lines) - self.maxLine
     
     def scrollDown(self, numLines = 1):
         """Moves the lines that will be shown down by numLines.
@@ -57,9 +58,15 @@ class ScrollingList:
         return lines
 
     def updateTooltip(self,tooltip):
+        self.maxLine = curses.LINES
         if(not tooltip == None):
             self.tooltip = tooltip
-            self.maxLine -= self.tooltip.height()
+            self.maxLine -= self.tooltip.height() # Applies line adjustment for new tooltip
+
+        if(len(self.lines) >= self.maxLine):
+            self.maxLine = len(self.lines) - self.maxLine
+        else:
+            self.maxLine = 0
 
     def print(self,numLines = None):
         """
