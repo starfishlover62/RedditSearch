@@ -15,27 +15,42 @@ def formatAge(age):
         while(age > constants.YEAR):
             age -= constants.YEAR
             ticker += 1
-        return f"{ticker} year(s)"
+        if(ticker > 1):
+            return f"{ticker} years"
+        else:
+            return f"{ticker} year"
     elif(age > constants.MONTH):
         while(age > constants.MONTH):
             age -= constants.MONTH
             ticker += 1
-        return f"{ticker} month(s)"
+        if(ticker > 1):
+            return f"{ticker} months"
+        else:
+            return f"{ticker} month"
     elif(age > constants.DAY):
         while(age > constants.DAY):
             age -= constants.DAY
             ticker += 1
-        return f"{ticker} day(s)"
+        if(ticker > 1):
+            return f"{ticker} days"
+        else:
+            return f"{ticker} day"
     elif(age > constants.HOUR):
         while(age > constants.HOUR):
             age -= constants.HOUR
             ticker += 1
-        return f"{ticker} hour(s)"
+        if(ticker > 1):
+            return f"{ticker} hours"
+        else:
+            return f"{ticker} hour"
     elif(age > constants.MINUTE):
         while(age > constants.MINUTE):
             age -= constants.MINUTE
             ticker += 1
-        return f"{ticker} minute(s)"
+        if(ticker > 1):
+            return f"{ticker} minutes"
+        else:
+            return f"{ticker} minute"
     else:
         return "just now"
     
