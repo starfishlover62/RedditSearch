@@ -8,7 +8,7 @@ def serializeSub(sub):
     string = string.replace("None","null")
     return string
 
-def serializeSeach(search):
+def serializeSearch(search):
     string = f'"name":"{search.name}", "lastSearchTime":{search.lastSearchTime}, "subreddits":['
     for item in search.subreddits:
         string = string + serializeSub(item) + ","
@@ -21,10 +21,10 @@ def serializeSeach(search):
     return string
 
 
-def serializeSeaches(searches):
+def serializeSearches(searches):
     string = f'"searches":['
     for item in searches:
-        string = string + serializeSeach(item) + ","
+        string = string + serializeSearch(item) + ","
     
     string = string.rstrip(",")
     string = string + "]"
@@ -36,7 +36,7 @@ def serializeSeaches(searches):
 
 
 def saveSearches(searches, filepath = "searches.json"):
-    dumpStr = serializeSeaches(searches)
+    dumpStr = serializeSearches(searches)
     parsed = json.loads(dumpStr)
     with open(filepath,"w") as write:
         json.dump(parsed,write,indent=2)
