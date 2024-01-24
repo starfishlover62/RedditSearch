@@ -1,4 +1,5 @@
 import praw
+import prawcore
 import curses
 import math
 
@@ -12,16 +13,37 @@ import constants
 import formatString
 import scroll
 
-if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
-    print("Either the client id, client secret, or user agent are not specified. Please enter these values in config.py")
-    exit()
+# Checks that the config options are set
+if(config.client_id == ""):
+    print("Please specify a client id in config.py")
+    exit(1)
+if(config.client_secret == ""):
+    print("Please specify a client secret in config.py")
+    exit(1)
+if(config.user_agent == ""):
+    print("Please specify a user agent in config.py")
+    exit(1)
+    
 
 # Read-only instance
 reddit_read_only = praw.Reddit(client_id=config.client_id,          # your client id
                                client_secret=config.client_secret,  # your client secret
                                user_agent=config.user_agent)        # your user agent
 
+# Pulls a post to test that config options are properly set
+try:
+    for post in reddit_read_only.subreddit("reddit").new(limit=1):
+        post = post
+except prawcore.exceptions.ResponseException:
+    print("Bat HTTP Response")
+    print("Please check that the client id, secret, and user agent are properly configured in config.py")
+    exit(1)
+
+# Ensures that the path to the searches file has been set
 searchesPath = config.searches_file
+if(searchesPath == ""):
+    print("Please specify a path to the searches file in config.py")
+    exit(1)
 
 # Initialization work
 screen = curses.initscr()
