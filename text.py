@@ -4,15 +4,15 @@ class Text:
     justify = 0 # 0 - Left, 1 - Center, 2 - Right
     width = 80
 
-    def __init__(self,contents,width=80):
-        self.updateContents(contents,width)
+    def __init__(self,contents,preformatted=False,width=80):
+        self.updateContents(contents,preformatted,width)
 
-    def updateContents(self,contents,width = 80):
+    def updateContents(self,contents,preformatted=False,width = 80):
         self.content = contents
         self.width = width
-        self.updateDisplay()
+        self.updateDisplay(preformatted)
     
-    def updateDisplay(self):
+    def updateDisplay(self,preformatted = False):
         if(self.content == ""):
             return
         self.displayContent = []
@@ -22,17 +22,19 @@ class Text:
             if(endIndex >= len(self.content)):
                 endIndex = len(self.content)
             else:
-                while(not self.content[endIndex] == " "):
-                    endIndex = endIndex - 1
-                    if(endIndex == index):
-                        endIndex = index + (self.width - 1)
-                        break
+                if(preformatted == False):
+                    while(not self.content[endIndex] == " "):
+                        endIndex = endIndex - 1
+                        if(endIndex == index):
+                            endIndex = index + (self.width)
+                            break
             string = self.content[index:endIndex]
             self.displayContent.append(Line(string,self.width))
 
             index = endIndex
-            while(index < len(self.content) and self.content[index] == " "):
-                index = index +1
+            if(preformatted == False):
+                while(index < len(self.content) and self.content[index] == " "):
+                    index = index +1
             
 
         # while(line*self.width <= len(self.content)):
