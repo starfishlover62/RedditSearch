@@ -1,9 +1,48 @@
 class Text:
-    def __init__(self,contents):
-        self.updateContents(contents)
+    content = ""
+    displayContent = []
+    justify = 0 # 0 - Left, 1 - Center, 2 - Right
+    width = 80
 
-    def updateContents(self,contents):
-        self.contents = contents
+    def __init__(self,contents,width=80):
+        self.updateContents(contents,width)
+
+    def updateContents(self,contents,width = 80):
+        self.content = contents
+        self.width = width
+        self.updateDisplay()
+    
+    def updateDisplay(self):
+        if(self.content == ""):
+            return
+        self.displayContent = []
+        index = 0
+        while(index < len(self.content)):
+            endIndex = index + (self.width)
+            if(endIndex >= len(self.content)):
+                endIndex = len(self.content)
+            else:
+                while(not self.content[endIndex] == " "):
+                    endIndex = endIndex - 1
+                    if(endIndex == index):
+                        endIndex = index + (self.width - 1)
+                        break
+            string = self.content[index:endIndex]
+            self.displayContent.append(Line(string,self.width))
+
+            index = endIndex
+            while(index < len(self.content) and self.content[index] == " "):
+                index = index +1
+            
+
+        # while(line*self.width <= len(self.content)):
+        #     string = ""
+        #     string = self.content[line*self.width:(line+1)*self.width]
+        #     self.displayContent.append(Line(string,self.width))
+        #     line = line + 1
+    
+    def returnLines(self):
+        return self.displayContent
 
 
 
@@ -20,6 +59,12 @@ class Line:
             self.content = content
             self.width = width
             self.displayContent = self.content
+            if(self.justify == 1):
+                self.justifyCenter()
+            elif(self.justify == 2):
+                self.justifyRight()
+            else:
+                self.justifyLeft()
             return True
         else:
             return False
