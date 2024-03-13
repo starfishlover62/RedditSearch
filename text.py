@@ -36,12 +36,12 @@ class Text:
             
             # Adds the line to the list
             string = self.content[index:endIndex]
-            if(not string.find("\n") == -1):
-                endIndex = string.find("\n")
-                string = self.content[index:endIndex]
-                index = endIndex + 1
-            else:
-                index = endIndex
+            # if(not string.find("\n") == -1):
+            #     endIndex = string.find("\n")
+            #     string = self.content[index:endIndex]
+            #     index = endIndex + 1
+            # else:
+            #     index = endIndex
 
             self.displayContent.append(Line(string,self.width))
             
