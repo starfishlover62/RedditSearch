@@ -8,7 +8,7 @@ Issues:
 
 * scroll.py Tooltip class does not have proper spacing. It does not account for blank lines between rows
 * Scrolling will sometimes be allowed when it shouldnt, leading to instances of being at a negative line number
-* Text display is not centered, nor does it keep words together at the end of the line. Need to have words not be wrapped across lines, unless necessary
-* Search selection display and prompts are a bit lackluster
+* main.py browsing mode still uses old method of tool tip, needs to be updated
+* No user / subreddit shown on full post view
 * Does not fully check that config is proper
 * No command line options
