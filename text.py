@@ -36,9 +36,15 @@ class Text:
             
             # Adds the line to the list
             string = self.content[index:endIndex]
-            self.displayContent.append(Line(string,self.width))
+            if(not string.find("\n") == -1):
+                endIndex = string.find("\n")
+                string = self.content[index:endIndex]
+                index = endIndex + 1
+            else:
+                index = endIndex
 
-            index = endIndex
+            self.displayContent.append(Line(string,self.width))
+            
             if(preformatted == False):
                 # Removes leading spaces from the beginning of the next line
                 while(index < len(self.content) and self.content[index] == " "):
@@ -61,6 +67,9 @@ class Line:
         if(len(content) <= width):
             self.content = content
             self.width = width
+            self.content = self.content.replace("\n","")
+            self.content = self.content.replace("\t","")
+            self.content = self.content.replace(chr(8226),"*")
             self.displayContent = self.content
             if(self.justify == 1):
                 self.justifyCenter()
