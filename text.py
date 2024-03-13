@@ -13,28 +13,21 @@ class Text:
         self.updateDisplay(preformatted)
     
     def updateDisplay(self,preformatted = False):
-        """
-        Updates the display version of the contents. A.k.a formats it for the display. Preformatted variable indicates
-        whether the text is already formatted. Pass True to leave the text as is, or False, to split the text up by words.
-        """
         if(self.content == ""):
             return
         self.displayContent = []
         index = 0
         while(index < len(self.content)):
-            endIndex = index + (self.width) # End index represents the index of the character after the last one on the line
-            if(endIndex >= len(self.content)): # Does not try to find the end of the last word, will simply add the rest of the content to the line
+            endIndex = index + (self.width)
+            if(endIndex >= len(self.content)):
                 endIndex = len(self.content)
             else:
                 if(preformatted == False):
-                    # Finds the end of the last word that can wholely fit in the line
                     while(not self.content[endIndex] == " "):
                         endIndex = endIndex - 1
                         if(endIndex == index):
                             endIndex = index + (self.width)
                             break
-            
-            # Adds the line to the list
             string = self.content[index:endIndex]
             # if(not string.find("\n") == -1):
             #     endIndex = string.find("\n")
@@ -46,9 +39,15 @@ class Text:
             self.displayContent.append(Line(string,self.width))
             
             if(preformatted == False):
-                # Removes leading spaces from the beginning of the next line
                 while(index < len(self.content) and self.content[index] == " "):
                     index = index +1
+            
+
+        # while(line*self.width <= len(self.content)):
+        #     string = ""
+        #     string = self.content[line*self.width:(line+1)*self.width]
+        #     self.displayContent.append(Line(string,self.width))
+        #     line = line + 1
     
     def returnLines(self):
         return self.displayContent
