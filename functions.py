@@ -252,12 +252,12 @@ def getHeaders(posts):
                 age = 0
 
             # Subreddit
-            sub = post.subreddit.display_name
+            sub = formatString.removeNonAscii(post.subreddit.display_name)
             if(sub == None):
                 sub = "<NO SUBREDDIT>"
 
             # Title
-            title = post.title
+            title = formatString.removeNonAscii(post.title)
             if(title == None):
                 title = "<NO TITLE>"
             
@@ -274,7 +274,7 @@ def getHeaders(posts):
                 author = author.name
 
             try:
-                headers += (formatString.enbox([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Posted in ({sub}), {formatString.formatAge(age)} ago"],curses.COLS))
+                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age)} ago"],curses.COLS))
             except AttributeError:
                 continue
             ticker += 1
@@ -305,7 +305,7 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
 
 def viewPost(post,screen):
     age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
-    stringList = formatString.enbox([post.title,post.author.name,f"Posted in ({post.subreddit.display_name}), {age}","%separator%",post.selftext,"%separator%",post.url],curses.COLS)
+    stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
     
     lineNum = 0
 

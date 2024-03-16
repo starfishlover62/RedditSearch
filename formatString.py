@@ -1,6 +1,13 @@
 import constants
 import math
 
+def removeNonAscii(text):
+    newString = ""
+    for char in text:
+        if(ord(char) <= 255):
+            newString = newString + char
+    return newString
+
 def formatAge(age):
     # time constants
 
