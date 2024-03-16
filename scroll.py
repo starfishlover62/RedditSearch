@@ -59,6 +59,7 @@ class ScrollingList:
 
     def updateTooltip(self,tooltip):
         self.maxLine = curses.LINES
+        self.tooltip = None
         if(not tooltip == None):
             self.tooltip = tooltip
             self.maxLine -= self.tooltip.height() # Applies line adjustment for new tooltip

@@ -12,4 +12,3 @@ Issues:
 * No user / subreddit shown on full post view
 * Does not fully check that config is proper
 * No command line options
-* pressing h on the view post screen will crash program
