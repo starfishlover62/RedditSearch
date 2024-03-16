@@ -15,3 +15,4 @@ Issues:
 * No user / subreddit shown on full post view
 * Does not fully check that config is proper
 * No command line options
+* Formatting of post text can be a little wonky at times

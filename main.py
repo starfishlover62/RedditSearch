@@ -1,4 +1,5 @@
 import praw
+import prawcore
 import curses
 import math
 
@@ -12,16 +13,37 @@ import constants
 import formatString
 import scroll
 
-if(config.client_id == "" or config.client_secret == "" or config.user_agent == ""):
-    print("Either the client id, client secret, or user agent are not specified. Please enter these values in config.py")
-    exit()
+# Checks that the config options are set
+if(config.client_id == ""):
+    print("Please specify a client id in config.py")
+    exit(1)
+if(config.client_secret == ""):
+    print("Please specify a client secret in config.py")
+    exit(1)
+if(config.user_agent == ""):
+    print("Please specify a user agent in config.py")
+    exit(1)
+    
 
 # Read-only instance
 reddit_read_only = praw.Reddit(client_id=config.client_id,          # your client id
                                client_secret=config.client_secret,  # your client secret
                                user_agent=config.user_agent)        # your user agent
 
+# Pulls a post to test that config options are properly set
+try:
+    for post in reddit_read_only.subreddit("reddit").new(limit=1):
+        post = post
+except prawcore.exceptions.ResponseException:
+    print("Bat HTTP Response")
+    print("Please check that the client id, secret, and user agent are properly configured in config.py")
+    exit(1)
+
+# Ensures that the path to the searches file has been set
 searchesPath = config.searches_file
+if(searchesPath == ""):
+    print("Please specify a path to the searches file in config.py")
+    exit(1)
 
 # Initialization work
 screen = curses.initscr()
@@ -44,13 +66,13 @@ try:
 except FileNotFoundError:
     searches = []
 
-numPosts = 0
-postNum = 0
-lineNum = 0
-browseMode = True
-choosingSearches = True
-searchIndex = 0
-posts = []
+numPosts = 0 # Number of posts found meeting criteria
+postNum = 0 # Number of the post to be viewed in full
+lineNum = 0 # Current line number for paginating through post browsing
+browseMode = True # True if browsing through posts, false if reading a specific post
+choosingSearches = True # True if the user has yet to choose a search to perform, false if the search has been chosen
+searchIndex = 0 # Index of the search to be performed
+posts = [] # List of all the posts meeting criteria
 
 
 page = scroll.ScrollingList(screen,[""])
@@ -68,15 +90,19 @@ try:
     while True:
         screen.clear()
 
+        # If the user still has to choose a search to perform
         if(choosingSearches):
+            # If searches were found in the search file
             if(searches):
                 searchIndex = functions.getSearchNum(screen, searches)
+                # If the user indicated that they wanted to quit the program in getSearchNum
                 if(searchIndex == -1):
                     break
-                choosingSearches = False
-                
-                currentTime = functions.currentTimestamp()
-                searchTime = searches[searchIndex].lastSearchTime
+
+                else:
+                    choosingSearches = False
+                    currentTime = functions.currentTimestamp()
+                    searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
 
                 # If search has never been performed
                 if(searchTime == None):
@@ -104,22 +130,30 @@ try:
                     elif not char == ord('y'):
                         searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
                 
+                # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())
-                posts = functions.performSearch(reddit_read_only,searches[searchIndex])
+                posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
 
+                # If no posts matched the criteria
+                if(len(posts) <= 0):
+                    screen.clear()
+                    screen.addstr(0,0,"No posts found")
+                    screen.addstr(curses.LINES-1,0,"Press any key to exit")
+                    screen.getch()
+                    screen.refresh()
+                    searches[searchIndex].lastSearchTime = time
+                    dump.saveSearches(searches,searchesPath)
+                    break
 
+                # If at least one post matching the criteria was found
+                else:
+                    headers = functions.getHeaders(posts) # Returns the boxes containing post info
+                    numPosts = len(posts)
+                    page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
+                    searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                    dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
 
-                # Need to do something if posts is empty
-
-
-
-                headers = functions.getHeaders(posts)
-                numPosts = len(posts)
-                page.updateStrings(screen,headers,0,toolTip)
-                searches[searchIndex].lastSearchTime = time
-                dump.saveSearches(searches,searchesPath)
-
-                #end of need to change
+            # If no searches were found in the file, or the file does not exist
             else:
                 screen.addstr(0,0,"No searches found. Press e to create a new search.")
                 screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
@@ -135,70 +169,73 @@ try:
             screen.refresh()
 
         
-        
+        # Displays a single post
         elif(not browseMode):
             functions.viewPost(posts[postNum],screen)
             browseMode = True
 
+        # Displays post headers for browsing
         else:
-            ticker = 0
-
+            # Updates the tooltip, and prints the headers to the screen
             toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
-            for item in page.getLines():
-                screen.addstr(ticker,0,f"{item}")
-                ticker = ticker + 1
+            page.print()           
             
-            
-            screen.refresh()
+            # Gets input from the user
             char = screen.getch()
 
-            
+            # Quits the program
             if char == ord('q'):
                 break
 
+            # Scrolls up if allowed
             elif(char == curses.KEY_UP or char == ord('w')):
                 lineNum = page.scrollUp()
             
+            # Scrolls down if allowed
             elif(char == curses.KEY_DOWN or char == ord('s')):
                 lineNum = page.scrollDown()
      
+            # Allows the user to input a post number
             elif char == ord('e'):
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
-                c = screen.getch() # Allows immediate exit if they press q
-                if c == ord('q'):
+                # Updates the tooltip and places the cursor for input
+                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
+                page.print()
+                functions.placeCursor(screen,x=40,y=curses.LINES-1)
+                c = screen.getch() # Gets the character they type
+                if c == ord('q'): # Immediately exits if they pressed q
                     continue
 
-                # Otherwise update prompt
-                screen.addstr(curses.LINES-1,0,"")
-                screen.clrtoeol()
-                screen.refresh()
-                screen.addstr(curses.LINES-1,curses.COLS-18,"(enter q to exit)")
-                screen.addstr(curses.LINES-1,0,f"Enter a post number, then press enter: ")
+                else: # Otherwise
+                    # Update prompt to tell them to 'enter q" instead of 'press q"
+                    toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(enter q to exit)",80,0,curses.COLS-18)])
+                    page.print()
+                    functions.placeCursor(screen,x=40,y=curses.LINES-1)
 
-                # Display what they type, and require they press enter
-                curses.echo()
-                curses.nocbreak()
-                curses.ungetch(c) # Adds the first character back to the buffer
-                string = screen.getstr()
+                    # Gets input
+                    curses.echo() # Displays what they type
+                    curses.nocbreak() # Requires that they press enter
+                    curses.ungetch(c) # Adds the first character back to the buffer
+                    string = screen.getstr() # Their input
 
-                # Undo displaying input and requiring enter be pressed
-                curses.noecho()
-                curses.cbreak()
+                    # Undo displaying input and requiring enter be pressed
+                    curses.noecho()
+                    curses.cbreak()
 
-                val = 0
-                try:
-                    val = int(string)
-                except ValueError:
-                    continue
+                    # Attempts to convert their input into an integer.
+                    val = 0
+                    try:
+                        val = int(string)
+                    except ValueError:
+                        continue
 
-                val -= 1
-                if(val >= 0 and val < numPosts):
-                    browseMode = False
-                    postNum = val
+                    # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
+                    val -= 1
+                    if(val >= 0 and val < numPosts):
+                        browseMode = False # Will display post in full on next iteration
+                        postNum = val # Index of the post to be viewed
 
             
-
+# Resets the terminal window for normal usage outside of the program
 finally:
     curses.nocbreak(); screen.keypad(0); curses.echo()
     curses.endwin()

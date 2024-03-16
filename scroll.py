@@ -2,7 +2,7 @@ import curses
 from formatString import placeString
 class ScrollingList:
     """Represents a list that can be scrolled through. Useful for displaying a large amount of related data.
-     Requires a list of strings, a curses window object, as well optionally a starting line number and/or a 
+     Requires a list of strings, a curses window object, and optionally a starting line number and/or a 
      ToolTip object.
     """
     def __init__(self, screen, stringList, line = 0, tooltip = None):
@@ -12,12 +12,13 @@ class ScrollingList:
         self.screen = screen
         self.lines = stringList
         self.currentLine = line
-        self.tooltip = tooltip
-        self.maxLine = curses.LINES
-        if(not self.tooltip == None):
-            self.maxLine -= self.tooltip.height()
+        self.updateTooltip(tooltip)
+        # self.tooltip = tooltip
+        # self.maxLine = curses.LINES
+        # if(not self.tooltip == None):
+        #     self.maxLine -= self.tooltip.height()
         
-        self.maxLine = len(self.lines) - self.maxLine
+        # self.maxLine = len(self.lines) - self.maxLine
     
     def scrollDown(self, numLines = 1):
         """Moves the lines that will be shown down by numLines.
@@ -57,9 +58,31 @@ class ScrollingList:
         return lines
 
     def updateTooltip(self,tooltip):
+        self.maxLine = curses.LINES
+        self.tooltip = None
         if(not tooltip == None):
             self.tooltip = tooltip
-            self.maxLine -= self.tooltip.height()
+            self.maxLine -= self.tooltip.height() # Applies line adjustment for new tooltip
+
+        if(len(self.lines) >= self.maxLine):
+            self.maxLine = len(self.lines) - self.maxLine
+        else:
+            self.maxLine = 0
+
+    def print(self,numLines = None):
+        """
+        Prints the values returned by getLines to the screen. Prints numLines number of lines if specified
+        """
+        if(numLines == None or numLines > 0):
+            ticker = 0
+            self.screen.clear()
+            for item in self.getLines():
+                self.screen.addstr(ticker,0,f"{item}")
+                ticker = ticker + 1
+                if(not numLines == None and ticker >= numLines):
+                    self.screen.refresh()
+                    break
+            self.screen.refresh()
         
 
 

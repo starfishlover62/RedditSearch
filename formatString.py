@@ -1,6 +1,13 @@
 import constants
 import math
 
+def removeNonAscii(text):
+    newString = ""
+    for char in text:
+        if(ord(char) <= 255):
+            newString = newString + char
+    return newString
+
 def formatAge(age):
     # time constants
 
@@ -15,27 +22,42 @@ def formatAge(age):
         while(age > constants.YEAR):
             age -= constants.YEAR
             ticker += 1
-        return f"{ticker} year(s)"
+        if(ticker > 1):
+            return f"{ticker} years"
+        else:
+            return f"{ticker} year"
     elif(age > constants.MONTH):
         while(age > constants.MONTH):
             age -= constants.MONTH
             ticker += 1
-        return f"{ticker} month(s)"
+        if(ticker > 1):
+            return f"{ticker} months"
+        else:
+            return f"{ticker} month"
     elif(age > constants.DAY):
         while(age > constants.DAY):
             age -= constants.DAY
             ticker += 1
-        return f"{ticker} day(s)"
+        if(ticker > 1):
+            return f"{ticker} days"
+        else:
+            return f"{ticker} day"
     elif(age > constants.HOUR):
         while(age > constants.HOUR):
             age -= constants.HOUR
             ticker += 1
-        return f"{ticker} hour(s)"
+        if(ticker > 1):
+            return f"{ticker} hours"
+        else:
+            return f"{ticker} hour"
     elif(age > constants.MINUTE):
         while(age > constants.MINUTE):
             age -= constants.MINUTE
             ticker += 1
-        return f"{ticker} minute(s)"
+        if(ticker > 1):
+            return f"{ticker} minutes"
+        else:
+            return f"{ticker} minute"
     else:
         return "just now"
     
@@ -65,26 +87,37 @@ def spacesString(spaces):
     return st
 
 def tabulate(string, terminalWidth = 80, spaces = 8):
+    # Removes new lines and tabs from the original string
     string = string.replace("\t","")
     string = string.replace("\n","")
+
+    # Creates a string with a number of spaces equal to spaces
     addString = spacesString(spaces)
     ogString = addString
 
     offset = terminalWidth - (spaces)
     for i in range(math.ceil(len(string)/offset)):
-        if(addString != ogString):
+        if(addString != ogString): # Adds a new line and spaces to every line after the first
             addString += "\n" 
             addString += spacesString(spaces)
         nonSpaceFound = False
         for j in range(offset):
             try:
                 if(not nonSpaceFound):
-                    if(string[j + offset*i] != " "):
+                    if(string[j + offset*i] != " "): # Checks character to see if it is something other than a space
                         nonSpaceFound = True
                 if(nonSpaceFound):
-                    addString += string[j + offset*i]
+                    addString += string[j + offset*i] # Adds the characters to the string to be returned
             except IndexError:
                 break
+    
+    # index = 0
+    # nextSpace = 0
+    # charactersInLine = 0
+    # while(index < len(string)):
+    #     if((charactersInLine + (nextSpace - index)) > terminalWidth):
+
+
 
     return addString
 
@@ -96,6 +129,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     s = []
 
+    # Creates the top border of the box
     boxStr = "+"
     for i in range(boxWidth-2):
         boxStr += "-"
@@ -105,6 +139,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     for item in stringList:
         if(item != None):
+            # Creates a separating line in the box
             if(item == "%separator%"):
                 boxStr += "+"
                 for i in range(boxWidth-2):

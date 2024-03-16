@@ -155,13 +155,12 @@ def getSearchNum(screen, searches):
         return -2
             
 
-def performSearch(reddit,search):
+def performSearch(reddit,search,screen = None):
     posts = []
-    ticker = 1
+    ticker = 0
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
-            print(ticker)
             if(post.created_utc == None):
                 continue
             if(post.created_utc < search.lastSearchTime):
@@ -170,7 +169,30 @@ def performSearch(reddit,search):
                 if(filterPost(post,sub)):
                     posts.append(post)
             ticker = ticker + 1
-    
+            if(screen != None):
+                startX = 13
+                startY = 8
+                screen.clear()
+                screen.addstr(curses.LINES-1,0," (This may take a while, depending on time since the search was last performed)")
+                screen.addstr(startY,startX,"                         _     _ ")
+                screen.addstr(startY+1,startX," ___  ___  __ _ _ __ ___| |__ (_)_ __   __ _ ")
+                screen.addstr(startY+2,startX,"/ __|/ _ \/ _` | '__/ __| '_ \| | '_ \ / _` |")
+                if(ticker % 3 == 1):
+                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _")
+                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_)")
+
+                elif(ticker % 3 == 2):
+                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _   _")
+                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_) (_)")
+
+                if(ticker % 3 == 0):
+                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _   _   _")
+                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_) (_) (_)")
+
+                screen.addstr(startY+5,startX,"                                       |___/ ")
+                screen.addstr(0,0,"")
+                screen.refresh()
+
     return posts
 
 def filterPost(post,subReddit):
@@ -229,8 +251,13 @@ def getHeaders(posts):
             else:
                 age = 0
 
+            # Subreddit
+            sub = formatString.removeNonAscii(post.subreddit.display_name)
+            if(sub == None):
+                sub = "<NO SUBREDDIT>"
+
             # Title
-            title = post.title
+            title = formatString.removeNonAscii(post.title)
             if(title == None):
                 title = "<NO TITLE>"
             
@@ -247,7 +274,7 @@ def getHeaders(posts):
                 author = author.name
 
             try:
-                headers += (formatString.enbox([f"{ticker}). {post.title}",post.link_flair_text,post.author.name,f"Created: {formatString.formatAge(age)} ago"],curses.COLS))
+                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age)} ago"],curses.COLS))
             except AttributeError:
                 continue
             ticker += 1
@@ -277,8 +304,8 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
 
 
 def viewPost(post,screen):
-    age = f"Created {formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
-    stringList = formatString.enbox([post.title,age,"%separator%",post.selftext,"%separator%",post.url],curses.COLS)
+    age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
+    stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
     
     lineNum = 0
 
@@ -317,7 +344,7 @@ def viewPost(post,screen):
                                                         "(u) Prints the post url to the screen (You will have to manually copy it)",
                                                         "(a) Opens the author's page in a new tab of the default web browser",
                                                         "(q) returns to the previous screen",
-                                                        "Press any key to exit this screen"],0,None)
+                                                        "Press 'q' to exit this screen'"],0,None)
                 
                 ticker = 0
                 for item in helpPage.getLines():
@@ -348,3 +375,5 @@ def viewPost(post,screen):
                 char = screen.getch()
 
 
+def placeCursor(screen,x,y):
+    screen.addstr(y,x,"")
