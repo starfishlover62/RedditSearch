@@ -1,3 +1,5 @@
 __pycache__/
 scraper/
 venv/
+config.py
+searches.json
