@@ -99,7 +99,7 @@ def getSearchNum(screen, searches):
             
             elif char == ord('e'):
                 # Updates prompt
-                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
+                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
                 screen.clear()
             
                 ticker = 0
@@ -109,7 +109,7 @@ def getSearchNum(screen, searches):
                 
 
                 screen.refresh()
-                screen.addstr(curses.LINES-1,39,"") # Moves cursor to end of prompt
+                screen.addstr(curses.LINES-1,41,"") # Moves cursor to end of prompt
     
 
                 # Display what they type, and require they press enter
@@ -117,7 +117,7 @@ def getSearchNum(screen, searches):
                 if c == ord('q'):
                     toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
                     continue
-                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter: ","(enter q to quit)",80,0,curses.COLS-18)])
+                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to quit)",80,0,curses.COLS-18)])
                 ticker = 0
                 for item in page.getLines():
                     screen.addstr(ticker,0,f"{item}")
@@ -125,7 +125,7 @@ def getSearchNum(screen, searches):
                 
 
                 screen.refresh()
-                screen.addstr(curses.LINES-1,39,"") # Moves cursor to end of prompt
+                screen.addstr(curses.LINES-1,41,"") # Moves cursor to end of prompt
                 curses.echo()
                 curses.nocbreak()
                 curses.ungetch(c) # Adds the first character back to the buffer

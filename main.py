@@ -177,7 +177,7 @@ try:
         # Displays post headers for browsing
         else:
             # Updates the tooltip, and prints the headers to the screen
-            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press e to view a post or q to quit)",80,0,curses.COLS-38)])
             page.print()           
             
             # Gets input from the user
@@ -198,18 +198,18 @@ try:
             # Allows the user to input a post number
             elif char == ord('e'):
                 # Updates the tooltip and places the cursor for input
-                toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(press q to exit)",80,0,curses.COLS-18)])
+                toolTip.replace([formatString.combineStrings(f"Enter a post number (1-{len(posts)}), then press enter:","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
-                functions.placeCursor(screen,x=40,y=curses.LINES-1)
+                functions.placeCursor(screen,x=48,y=curses.LINES-1)
                 c = screen.getch() # Gets the character they type
                 if c == ord('q'): # Immediately exits if they pressed q
                     continue
 
                 else: # Otherwise
                     # Update prompt to tell them to 'enter q" instead of 'press q"
-                    toolTip.replace([formatString.combineStrings(f"Enter a post number, then press enter:","(enter q to exit)",80,0,curses.COLS-18)])
+                    toolTip.replace([formatString.combineStrings(f"Enter a post number (1-{len(posts)}), then press enter:","(enter q to exit)",80,0,curses.COLS-18)])
                     page.print()
-                    functions.placeCursor(screen,x=40,y=curses.LINES-1)
+                    functions.placeCursor(screen,x=48,y=curses.LINES-1)
 
                     # Gets input
                     curses.echo() # Displays what they type
