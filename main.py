@@ -123,7 +123,7 @@ try:
                 # If search was last performed over a week ago
                 elif(currentTime - searchTime > constants.DAY * 7):
                     screen.clear()
-                    screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime)} ago.")
+                    screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime,"ago.")}")
                     screen.addstr(1,0,"Press q to quit,")
                     screen.addstr(2,0,"y to perform the search anyways,")
                     screen.addstr(3,0,"or n to perform search on posts from the last week")

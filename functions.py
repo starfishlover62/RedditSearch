@@ -385,7 +385,7 @@ def getHeaders(posts):
                 author = author.name
 
             try:
-                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age)} ago"],curses.COLS))
+                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age,"ago")}"],curses.COLS))
             except AttributeError:
                 continue
             ticker += 1
@@ -438,7 +438,7 @@ def viewPost(post,screen):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move between posts.
     """
-    age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
+    age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
     stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
     
     lineNum = 0

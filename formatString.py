@@ -8,8 +8,13 @@ def removeNonAscii(text):
             newString = newString + char
     return newString
 
-def formatAge(age):
-    # time constants
+def formatAge(age, suffix=""):
+    """
+    Takes a time (age) in seconds, and returns a string that describes it with the largest unit that
+    is smaller than the time. ex: age = 119, returns 'one minute', age = 95000, returns 'one day.'
+    Suffix is used to append some phrase after the unit, such as 'ago.' The suffix is not applied to the
+    just now unit (ages less than 60 seconds)
+    """
 
     try:
         age + 1
@@ -18,47 +23,52 @@ def formatAge(age):
 
     ticker = 0
 
-    if(age > constants.YEAR):
+    if(age > constants.YEAR):       # Years
         while(age > constants.YEAR):
             age -= constants.YEAR
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} years"
+            return f"{ticker} years {suffix}"
         else:
-            return f"{ticker} year"
-    elif(age > constants.MONTH):
+            return f"{ticker} year {suffix}"
+        
+    elif(age > constants.MONTH):    # Months
         while(age > constants.MONTH):
             age -= constants.MONTH
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} months"
+            return f"{ticker} months {suffix}"
         else:
-            return f"{ticker} month"
-    elif(age > constants.DAY):
+            return f"{ticker} month {suffix}"
+        
+    elif(age > constants.DAY):      # Days
         while(age > constants.DAY):
             age -= constants.DAY
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} days"
+            return f"{ticker} days {suffix}"
         else:
-            return f"{ticker} day"
-    elif(age > constants.HOUR):
+            return f"{ticker} day {suffix}"
+        
+    elif(age > constants.HOUR):     # Hours
         while(age > constants.HOUR):
             age -= constants.HOUR
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} hours"
+            return f"{ticker} hours {suffix}"
         else:
-            return f"{ticker} hour"
-    elif(age > constants.MINUTE):
+            return f"{ticker} hour {suffix}"
+        
+    elif(age > constants.MINUTE):   # Minutes
         while(age > constants.MINUTE):
             age -= constants.MINUTE
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} minutes"
+            return f"{ticker} minutes {suffix}"
         else:
-            return f"{ticker} minute"
-    else:
+            return f"{ticker} minute {suffix}"
+        
+    else:   # Times less than 60 seconds (1 minute)
         return "just now"
     
 
