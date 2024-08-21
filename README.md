@@ -13,3 +13,4 @@ Issues:
 * Does not fully check that config is proper
 * No command line options
 * Formatting of post text can be a little wonky at times
+* Doesn't handle banned, quarantined, private, or nonexistent subreddits
