@@ -160,13 +160,19 @@ def getSearchNum(screen, searches):
             
 
 def createSearch(screen):
+    """
+    Creates a search object found in search.py. Prompts user to input data to create this object
+    """
+
+    # Clears out the screen to prepare it for creating the search
     screen.clear()
     screen.refresh()
+
     stringList = []
     questions = ["Name of search:","Subreddit:","Whitelisted title:","Blacklisted title:","Whitelisted flair:","Blacklisted flair:","Whitelisted word in post:","Blacklisted word in post:"]
-    searchBuild = []
-    subSearchBuild = []
-    questionIndex = 0
+    searchBuild = [] # Saves the name, creation data, and the list of subreddit searches
+    subSearchBuild = [] # Used to save the componentes of a subreddit search while it is being built
+    questionIndex = 0 # The current index of questions array
     lineNum = 0
     quit = False
     toolTip = scroll.ToolTip([questions[questionIndex],formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
@@ -248,12 +254,12 @@ def createSearch(screen):
         dump.saveSearches(s,"checkValidSearch.json")
 
         return s
-
-                        
-
-            
-
+    
     return
+
+
+
+
 
 
 def performSearch(reddit,search,screen = None):
@@ -383,18 +389,32 @@ def getHeaders(posts):
 
 
 def sortPosts(posts):
+    """
+    Sorts a list by creation date. The newest posts come first
+    """
     posts.sort(key=postAge, reverse=True)
     return posts
 
 
 def postAge(post):
+    """
+    Provides the creation time of a post, in UTC
+    """
     return post.created_utc
 
 
 def copyToClipboard(string):
+    """
+    Copies the string to the clipboard
+    """
     pyperclip.copy(string)
 
+
 def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
+    """
+    Gets an integer input from an user, verifies that it is within some bounds, and 
+    allows them a set number of attempts to get a valid input. Most likely unused, and able to be removed
+    """
     if(lowerBound < 0  or upperBound < 0):
         return -1
     attempts = 0
@@ -411,6 +431,9 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
 
 
 def viewPost(post,screen):
+    """
+    Enters a viewing mode for a single post. Arrow keys can be used to move between posts.
+    """
     age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc))} ago"
     stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
     
