@@ -99,8 +99,10 @@ try:
                 if(searchIndex == -1):
                     break
                 elif(searchIndex == -2):
-                    screen.addstr(3,0,"create new string")
-                    screen.getch()
+                    newSearch = functions.createSearch(screen)
+                    searches.append(newSearch)
+                    dump.saveSearches(searches,searchesPath)
+                    continue
 
                 else:
                     choosingSearches = False

@@ -159,6 +159,103 @@ def getSearchNum(screen, searches):
         return -2
             
 
+def createSearch(screen):
+    screen.clear()
+    screen.refresh()
+    stringList = []
+    questions = ["Name of search:","Subreddit:","Whitelisted title:","Blacklisted title:","Whitelisted flair:","Blacklisted flair:","Whitelisted word in post:","Blacklisted word in post:"]
+    searchBuild = []
+    subSearchBuild = []
+    questionIndex = 0
+    lineNum = 0
+    quit = False
+    toolTip = scroll.ToolTip([questions[questionIndex],formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+    page = scroll.ScrollingList(screen,stringList,0,toolTip)
+
+    while(True):
+        if(quit):
+            break
+
+        page.print()
+
+        
+        placeCursor(screen,x=16,y=curses.LINES-2)
+        screen.refresh()
+        if(questionIndex == 0):
+            toolTip.replace([questions[questionIndex]])
+            page.print()
+            placeCursor(screen,x=16,y=curses.LINES-1)
+            
+            # Gets input
+            curses.echo() # Displays what they type
+            curses.nocbreak() # Requires that they press enter
+            string = screen.getstr().decode("ASCII") # Their input
+
+            # Undo displaying input and requiring enter be pressed
+            curses.noecho()
+            curses.cbreak()
+            searchBuild.append(string)
+            searchBuild.append(None)
+            stringList.append(f"{questions[questionIndex]} {string}")
+            questionIndex = questionIndex + 1
+            
+        else: # For all questions except name of search
+            temp = []
+            while(True):
+                toolTip.replace([f"Add a {questions[questionIndex]} (y/n):"])
+                page.print()
+                placeCursor(screen,x=26,y=curses.LINES-1)
+                if (questionIndex == 1 and (len(temp) > 0)): # Allows user to only add one subreddit at a time.
+                    c = ord('n')
+                    quit = False
+                else:
+                    c = screen.getch() # Gets the character they type
+                if c == ord('n'):
+                    if(questionIndex == 1):
+                        if(len(temp) == 0):
+                            quit = True
+                            break
+                        subSearchBuild.append(temp[0])
+                        stringList.append(f"|----{questions[questionIndex]} {temp[0]}")
+                    else:
+                        subSearchBuild.append(temp)
+                        stringList.append(f"{questions[questionIndex]} {string}")
+                    questionIndex = questionIndex + 1
+                    if(questionIndex >= len(questions)):
+                        questionIndex = 1
+                        if(len(searchBuild) < 3):
+                            searchBuild.append([])
+                        searchBuild[2].append(search.SubredditSearch(subSearchBuild[0],subSearchBuild[1],subSearchBuild[2],subSearchBuild[3],subSearchBuild[4],subSearchBuild[5],subSearchBuild[6]))
+                    break
+                elif c == ord('y'): # Otherwise
+                    # Update prompt to remove option to quit
+                    toolTip.replace([questions[questionIndex]])
+                    page.print()
+                    placeCursor(screen,x=26,y=curses.LINES-1)
+
+                    # Gets input
+                    curses.echo() # Displays what they type
+                    curses.nocbreak() # Requires that they press enter
+                    string = screen.getstr().decode("ASCII") # Their input
+
+                    # Undo displaying input and requiring enter be pressed
+                    curses.noecho()
+                    curses.cbreak()
+                    temp.append(string)
+        
+        if(len(searchBuild) >= 3):
+            s = search.Search(searchBuild[0],searchBuild[1],searchBuild[2])
+            dump.saveSearches(s,"checkValidSearch.json")
+
+            return s
+
+                        
+
+            
+
+    return
+
+
 def performSearch(reddit,search,screen = None):
     posts = []
     ticker = 0
