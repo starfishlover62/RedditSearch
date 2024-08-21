@@ -243,11 +243,11 @@ def createSearch(screen):
                     curses.cbreak()
                     temp.append(string)
         
-        if(len(searchBuild) >= 3):
-            s = search.Search(searchBuild[0],searchBuild[1],searchBuild[2])
-            dump.saveSearches(s,"checkValidSearch.json")
+    if(len(searchBuild) >= 3):
+        s = search.Search(searchBuild[0],searchBuild[1],searchBuild[2])
+        dump.saveSearches(s,"checkValidSearch.json")
 
-            return s
+        return s
 
                         
 
