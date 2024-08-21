@@ -342,6 +342,8 @@ def viewPost(post,screen):
                 helpPage = scroll.ScrollingList(screen,["Press the button in () to execute its command",
                                                         "(w) or (up arrow) scroll up",
                                                         "(s) or (down arrow) scroll down",
+                                                        "(a) or (left arrow) view previous post",
+                                                        "(d) or (right arrow) view next post",
                                                         "(h) Displays this menu",
                                                         "(o) Opens the post in a new tab of the default web browser",
                                                         "(c) Copies the post url to the clipboard",
