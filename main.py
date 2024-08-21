@@ -138,6 +138,7 @@ try:
                 # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())
                 posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+                posts = functions.sortPosts(posts)
 
                 # If no posts matched the criteria
                 if(len(posts) <= 0):

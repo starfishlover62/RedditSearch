@@ -382,7 +382,13 @@ def getHeaders(posts):
     return headers
 
 
+def sortPosts(posts):
+    posts.sort(key=postAge, reverse=True)
+    return posts
 
+
+def postAge(post):
+    return post.created_utc
 
 
 def copyToClipboard(string):
