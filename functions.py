@@ -332,6 +332,10 @@ def viewPost(post,screen):
             lineNum = page.scrollDown()
         elif(char == curses.KEY_UP or char == ord('w')):
             lineNum = page.scrollUp()
+        elif(char == curses.KEY_LEFT or char == ord('a')):
+            return -1
+        elif(char == curses.KEY_RIGHT or char == ord('d')):
+            return 1
         elif char == ord('h'):
             while(True):
                 screen.clear()

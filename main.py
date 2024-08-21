@@ -171,8 +171,15 @@ try:
         
         # Displays a single post
         elif(not browseMode):
-            functions.viewPost(posts[postNum],screen)
-            browseMode = True
+            next = functions.viewPost(posts[postNum],screen)
+            if(next == -1):
+                if(postNum - 1 >= 0):
+                    postNum = postNum - 1
+            elif(next == 1):
+                if((postNum + 1) < len(posts)):
+                    postNum = postNum + 1
+            else:
+                browseMode = True
 
         # Displays post headers for browsing
         else:
