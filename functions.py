@@ -344,7 +344,7 @@ def viewPost(post,screen):
                                                         "(u) Prints the post url to the screen (You will have to manually copy it)",
                                                         "(a) Opens the author's page in a new tab of the default web browser",
                                                         "(q) returns to the previous screen",
-                                                        "Press 'q' to exit this screen'"],0,None)
+                                                        "Press 'q' to exit this screen"],0,None)
                 
                 ticker = 0
                 for item in helpPage.getLines():
