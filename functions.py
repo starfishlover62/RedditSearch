@@ -9,6 +9,10 @@ import json
 import dump
 import formatString
 import scroll
+import requests
+from io import BytesIO
+from PIL import Image
+import PIL
 
 
 
@@ -499,6 +503,14 @@ def viewPost(post,screen):
             webbrowser.open_new_tab(post.url)
         elif char == ord('c'):
             copyToClipboard(post.url)
+        elif char == ord('i'):
+            response = requests.get(post.url)
+            if(response.status_code == 200):
+                try:
+                    img = Image.open(BytesIO(response.content))
+                    img.show()
+                except  PIL.UnidentifiedImageError:
+                    pass
         elif char == ord('m'):
             webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
         elif char == ord('u'):
