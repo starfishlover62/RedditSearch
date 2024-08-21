@@ -348,7 +348,7 @@ def viewPost(post,screen):
                                                         "(o) Opens the post in a new tab of the default web browser",
                                                         "(c) Copies the post url to the clipboard",
                                                         "(u) Prints the post url to the screen (You will have to manually copy it)",
-                                                        "(a) Opens the author's page in a new tab of the default web browser",
+                                                        "(m) Opens the author's page in a new tab of the default web browser",
                                                         "(q) returns to the previous screen",
                                                         "Press 'q' to exit this screen"],0,None)
                 
@@ -369,7 +369,7 @@ def viewPost(post,screen):
             webbrowser.open_new_tab(post.url)
         elif char == ord('c'):
             copyToClipboard(post.url)
-        elif char == ord('a'):
+        elif char == ord('m'):
             webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
         elif char == ord('u'):
             screen.clear()
