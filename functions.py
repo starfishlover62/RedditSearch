@@ -479,6 +479,7 @@ def viewPost(post,screen):
                                                         "(a) or (left arrow) view previous post",
                                                         "(d) or (right arrow) view next post",
                                                         "(h) Displays this menu",
+                                                        "(i) If post is an image, opens image",
                                                         "(o) Opens the post in a new tab of the default web browser",
                                                         "(c) Copies the post url to the clipboard",
                                                         "(u) Prints the post url to the screen (You will have to manually copy it)",
