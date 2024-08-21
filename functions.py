@@ -59,7 +59,7 @@ def getNumPosts(reddit, searchCriteria, numPosts = 20):
 
 """
 Return values:
-    -2 searches is empty
+    -2 searches is empty or user wants to perform a custom search
     -1 user pressed q to quit
     >=0 the index of the searches list that was chosen
 
@@ -71,6 +71,7 @@ def getSearchNum(screen, searches):
         for item in searches:
             ls.append(f"{ticker}. {item.name}")
             ticker = ticker + 1
+        ls.append(f"{ticker}. Create a new search")
         
         toolTip = scroll.ToolTip(formatString.combineStrings("<-- Line 1 -- >","(press q to quit)",80,0,curses.COLS-18))
         page = scroll.ScrollingList(screen,ls,0,toolTip)
@@ -140,7 +141,6 @@ def getSearchNum(screen, searches):
                 try:
                     val = int(string)
                 except ValueError:
-                    
                     continue
                 
 
@@ -149,6 +149,10 @@ def getSearchNum(screen, searches):
                     screen.clear()
                     screen.refresh()
                     return val
+                elif(val == len(searches)):
+                    screen.clear()
+                    screen.refresh()
+                    return -2
                 toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
         return -1
     else:

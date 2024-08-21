@@ -98,6 +98,9 @@ try:
                 # If the user indicated that they wanted to quit the program in getSearchNum
                 if(searchIndex == -1):
                     break
+                elif(searchIndex == -2):
+                    screen.addstr(3,0,"create new string")
+                    screen.getch()
 
                 else:
                     choosingSearches = False
@@ -105,7 +108,7 @@ try:
                     searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
 
                 # If search has never been performed
-                if(searchTime == None):
+                if(searchTime == None or searchTime == 0):
                     screen.clear()
                     screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
                     screen.addstr(1,0,"Press q to quit or any other key to continue")
