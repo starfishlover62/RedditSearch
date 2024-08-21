@@ -207,6 +207,17 @@ try:
             # Scrolls down if allowed
             elif(char == curses.KEY_DOWN or char == ord('s')):
                 lineNum = page.scrollDown()
+
+            elif(char == ord('r')):
+                # Records the current timestamp before performing the search, then performs the search
+                time = math.floor(functions.currentTimestamp())
+                posts = posts + functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+                posts = functions.sortPosts(posts)
+                headers = functions.getHeaders(posts) # Returns the boxes containing post info
+                numPosts = len(posts)
+                page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
+                searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
      
             # Allows the user to input a post number
             elif char == ord('e'):
