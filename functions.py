@@ -176,18 +176,18 @@ def performSearch(reddit,search,screen = None):
                 screen.addstr(curses.LINES-1,0," (This may take a while, depending on time since the search was last performed)")
                 screen.addstr(startY,startX,"                         _     _ ")
                 screen.addstr(startY+1,startX," ___  ___  __ _ _ __ ___| |__ (_)_ __   __ _ ")
-                screen.addstr(startY+2,startX,"/ __|/ _ \/ _` | '__/ __| '_ \| | '_ \ / _` |")
+                screen.addstr(startY+2,startX,"/ __|/ _ \\/ _` | '__/ __| '_ \\| | '_ \\ / _` |")
                 if(ticker % 3 == 1):
-                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _")
-                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_)")
+                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _")
+                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_)")
 
                 elif(ticker % 3 == 2):
-                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _   _")
-                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_) (_)")
+                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _   _")
+                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_) (_)")
 
                 if(ticker % 3 == 0):
-                    screen.addstr(startY+3,startX,"\__ \  __/ (_| | | | (__| | | | | | | | (_| |  _   _   _")
-                    screen.addstr(startY+4,startX,"|___/\___|\__,_|_|  \___|_| |_|_|_| |_|\__, | (_) (_) (_)")
+                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _   _   _")
+                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_) (_) (_)")
 
                 screen.addstr(startY+5,startX,"                                       |___/ ")
                 screen.addstr(0,0,"")
