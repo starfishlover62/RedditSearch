@@ -178,13 +178,13 @@ try:
         # Displays a single post
         elif(not browseMode):
             next = functions.viewPost(posts[postNum],screen)
-            if(next == -1):
+            if(next == -1): # The user wants to view previous post
                 if(postNum - 1 >= 0):
                     postNum = postNum - 1
-            elif(next == 1):
+            elif(next == 1): # The user wants to view next post
                 if((postNum + 1) < len(posts)):
                     postNum = postNum + 1
-            else:
+            else: # User wanted to exit viewPost
                 browseMode = True
 
         # Displays post headers for browsing
@@ -208,6 +208,7 @@ try:
             elif(char == curses.KEY_DOWN or char == ord('s')):
                 lineNum = page.scrollDown()
 
+            # Refreshes the search, gathering any new submissions that have been posted
             elif(char == ord('r')):
                 # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())

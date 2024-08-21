@@ -351,6 +351,9 @@ def filterPost(post,subReddit):
 
 
 def getHeaders(posts):
+    """
+    Formats and returns post header information. This includes: subreddit, title, flair, author, and age
+    """
     headers = []
     ticker = 1
     if (not posts == None):
@@ -419,7 +422,7 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
     Gets an integer input from an user, verifies that it is within some bounds, and 
     allows them a set number of attempts to get a valid input. Most likely unused, and able to be removed
     """
-    if(lowerBound < 0  or upperBound < 0):
+    if(lowerBound < 0  or upperBound < 0): # Makes sure both bounds are valid
         return -1
     attempts = 0
     if(numAttempts <= 0):
@@ -444,7 +447,6 @@ def viewPost(post,screen):
     lineNum = 0
 
     toolTip = scroll.ToolTip([formatString.combineStrings(f"<-- Line 1 -- >","(press q to quit)",80,0,curses.COLS-18)])
-
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
             
     while(True):
@@ -460,32 +462,44 @@ def viewPost(post,screen):
         screen.refresh()
         char = screen.getch()
         
+        # Exit viewing the post
         if char == ord('q'):
             break
+
+        # Scroll down in the post
         elif(char == curses.KEY_DOWN or char == ord('s')):
             lineNum = page.scrollDown()
+        
+        # Scroll up in the post
         elif(char == curses.KEY_UP or char == ord('w')):
             lineNum = page.scrollUp()
+
+        # View previous post
         elif(char == curses.KEY_LEFT or char == ord('a')):
             return -1
+        
+        # View next post
         elif(char == curses.KEY_RIGHT or char == ord('d')):
             return 1
+        
+        # Display help screen
         elif char == ord('h'):
             while(True):
                 screen.clear()
-                helpPage = scroll.ScrollingList(screen,["Press the button in () to execute its command",
-                                                        "(w) or (up arrow) scroll up",
-                                                        "(s) or (down arrow) scroll down",
-                                                        "(a) or (left arrow) view previous post",
-                                                        "(d) or (right arrow) view next post",
-                                                        "(h) Displays this menu",
-                                                        "(i) If post is an image, opens image",
-                                                        "(o) Opens the post in a new tab of the default web browser",
-                                                        "(c) Copies the post url to the clipboard",
-                                                        "(u) Prints the post url to the screen (You will have to manually copy it)",
-                                                        "(m) Opens the author's page in a new tab of the default web browser",
-                                                        "(q) returns to the previous screen",
-                                                        "Press 'q' to exit this screen"],0,None)
+                helpPage = scroll.ScrollingList(screen,[
+                    "Press the button in () to execute its command",
+                    "(w) or (up arrow) scroll up",
+                    "(s) or (down arrow) scroll down",
+                    "(a) or (left arrow) view previous post",
+                    "(d) or (right arrow) view next post",
+                    "(h) Displays this menu",
+                    "(i) If post is an image, opens image",
+                    "(o) Opens the post in a new tab of the default web browser",
+                    "(c) Copies the post url to the clipboard",
+                    "(u) Prints the post url to the screen (You will have to manually copy it)",
+                    "(m) Opens the author's page in a new tab of the default web browser",
+                    "(q) returns to the previous screen",
+                    "Press 'q' to exit this screen"],0,None)
                 
                 ticker = 0
                 for item in helpPage.getLines():
@@ -500,20 +514,29 @@ def viewPost(post,screen):
                 elif(char == ord('w')):
                     helpPage.scrollUp()
 
+        # Open post in web browser
         elif char == ord('o'):
             webbrowser.open_new_tab(post.url)
+
+        # Copy url to clipboard
         elif char == ord('c'):
             copyToClipboard(post.url)
+        
+        # Open image, if present
         elif char == ord('i'):
-            response = requests.get(post.url)
-            if(response.status_code == 200):
+            response = requests.get(post.url) # Gets information from Internet
+            if(response.status_code == 200): # Code 200 means information was sucessfully gathered
                 try:
-                    img = Image.open(BytesIO(response.content))
-                    img.show()
-                except  PIL.UnidentifiedImageError:
+                    img = Image.open(BytesIO(response.content)) # Converts binary data to image
+                    img.show() # Opens the image in default image viewer
+                except  PIL.UnidentifiedImageError: # Typically thrown if the link was not an image.
                     pass
+        
+        # Open author's page
         elif char == ord('m'):
             webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
+        
+        # Displays url of post
         elif char == ord('u'):
             screen.clear()
             screen.addstr(0,0,post.url)
@@ -525,4 +548,7 @@ def viewPost(post,screen):
 
 
 def placeCursor(screen,x,y):
+    """
+    Moves the cursor to the specified location
+    """
     screen.addstr(y,x,"")
