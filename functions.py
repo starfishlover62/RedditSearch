@@ -426,7 +426,7 @@ def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
 
 def viewPost(post,screen):
     """
-    Enters a viewing mode for a single post. Arrow keys can be used to move between posts.
+    Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
     age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
     stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
@@ -437,16 +437,9 @@ def viewPost(post,screen):
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
             
     while(True):
-        screen.clear()
         toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
-        ticker = 0
-        for item in page.getLines():
-            screen.addstr(ticker,0,f"{item}")
-            ticker = ticker + 1
+        page.print()
 
-        
-
-        screen.refresh()
         char = screen.getch()
         
         # Exit viewing the post
@@ -471,35 +464,23 @@ def viewPost(post,screen):
         
         # Display help screen
         elif char == ord('h'):
-            while(True):
-                screen.clear()
-                helpPage = scroll.ScrollingList(screen,[
-                    "Press the button in () to execute its command",
-                    "(w) or (up arrow) scroll up",
-                    "(s) or (down arrow) scroll down",
-                    "(a) or (left arrow) view previous post",
-                    "(d) or (right arrow) view next post",
-                    "(h) Displays this menu",
-                    "(i) If post is an image, opens image",
-                    "(o) Opens the post in a new tab of the default web browser",
-                    "(c) Copies the post url to the clipboard",
-                    "(u) Prints the post url to the screen (You will have to manually copy it)",
-                    "(m) Opens the author's page in a new tab of the default web browser",
-                    "(q) returns to the previous screen",
-                    "Press 'q' to exit this screen"],0,None)
-                
-                ticker = 0
-                for item in helpPage.getLines():
-                    screen.addstr(ticker,0,f"{item}")
-                    ticker = ticker + 1
-                screen.refresh()
-                char = screen.getch()
-                if char == ord('q'):
-                    break
-                elif(char == ord('s')):
-                    helpPage.scrollDown()
-                elif(char == ord('w')):
-                    helpPage.scrollUp()
+            screen.clear()
+            helpPage = scroll.ScrollingList(screen,[
+                "Press the button in () to execute its command",
+                "(w) or (up arrow) scroll up",
+                "(s) or (down arrow) scroll down",
+                "(a) or (left arrow) view previous post",
+                "(d) or (right arrow) view next post",
+                "(h) Displays this menu",
+                "(i) If post is an image, opens image",
+                "(o) Opens the post in a new tab of the default web browser",
+                "(c) Copies the post url to the clipboard",
+                "(u) Prints the post url to the screen (You will have to manually copy it)",
+                "(m) Opens the author's page in a new tab of the default web browser",
+                "Press any key to exit this screen"],0,None)
+            placeCursor(screen,x=0,y=curses.LINES-1)
+            helpPage.print()
+            char = screen.getch() # Help screen disappears when user presses any key
 
         # Open post in web browser
         elif char == ord('o'):
@@ -527,11 +508,10 @@ def viewPost(post,screen):
         elif char == ord('u'):
             screen.clear()
             screen.addstr(0,0,post.url)
-            screen.addstr(curses.LINES-1,curses.COLS-18,"(press q to exit)")
-            screen.addstr(curses.LINES-1,0,"")
+            screen.addstr(curses.LINES-1,curses.COLS-24,"(press any key to exit)")
+            placeCursor(screen,x=0,y=curses.LINES-1)
             screen.refresh()
-            while(char != ord('q')):
-                char = screen.getch()
+            char = screen.getch()
 
 
 def placeCursor(screen,x,y):
