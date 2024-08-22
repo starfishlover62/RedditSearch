@@ -2,6 +2,7 @@ import praw
 import prawcore
 import curses
 import math
+import argparse
 
 import configparser
 
@@ -13,6 +14,11 @@ import constants
 import formatString
 import scroll
 import json.decoder
+
+parser = argparse.ArgumentParser(description="Gather posts on Reddit that meets specific criteria.")
+parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-insensitive")
+args = vars(parser.parse_args())
+
 
 # Checks that the config options are set
 if(config.client_id == ""):
@@ -95,7 +101,23 @@ try:
         if(choosingSearches):
             # If searches were found in the search file
             if(searches):
-                searchIndex = functions.getSearchNum(screen, searches)
+                if(args["name"]):
+                    valid = False
+                    for item in range(len(searches)):
+                        if (searches[item].name == args["name"]):
+                            valid = True
+                            searchIndex = item
+                            break
+                    if(not valid):
+                        curses.nocbreak(); screen.keypad(0); curses.echo()
+                        curses.endwin()
+                        print(f"No search by the name of {args["name"]} exists\nThe following are valid searches:")
+                        for item in searches:
+                            print(f"\t{item.name}")
+                        exit(1)
+
+                else:
+                    searchIndex = functions.getSearchNum(screen, searches)
             else: # If no searches were found in the file, or the file does not exist
                 screen.addstr(0,0,"No searches found at the current searches file:")
                 screen.addstr(1,4,f"{searchesPath}")
