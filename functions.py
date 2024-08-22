@@ -77,12 +77,12 @@ def getSearchNum(screen, searches):
             ticker = ticker + 1
         ls.append(f"{ticker}. Create a new search")
         lineNum = 0
-        toolTip = scroll.ToolTip(formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52))
+        toolTip = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
         page = scroll.ScrollingList(screen,ls,0,toolTip)
         
         while(True):
             # Updates tooltip and prints page to screen
-            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
+            toolTip.replace(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
             page.print()
 
             char = screen.getch() # Gets single character input from user
@@ -101,7 +101,10 @@ def getSearchNum(screen, searches):
             # Either way, input is gathered the same
             elif char == ord('e') or char == ord('d'):
                 # Updates prompt(tooltip), then prints to screen
-                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
+                if(char == ord('e')):
+                    toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
+                else:
+                    toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
 
                 # Moves cursor to end of prompt
@@ -114,7 +117,10 @@ def getSearchNum(screen, searches):
                     continue
 
                 # Updates prompt(tooltip), then prints to screen
-                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
+                if(char == ord('e')):
+                    toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
+                else:
+                    toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
                 page.print()
 
                 # Moves cursor to end of prompt
