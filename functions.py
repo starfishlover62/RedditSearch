@@ -77,12 +77,12 @@ def getSearchNum(screen, searches):
             ticker = ticker + 1
         ls.append(f"{ticker}. Create a new search")
         lineNum = 0
-        toolTip = scroll.ToolTip(formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select post, (d) delete post, or press q to quit)",80,0,curses.COLS-55))
+        toolTip = scroll.ToolTip(formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52))
         page = scroll.ScrollingList(screen,ls,0,toolTip)
         
         while(True):
             # Updates tooltip and prints page to screen
-            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select post, (d) delete post, or press q to quit)",80,0,curses.COLS-55)])
+            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
             page.print()
 
             char = screen.getch() # Gets single character input from user
