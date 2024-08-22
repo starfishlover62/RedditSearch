@@ -7,11 +7,7 @@ For pyperclip, if it doesn't work, run sudo apt-get install xclip. For more info
 Issues:
 
 * scroll.py Tooltip class does not have proper spacing. It does not account for blank lines between rows
-* Scrolling will sometimes be allowed when it shouldnt, leading to instances of being at a negative line number
-* main.py browsing mode still uses old method of tool tip, needs to be updated
 * Does not fully check that config is proper
 * No command line options
-* Formatting of post text can be a little wonky at times
 * Doesn't handle banned, quarantined, private, or nonexistent subreddits
 * Search creation UI is subpar
-* Searches can not be deleted from within the program
