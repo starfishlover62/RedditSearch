@@ -17,7 +17,7 @@ import PIL
 
 
 def currentTimestamp():
-    return datetime.datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
+    return datetime.datetime.now(timezone.utc).timestamp()
 
 
 def getSearches(JSONPath):
