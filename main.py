@@ -15,8 +15,8 @@ import formatString
 import scroll
 import json.decoder
 
-parser = argparse.ArgumentParser(description="Gather posts on Reddit that meets specific criteria.")
-parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-insensitive")
+parser = argparse.ArgumentParser(description="Gathers posts on Reddit that meets specific criteria. Note that the program can be run without any command-line options")
+parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-sensitive")
 args = vars(parser.parse_args())
 
 
@@ -42,7 +42,7 @@ try:
     for post in reddit_read_only.subreddit("reddit").new(limit=1):
         post = post
 except prawcore.exceptions.ResponseException:
-    print("Bat HTTP Response")
+    print("Bad HTTP Response")
     print("Please check that the client id, secret, and user agent are properly configured in config.py")
     exit(1)
 
