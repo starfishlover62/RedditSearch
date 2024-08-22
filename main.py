@@ -12,6 +12,7 @@ import dump
 import constants
 import formatString
 import scroll
+import json.decoder
 
 # Checks that the config options are set
 if(config.client_id == ""):
@@ -63,7 +64,7 @@ if(curses.LINES < minTermLines or curses.COLS < minTermCols):
 searches = []
 try:
     searches = functions.getSearches(searchesPath)
-except FileNotFoundError:
+except(FileNotFoundError, json.decoder.JSONDecodeError):
     searches = []
 
 numPosts = 0 # Number of posts found meeting criteria
@@ -95,85 +96,88 @@ try:
             # If searches were found in the search file
             if(searches):
                 searchIndex = functions.getSearchNum(screen, searches)
-                screen.clear()
-                screen.refresh()
-                # If the user indicated that they wanted to quit the program in getSearchNum
-                if(searchIndex == -1):
+            else: # If no searches were found in the file, or the file does not exist
+                screen.addstr(0,0,"No searches found at the current searches file:")
+                screen.addstr(1,4,f"{searchesPath}")
+                screen.addstr(2,0,"If this is not the correct path, edit the value of 'searches_file' in config.py.")
+                screen.addstr(3,0,f"Press q to quit the program.")
+                screen.addstr(4,0,f"Press any other key to create a new search in the above search file")
+                char = screen.getch()  
+                if char == ord('q'):
                     break
-                elif(searchIndex == -2):
-                    newSearch = functions.createSearch(screen)
-                    searches.append(newSearch)
-                    dump.saveSearches(searches,searchesPath)
-                    continue
-                elif(searchIndex == -3):
-                    dump.saveSearches(searches,searchesPath)
-                    continue
-
                 else:
-                    choosingSearches = False
-                    currentTime = functions.currentTimestamp()
-                    searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
+                    searchIndex = -2
 
-                # If search has never been performed
-                if(searchTime == None or searchTime == 0):
-                    screen.clear()
-                    screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
-                    screen.addstr(1,0,"Press q to quit or any other key to continue")
-                    screen.refresh()
-                    char = screen.getch()  
-                    if char == ord('q'):
-                        break
-                    searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
+            screen.clear()
+            screen.refresh()
+            # If the user indicated that they wanted to quit the program in getSearchNum
+            if(searchIndex == -1):
+                break
+            elif(searchIndex == -2):
+                newSearch = functions.createSearch(screen)
+                searches.append(newSearch)
+                dump.saveSearches(searches,searchesPath)
+                continue
+            elif(searchIndex == -3):
+                dump.saveSearches(searches,searchesPath)
+                continue
 
-                # If search was last performed over a week ago
-                elif(currentTime - searchTime > constants.DAY * 7):
-                    screen.clear()
-                    screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime,"ago.")}")
-                    screen.addstr(1,0,"Press q to quit,")
-                    screen.addstr(2,0,"y to perform the search anyways,")
-                    screen.addstr(3,0,"or n to perform search on posts from the last week")
-                    screen.refresh()
-
-                    char = screen.getch()  
-                    if char == ord('q'):
-                        break
-                    elif not char == ord('y'):
-                        searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
-                
-                # Records the current timestamp before performing the search, then performs the search
-                time = math.floor(functions.currentTimestamp())
-                posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
-                posts = functions.sortPosts(posts)
-
-                # If no posts matched the criteria
-                if(len(posts) <= 0):
-                    screen.clear()
-                    screen.addstr(0,0,"No posts found")
-                    screen.addstr(curses.LINES-1,0,"Press any key to exit")
-                    screen.getch()
-                    screen.refresh()
-                    searches[searchIndex].lastSearchTime = time
-                    dump.saveSearches(searches,searchesPath)
-                    break
-
-                # If at least one post matching the criteria was found
-                else:
-                    headers = functions.getHeaders(posts) # Returns the boxes containing post info
-                    numPosts = len(posts)
-                    page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
-                    searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
-                    dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
-
-            # If no searches were found in the file, or the file does not exist
             else:
-                screen.addstr(0,0,"No searches found. Press e to create a new search.")
-                screen.addstr(1,0,"Alternatively, press q to exit, and edit the searches file")
-                screen.addstr(2,0,f"The current searches file is {searchesPath}. Is this correct?")
-                screen.addstr(3,0,"If not, edit the value of searches_file in config.py")
+                choosingSearches = False
+                currentTime = functions.currentTimestamp()
+                searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
+
+            # If search has never been performed
+            if(searchTime == None or searchTime == 0):
+                screen.clear()
+                screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
+                screen.addstr(1,0,"Press q to quit or any other key to continue")
+                screen.refresh()
+                char = screen.getch()  
+                if char == ord('q'):
+                    break
+                searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
+
+            # If search was last performed over a week ago
+            elif(currentTime - searchTime > constants.DAY * 7):
+                screen.clear()
+                screen.addstr(0,0,f"This search was last performed {formatString.formatAge(currentTime-searchTime,"ago.")}")
+                screen.addstr(1,0,"Press q to quit,")
+                screen.addstr(2,0,"y to perform the search anyways,")
+                screen.addstr(3,0,"or n to perform search on posts from the last week")
+                screen.refresh()
 
                 char = screen.getch()  
                 if char == ord('q'):
                     break
+                elif not char == ord('y'):
+                    searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
+            
+            # Records the current timestamp before performing the search, then performs the search
+            time = math.floor(functions.currentTimestamp())
+            posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+            posts = functions.sortPosts(posts)
+
+            # If no posts matched the criteria
+            if(len(posts) <= 0):
+                screen.clear()
+                screen.addstr(0,0,"No posts found")
+                screen.addstr(curses.LINES-1,0,"Press any key to exit")
+                screen.getch()
+                screen.refresh()
+                searches[searchIndex].lastSearchTime = time
+                dump.saveSearches(searches,searchesPath)
+                break
+
+            # If at least one post matching the criteria was found
+            else:
+                headers = functions.getHeaders(posts) # Returns the boxes containing post info
+                numPosts = len(posts)
+                page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
+                searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
+
+           
 
             # Clears screen after search choosing process
             screen.clear()
