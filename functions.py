@@ -519,3 +519,32 @@ def placeCursor(screen,x,y):
     Moves the cursor to the specified location
     """
     screen.addstr(y,x,"")
+
+
+
+def convertHTML(original):
+    """
+    Takes a post's selftext_html, and converts to a list of strings, which are used in various other functions
+    """
+    stringsList = []
+
+    while(not original.find("<p>") == -1):
+        start = original.find("<p>")
+        end = original.find("</p>")
+        stringsList.append(original[start+3:end])
+        original = original[:start] + original[end+4:]
+        
+    print(original)
+    final = ""
+    for i in range(len(stringsList)):
+        while(not stringsList[i].find("&#39;") == -1):
+            apostrophe = stringsList[i].find("&#39;")
+            stringsList[i] = stringsList[i][:apostrophe] + "'" + stringsList[i][apostrophe+5:]
+        # print(stringsList[i])
+        # print()
+        final = final + stringsList[i] + "\n\n"
+    # print(final)
+    val = formatString.enbox([final],80)
+    return val
+
+
