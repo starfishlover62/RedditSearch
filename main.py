@@ -95,12 +95,17 @@ try:
             # If searches were found in the search file
             if(searches):
                 searchIndex = functions.getSearchNum(screen, searches)
+                screen.clear()
+                screen.refresh()
                 # If the user indicated that they wanted to quit the program in getSearchNum
                 if(searchIndex == -1):
                     break
                 elif(searchIndex == -2):
                     newSearch = functions.createSearch(screen)
                     searches.append(newSearch)
+                    dump.saveSearches(searches,searchesPath)
+                    continue
+                elif(searchIndex == -3):
                     dump.saveSearches(searches,searchesPath)
                     continue
 

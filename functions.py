@@ -59,16 +59,16 @@ def getNumPosts(reddit, searchCriteria, numPosts = 20):
     return posts
 
 
-
-
-"""
-Return values:
-    -2 searches is empty or user wants to perform a custom search
-    -1 user pressed q to quit
-    >=0 the index of the searches list that was chosen
-
-"""
 def getSearchNum(screen, searches):
+    """
+    Displays a list of searches, and has the user select one to be performed. Also allows the user
+    to create or delete searches.
+    Return Values: 
+        -3 : Search was deleted (therefore save)
+        -2 : Searches parameter is empty, or the user selected to create a new search
+        -1 : User pressed q to quit
+        >=0: The index of the searches list that was chosen
+    """
     if(searches):
         ls = []
         ticker = 1
@@ -76,61 +76,51 @@ def getSearchNum(screen, searches):
             ls.append(f"{ticker}. {item.name}")
             ticker = ticker + 1
         ls.append(f"{ticker}. Create a new search")
-        
-        toolTip = scroll.ToolTip(formatString.combineStrings("<-- Line 1 -- >","(press q to quit)",80,0,curses.COLS-18))
-        page = scroll.ScrollingList(screen,ls,0,toolTip)
         lineNum = 0
+        toolTip = scroll.ToolTip(formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select post, (d) delete post, or press q to quit)",80,0,curses.COLS-55))
+        page = scroll.ScrollingList(screen,ls,0,toolTip)
+        
         while(True):
-            screen.clear()
-            
-            ticker = 0
-            for item in page.getLines():
-                screen.addstr(ticker,0,f"{item}")
-                ticker = ticker + 1
-            
+            # Updates tooltip and prints page to screen
+            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select post, (d) delete post, or press q to quit)",80,0,curses.COLS-55)])
+            page.print()
 
-            screen.refresh()
-            char = screen.getch()
-            if(char == ord('q')):
+            char = screen.getch() # Gets single character input from user
+            if(char == ord('q')): # Returns from function, signalling to quit program
                 return -1
             
-            elif(char == curses.KEY_UP or char == ord('w')):
+            elif(char == curses.KEY_UP or char == ord('w')): # Scrolls up
                 lineNum = page.scrollUp()
-                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+                continue
             
-            elif(char == curses.KEY_DOWN or char == ord('s')):
+            elif(char == curses.KEY_DOWN or char == ord('s')): # Scrolls down
                 lineNum = page.scrollDown()
-                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
+                continue
             
-            elif char == ord('e'):
-                # Updates prompt
+            # User either wants to perform a search/create one or delete a search.
+            # Either way, input is gathered the same
+            elif char == ord('e') or char == ord('d'):
+                # Updates prompt(tooltip), then prints to screen
                 toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
-                screen.clear()
-            
-                ticker = 0
-                for item in page.getLines():
-                    screen.addstr(ticker,0,f"{item}")
-                    ticker = ticker + 1
-                
+                page.print()
 
-                screen.refresh()
-                screen.addstr(curses.LINES-1,41,"") # Moves cursor to end of prompt
+                # Moves cursor to end of prompt
+                placeCursor(screen,x=41,y=curses.LINES-1)
     
 
                 # Display what they type, and require they press enter
                 c = screen.getch() # Allows immediate exit if they press q
                 if c == ord('q'):
-                    toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
                     continue
-                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to quit)",80,0,curses.COLS-18)])
-                ticker = 0
-                for item in page.getLines():
-                    screen.addstr(ticker,0,f"{item}")
-                    ticker = ticker + 1
-                
 
-                screen.refresh()
-                screen.addstr(curses.LINES-1,41,"") # Moves cursor to end of prompt
+                # Updates prompt(tooltip), then prints to screen
+                toolTip.replace([formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
+                page.print()
+
+                # Moves cursor to end of prompt
+                placeCursor(screen,x=41,y=curses.LINES-1)
+
+                # Displays user's input, and requires they press enter to submit
                 curses.echo()
                 curses.nocbreak()
                 curses.ungetch(c) # Adds the first character back to the buffer
@@ -140,7 +130,7 @@ def getSearchNum(screen, searches):
                 curses.noecho()
                 curses.cbreak()
 
-                # Ensures that their input is an integer
+                # Attempts to convert their input to an integer
                 val = 0
                 try:
                     val = int(string)
@@ -148,17 +138,14 @@ def getSearchNum(screen, searches):
                     continue
                 
 
-                val -= 1
+                val -= 1 # Offsets input, so it is an index
                 if(val >= 0 and val < len(searches)):
-                    screen.clear()
-                    screen.refresh()
+                    if(char == ord('d')):
+                        del searches[val]
+                        return -3
                     return val
-                elif(val == len(searches)):
-                    screen.clear()
-                    screen.refresh()
+                elif(val == len(searches) and char == ord('e')):
                     return -2
-                toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
-        return -1
     else:
         return -2
             
