@@ -99,14 +99,90 @@ def spacesString(spaces):
 def tabulate(string, terminalWidth = 80, spaces = 8):
     # Removes new lines and tabs from the original string
     string = string.replace("\t","")
-    string = string.replace("\n","")
+    stringList = string.splitlines()
+    # for item in stringList:
+    #     print(item)
+    #     item = item.split()
+    #     print(item)
+    # string = string.replace("\n","")
 
-    # Creates a string with a number of spaces equal to spaces
-    addString = spacesString(spaces)
-    ogString = addString
+    offset = terminalWidth - spaces
+    tempstr = ""
+    checkstr = ""
+    tabulatedList = []
+    for item in stringList:
+        item = item.split()
+        for word in item:
+            if(len(word) > offset):
+                tempstr = checkstr
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = ""
+                checkstr = ""
+                workingWord = word
+                while(len(workingWord) > offset):
+                    addWord = spacesString(spaces) + workingWord[:offset] + "\n"
+                    tabulatedList.append(addWord)
+                    workingWord = workingWord[offset:]
+                addWord = spacesString(spaces) + workingWord + "\n"
+                tabulatedList.append(addWord)
+                continue
+            checkstr = checkstr + word
+            if(len(checkstr) < offset):
+                tempstr = checkstr
+                tempstr = tempstr + " "
+                checkstr = tempstr
+            elif (len(checkstr) == offset):
+                tempstr = checkstr
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = ""
+                checkstr = ""
+            else:
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = word + " "
+                checkstr = tempstr
+            # print(tempstr)
+        tempstr = spacesString(spaces) + tempstr + "\n"
+        tabulatedList.append(tempstr)
+        tempstr = ""
+        checkstr = ""
+    
+    newStr = ""
+    return newStr.join(tabulatedList)
 
-    offset = terminalWidth - (spaces)
-    for i in range(math.ceil(len(string)/offset)):
+
+
+
+
+    # WORKS
+    """offset = terminalWidth - (spaces)
+    tempstr = ""
+    tabulatedList = []
+    for item in stringList:
+        for i in range(len(item)):
+            tempstr = tempstr + item[i]
+            if(len(tempstr) >= offset):
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                print(tempstr)
+                tabulatedList.append(tempstr)
+                tempstr = ""
+        tempstr = spacesString(spaces) + tempstr
+        print(tempstr)
+        tabulatedList.append(f"{tempstr}\n")
+        tempstr = ""
+    newStr = ""
+    return newStr.join(tabulatedList)"""
+
+
+
+
+
+
+
+    # OLD
+    """for i in range(math.ceil(len(string)/offset)):
         if(addString != ogString): # Adds a new line and spaces to every line after the first
             addString += "\n" 
             addString += spacesString(spaces)
@@ -119,7 +195,7 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
                 if(nonSpaceFound):
                     addString += string[j + offset*i] # Adds the characters to the string to be returned
             except IndexError:
-                break
+                break"""
     
     # index = 0
     # nextSpace = 0
@@ -129,7 +205,7 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
 
 
 
-    return addString
+    #return addString
 
 
 
