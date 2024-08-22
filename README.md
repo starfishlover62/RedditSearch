@@ -1,4 +1,7 @@
 # RedditScraper
+
+*** INCOMPLETE ***
+
 Scrapes subreddits and filters by flair or title
 
 
