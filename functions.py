@@ -13,6 +13,7 @@ import requests
 from io import BytesIO
 from PIL import Image
 import PIL
+import prawcore
 
 
 
@@ -554,3 +555,16 @@ def convertHTML(original):
     return val
 
 
+def isValidSubreddit(userReddit,name):
+    """
+    Pulls a single post from the subreddit specified in name, using the praw reddit instance userReddit.
+    Returns 1 if sub is valid, -1 if it does not exist or has been banned, or -2 if it is private
+    """
+    try:
+        for submission in userReddit.subreddit(name).new(limit=1):
+            s = submission.id
+    except (prawcore.exceptions.NotFound, prawcore.exceptions.Redirect, AttributeError): # Errors that arise when the subreddit does not exist
+        return -1
+    except prawcore.exceptions.Forbidden:
+        return -2
+    return 1

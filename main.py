@@ -177,6 +177,18 @@ try:
             
             # Records the current timestamp before performing the search, then performs the search
             time = math.floor(functions.currentTimestamp())
+            for sub in searches[searchIndex].subreddits:
+                status = functions.isValidSubreddit(reddit_read_only,sub.name)
+                if(status == -1):
+                    curses.nocbreak(); screen.keypad(0); curses.echo()
+                    curses.endwin()
+                    print(f'Subreddit ({sub.name}) does not exist or has been banned')
+                    exit(1)
+                elif(status == -2):
+                    curses.nocbreak(); screen.keypad(0); curses.echo()
+                    curses.endwin()
+                    print(f'Subreddit ({sub.name}) is private or under quarantine')
+                    exit(1)
             posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
             posts = functions.sortPosts(posts)
 
