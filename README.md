@@ -38,4 +38,3 @@ Pressing d will also allow you to enter a number, this search will be deleted fr
 # Issues:
 
 * scroll.py Tooltip class does not have proper spacing. It does not account for blank lines between rows
-* Search creation UI is subpar
