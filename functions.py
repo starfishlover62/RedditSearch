@@ -78,12 +78,12 @@ def getSearchNum(screen, searches):
             ticker = ticker + 1
         ls.append(f"{ticker}. Create a new search")
         lineNum = 0
-        toolTip = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
+        toolTip = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-48)])
         page = scroll.ScrollingList(screen,ls,0,toolTip)
         
         while(True):
             # Updates tooltip and prints page to screen
-            toolTip.replace(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select search, (d) delete search, or (q) quit)",80,0,curses.COLS-52)])
+            toolTip.replace(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-48)])
             page.print()
 
             char = screen.getch() # Gets single character input from user
@@ -100,10 +100,12 @@ def getSearchNum(screen, searches):
             
             # User either wants to perform a search/create one or delete a search.
             # Either way, input is gathered the same
-            elif char == ord('e') or char == ord('d'):
+            elif char == ord('e') or char == ord('d') or char == ord('v'):
                 # Updates prompt(tooltip), then prints to screen
                 if(char == ord('e')):
                     toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
+                elif(char == ord('v')):
+                    toolTip.replace(["~Viewing~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
                 else:
                     toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",80,0,curses.COLS-18)])
                 page.print()
@@ -120,6 +122,8 @@ def getSearchNum(screen, searches):
                 # Updates prompt(tooltip), then prints to screen
                 if(char == ord('e')):
                     toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
+                elif(char == ord('v')):
+                    toolTip.replace(["~Viewing~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
                 else:
                     toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",80,0,curses.COLS-18)])
                 page.print()
@@ -150,7 +154,27 @@ def getSearchNum(screen, searches):
                     if(char == ord('d')):
                         del searches[val]
                         return -3
-                    return val
+                    elif(char == ord('v')):
+                        view = searchTree(searches[val])
+                        viewLine = 0
+                        viewTool = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {viewLine + 1} -- >","press (q) to exit",80,0,curses.COLS-18)])
+                        viewPage = scroll.ScrollingList(screen,view,viewLine,viewTool)
+                        while True:
+                            viewTool.replace([formatString.combineStrings(f"<-- Line {viewLine + 1} -- >","press (q) to exit",80,0,curses.COLS-18)])
+                            viewPage.print()
+                            viewChar = screen.getch()
+                            if(viewChar == ord('q')): # Returns from function, signalling to quit program
+                                break
+                            
+                            elif(viewChar == curses.KEY_UP or viewChar == ord('w')): # Scrolls up
+                                viewLine = viewPage.scrollUp()
+                                continue
+                            
+                            elif(viewChar == curses.KEY_DOWN or viewChar == ord('s')): # Scrolls down
+                                viewLine = viewPage.scrollDown()
+                                continue
+                    else:
+                        return val
                 elif(val == len(searches) and char == ord('e')):
                     return -2
     else:
@@ -169,12 +193,14 @@ def createSearch(screen):
     stringList = []
     questions = ["Name of search:","Subreddit:","Whitelisted title:","Blacklisted title:","Whitelisted flair:","Blacklisted flair:","Whitelisted word in post:","Blacklisted word in post:"]
     searchBuild = [] # Saves the name, creation data, and the list of subreddit searches
-    subSearchBuild = [] # Used to save the componentes of a subreddit search while it is being built
     questionIndex = 0 # The current index of questions array
+    returnSearch = search.Search()
     lineNum = 0
     quit = False
+    atLeastOneSub = False
     toolTip = scroll.ToolTip([questions[questionIndex],formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",80,0,curses.COLS-18)])
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
+    temp = []
 
     while(True):
         if(quit):
@@ -183,12 +209,14 @@ def createSearch(screen):
         page.print()
 
         
-        placeCursor(screen,x=16,y=curses.LINES-2)
-        screen.refresh()
+        # placeCursor(screen,x=16,y=curses.LINES-2)
+        # screen.refresh()
         if(questionIndex == 0):
-            toolTip.replace([questions[questionIndex]])
+            # Gets search name
+            prompt = questions[questionIndex]
+            toolTip.replace([prompt])
             page.print()
-            placeCursor(screen,x=16,y=curses.LINES-1)
+            placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
             
             # Gets input
             curses.echo() # Displays what they type
@@ -198,44 +226,66 @@ def createSearch(screen):
             # Undo displaying input and requiring enter be pressed
             curses.noecho()
             curses.cbreak()
-            searchBuild.append(string)
-            searchBuild.append(None)
-            stringList.append(f"{questions[questionIndex]} {string}")
+            returnSearch.update(name = string)
             questionIndex = questionIndex + 1
+            stringList = searchTree(returnSearch)
+            page.updateStrings(screen,stringList,0,toolTip)
+
+        elif(questionIndex == 1):
+            # Gets first subreddit name
+            prompt = questions[questionIndex]
+            toolTip.replace([prompt])
+            page.print()
+            placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
+            
+            # Gets input
+            curses.echo() # Displays what they type
+            curses.nocbreak() # Requires that they press enter
+            string = screen.getstr().decode("ASCII") # Their input
+
+            # Undo displaying input and requiring enter be pressed
+            curses.noecho()
+            curses.cbreak()
+            if(returnSearch.subreddits == None): # If this is the first sub search, set subreddits value
+               returnSearch.update(subreddits=[search.SubredditSearch()])
+            else: # Otherwise, append a new subreddit search
+               returnSearch.update(subreddits=returnSearch.subreddits.append(search.SubredditSearch()))
+            returnSearch.subreddits[-1].update(sub=string)
+            questionIndex = questionIndex + 1
+            stringList = searchTree(returnSearch)
+            page.updateStrings(screen,stringList,0,toolTip)
             
         else: # For all questions except name of search
-            temp = []
             while(True):
-                toolTip.replace([f"Add a {questions[questionIndex]} (y/n):"])
+                prompt = f"Add a {questions[questionIndex]} (y/n):"
+                toolTip.replace([prompt])
                 page.print()
-                placeCursor(screen,x=26,y=curses.LINES-1)
-                if (questionIndex == 1 and (len(temp) > 0)): # Allows user to only add one subreddit at a time.
-                    c = ord('n')
-                    quit = False
-                else:
-                    c = screen.getch() # Gets the character they type
+                placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
+                c = screen.getch() # Gets the character they type
+
+                # User entered n. Moves on to next question. If this was the last question, asks
+                # user if they want to add another subreddit.
                 if c == ord('n'):
-                    if(questionIndex == 1):
-                        if(len(temp) == 0):
+                    questionIndex = questionIndex + 1
+                    temp = []
+                    if(questionIndex >= len(questions)):
+                        prompt = f"Add another Subreddit (y/n):"
+                        toolTip.replace([prompt])
+                        page.print()
+                        placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
+                        answer = screen.getch()
+                        if(answer == ord('n')):
                             quit = True
                             break
-                        subSearchBuild.append(temp[0])
-                        stringList.append(f"|----{questions[questionIndex]} {temp[0]}")
-                    else:
-                        subSearchBuild.append(temp)
-                        stringList.append(f"{questions[questionIndex]} {string}")
-                    questionIndex = questionIndex + 1
-                    if(questionIndex >= len(questions)):
-                        questionIndex = 1
-                        if(len(searchBuild) < 3):
-                            searchBuild.append([])
-                        searchBuild[2].append(search.SubredditSearch(subSearchBuild[0],subSearchBuild[1],subSearchBuild[2],subSearchBuild[3],subSearchBuild[4],subSearchBuild[5],subSearchBuild[6]))
-                    break
+                        else:
+                            questionIndex = 1
+                            continue
                 elif c == ord('y'): # Otherwise
                     # Update prompt to remove option to quit
-                    toolTip.replace([questions[questionIndex]])
+                    prompt = f"{questions[questionIndex]}"
+                    toolTip.replace([prompt])
                     page.print()
-                    placeCursor(screen,x=26,y=curses.LINES-1)
+                    placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
 
                     # Gets input
                     curses.echo() # Displays what they type
@@ -245,16 +295,78 @@ def createSearch(screen):
                     # Undo displaying input and requiring enter be pressed
                     curses.noecho()
                     curses.cbreak()
-                    temp.append(string)
-        
-    if(len(searchBuild) >= 3):
-        s = search.Search(searchBuild[0],searchBuild[1],searchBuild[2])
-        dump.saveSearches(s,"checkValidSearch.json")
+                    if(not string.strip() == ""):
+                        temp.append(string)
+                        if(questionIndex == 2):
+                            returnSearch.subreddits[-1].update(titleWL=temp)
+                        elif(questionIndex == 3):
+                            returnSearch.subreddits[-1].update(titleBL=temp)
+                        elif(questionIndex == 4):
+                            returnSearch.subreddits[-1].update(flairWL=temp)
+                        elif(questionIndex == 5):
+                            returnSearch.subreddits[-1].update(flairBL=temp)
+                        elif(questionIndex == 6):
+                            returnSearch.subreddits[-1].update(postWL=temp)
+                        elif(questionIndex == 7):
+                            returnSearch.subreddits[-1].update(postBL=temp)
+                        stringList = searchTree(returnSearch)
+                        page.updateStrings(screen,stringList,0,toolTip)
+                            
+    return returnSearch
 
-        return s
-    
-    return
-
+def searchTree(search):
+    """
+    Returns a list of strings representing a tree-style view of a search
+    """
+    if(search is not None):
+        stringList = []
+        if(not search.name == None):
+            stringList.append(search.name)
+            if(not search.subreddits == None):
+                tierOne="  |->"
+                tierTwo="  |    |->"
+                tierThree="  |    |    |->"
+                for sub in search.subreddits:
+                    stringList.append(f"{tierOne}{sub.name}")
+                    if(not sub.titleWL == None and len(sub.titleWL) > 0):
+                        stringList.append(f"{tierTwo}Title whitelist")
+                        for item in sub.titleWL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+                    if(not sub.titleBL == None and len(sub.titleBL) > 0):
+                        stringList.append(f"{tierTwo}Title blacklist")
+                        for item in sub.titleBL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+                    if(not sub.flairWL == None and len(sub.flairWL) > 0):
+                        stringList.append(f"{tierTwo}Flair whitelist")
+                        for item in sub.flairWL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+                    if(not sub.flairBL == None and len(sub.flairBL) > 0):
+                        stringList.append(f"{tierTwo}Flair blacklist")
+                        for item in sub.flairBL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+                    if(not sub.postWL == None and len(sub.postWL) > 0):
+                        stringList.append(f"{tierTwo}Post whitelist")
+                        for item in sub.postWL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+                    if(not sub.postBL == None and len(sub.postBL) > 0):
+                        stringList.append(f"{tierTwo}Post blacklist")
+                        for item in sub.postBL:
+                            if(len(item) > (79-len(tierThree))):
+                                item = f"{item[:76-(len(tierThree))]}..."
+                            stringList.append(f"{tierThree}{item}")
+        return stringList
+    else:
+        return None
 
 
 
