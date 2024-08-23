@@ -8,8 +8,13 @@ def removeNonAscii(text):
             newString = newString + char
     return newString
 
-def formatAge(age):
-    # time constants
+def formatAge(age, suffix=""):
+    """
+    Takes a time (age) in seconds, and returns a string that describes it with the largest unit that
+    is smaller than the time. ex: age = 119, returns 'one minute', age = 95000, returns 'one day.'
+    Suffix is used to append some phrase after the unit, such as 'ago.' The suffix is not applied to the
+    just now unit (ages less than 60 seconds)
+    """
 
     try:
         age + 1
@@ -18,47 +23,52 @@ def formatAge(age):
 
     ticker = 0
 
-    if(age > constants.YEAR):
+    if(age > constants.YEAR):       # Years
         while(age > constants.YEAR):
             age -= constants.YEAR
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} years"
+            return f"{ticker} years {suffix}"
         else:
-            return f"{ticker} year"
-    elif(age > constants.MONTH):
+            return f"{ticker} year {suffix}"
+        
+    elif(age > constants.MONTH):    # Months
         while(age > constants.MONTH):
             age -= constants.MONTH
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} months"
+            return f"{ticker} months {suffix}"
         else:
-            return f"{ticker} month"
-    elif(age > constants.DAY):
+            return f"{ticker} month {suffix}"
+        
+    elif(age > constants.DAY):      # Days
         while(age > constants.DAY):
             age -= constants.DAY
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} days"
+            return f"{ticker} days {suffix}"
         else:
-            return f"{ticker} day"
-    elif(age > constants.HOUR):
+            return f"{ticker} day {suffix}"
+        
+    elif(age > constants.HOUR):     # Hours
         while(age > constants.HOUR):
             age -= constants.HOUR
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} hours"
+            return f"{ticker} hours {suffix}"
         else:
-            return f"{ticker} hour"
-    elif(age > constants.MINUTE):
+            return f"{ticker} hour {suffix}"
+        
+    elif(age > constants.MINUTE):   # Minutes
         while(age > constants.MINUTE):
             age -= constants.MINUTE
             ticker += 1
         if(ticker > 1):
-            return f"{ticker} minutes"
+            return f"{ticker} minutes {suffix}"
         else:
-            return f"{ticker} minute"
-    else:
+            return f"{ticker} minute {suffix}"
+        
+    else:   # Times less than 60 seconds (1 minute)
         return "just now"
     
 
@@ -87,39 +97,73 @@ def spacesString(spaces):
     return st
 
 def tabulate(string, terminalWidth = 80, spaces = 8):
-    # Removes new lines and tabs from the original string
+    """
+    Given a string, splits the string across enough lines, such that there
+    each line begins with spaces number of spaces, and the total length of the line
+    does not exceed terminalWidth. Each line is terminated with '\n'
+    """
+    # Removes tabs from the original string
     string = string.replace("\t","")
-    string = string.replace("\n","")
 
-    # Creates a string with a number of spaces equal to spaces
-    addString = spacesString(spaces)
-    ogString = addString
+    # Splits the string into a list, separating at newlines already present (ends of paragraphs)
+    stringList = string.splitlines()
 
-    offset = terminalWidth - (spaces)
-    for i in range(math.ceil(len(string)/offset)):
-        if(addString != ogString): # Adds a new line and spaces to every line after the first
-            addString += "\n" 
-            addString += spacesString(spaces)
-        nonSpaceFound = False
-        for j in range(offset):
-            try:
-                if(not nonSpaceFound):
-                    if(string[j + offset*i] != " "): # Checks character to see if it is something other than a space
-                        nonSpaceFound = True
-                if(nonSpaceFound):
-                    addString += string[j + offset*i] # Adds the characters to the string to be returned
-            except IndexError:
-                break
+    offset = terminalWidth - spaces # the number of non-space characters for the line
+    tempstr = "" # Stores the working string while it is being built up
+    checkstr = "" # Used for checking if adding the next word will push the string over the length limit
+    tabulatedList = [] # A list comprised of each finished line
+    for item in stringList:
+        item = item.split() # Splits the paragraphs up by words. Separating at every space
+        for word in item: # Loops through every word
+            # If the word is longer than the amount of space for a single line
+            if(len(word) > offset): 
+                # Finishes the work in progress line
+                tempstr = checkstr 
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = ""
+                checkstr = ""
+
+                # Used to split the long word (typically links) into multiple lines
+                workingWord = word
+
+                # Splits word into offset sized lines
+                while(len(workingWord) > offset):
+                    addWord = spacesString(spaces) + workingWord[:offset] + "\n"
+                    tabulatedList.append(addWord)
+                    workingWord = workingWord[offset:]
+                
+                # Gives the end of the word (the part less than offset length) its own line
+                addWord = spacesString(spaces) + workingWord + "\n"
+                tabulatedList.append(addWord)
+                continue
+
+            # For normal words
+            checkstr = checkstr + word
+            if(len(checkstr) < offset): # simply adds new word to tempstr if it won't make it too long
+                tempstr = checkstr
+                tempstr = tempstr + " "
+                checkstr = tempstr
+            elif (len(checkstr) == offset): # Adds word, then pushes line to list and starts new line
+                tempstr = checkstr
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = ""
+                checkstr = ""
+            else: # Pushes current line to list, then starts a new line with word at the start
+                tempstr = spacesString(spaces) + tempstr + "\n"
+                tabulatedList.append(tempstr)
+                tempstr = word + " "
+                checkstr = tempstr
+        
+        # Adds leftover words at the end of paragraph
+        tempstr = spacesString(spaces) + tempstr + "\n"
+        tabulatedList.append(tempstr)
+        tempstr = ""
+        checkstr = ""
     
-    # index = 0
-    # nextSpace = 0
-    # charactersInLine = 0
-    # while(index < len(string)):
-    #     if((charactersInLine + (nextSpace - index)) > terminalWidth):
-
-
-
-    return addString
+    newStr = ""
+    return newStr.join(tabulatedList) # Combines list into a single string
 
 
 
