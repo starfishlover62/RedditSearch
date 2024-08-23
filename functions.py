@@ -675,7 +675,7 @@ def isValidSubreddit(userReddit,name):
     try:
         for submission in userReddit.subreddit(name).new(limit=1):
             s = submission.id
-    except (prawcore.exceptions.NotFound, prawcore.exceptions.Redirect, AttributeError): # Errors that arise when the subreddit does not exist
+    except (prawcore.exceptions.NotFound, prawcore.exceptions.Redirect, prawcore.exceptions.BadRequest, AttributeError): # Errors that arise when the subreddit does not exist
         return -1
     except prawcore.exceptions.Forbidden:
         return -2
