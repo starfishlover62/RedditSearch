@@ -76,14 +76,13 @@ def getSearchNum(screen, searches):
         for item in searches:
             ls.append(f"{ticker}. {item.name}")
             ticker = ticker + 1
-        ls.append(f"{ticker}. Create a new search")
         lineNum = 0
-        toolTip = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-48)])
+        toolTip = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((a) add, (e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-57)])
         page = scroll.ScrollingList(screen,ls,0,toolTip)
         
         while(True):
             # Updates tooltip and prints page to screen
-            toolTip.replace(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-48)])
+            toolTip.replace(["",formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","((a) add, (e) select, (d) delete, (v) view, or (q) quit)",80,0,curses.COLS-57)])
             page.print()
 
             char = screen.getch() # Gets single character input from user
@@ -97,6 +96,9 @@ def getSearchNum(screen, searches):
             elif(char == curses.KEY_DOWN or char == ord('s')): # Scrolls down
                 lineNum = page.scrollDown()
                 continue
+
+            elif(char == ord('a')):
+                return -2
             
             # User either wants to perform a search/create one or delete a search.
             # Either way, input is gathered the same
@@ -175,8 +177,6 @@ def getSearchNum(screen, searches):
                                 continue
                     else:
                         return val
-                elif(val == len(searches) and char == ord('e')):
-                    return -2
     else:
         return -2
             
@@ -279,7 +279,7 @@ def createSearch(screen):
                             break
                         else:
                             questionIndex = 1
-                            continue
+                            break
                 elif c == ord('y'): # Otherwise
                     # Update prompt to remove option to quit
                     prompt = f"{questions[questionIndex]}"
