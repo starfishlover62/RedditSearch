@@ -157,7 +157,7 @@ def getSearchNum(screen, searches):
                         del searches[val]
                         return -3
                     elif(char == ord('v')):
-                        view = searchTree(searches[val])
+                        view = searchTree(searches[val],True)
                         viewLine = 0
                         viewTool = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {viewLine + 1} -- >","press (q) to exit",80,0,curses.COLS-18)])
                         viewPage = scroll.ScrollingList(screen,view,viewLine,viewTool)
@@ -228,7 +228,7 @@ def createSearch(screen):
             curses.cbreak()
             returnSearch.update(name = string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch)
+            stringList = searchTree(returnSearch,True)
             page.updateStrings(screen,stringList,0,toolTip)
 
         elif(questionIndex == 1):
@@ -252,7 +252,7 @@ def createSearch(screen):
                returnSearch.update(subreddits=returnSearch.subreddits.append(search.SubredditSearch()))
             returnSearch.subreddits[-1].update(sub=string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch)
+            stringList = searchTree(returnSearch,True)
             page.updateStrings(screen,stringList,0,toolTip)
             
         else: # For all questions except name of search
@@ -309,45 +309,80 @@ def createSearch(screen):
                             returnSearch.subreddits[-1].update(postWL=temp)
                         elif(questionIndex == 7):
                             returnSearch.subreddits[-1].update(postBL=temp)
-                        stringList = searchTree(returnSearch)
+                        stringList = searchTree(returnSearch,True)
                         page.updateStrings(screen,stringList,0,toolTip)
                             
     return returnSearch
 
-def placeItem(item,middle,last):
-    tierThree="  |    |    |->"
-    tierThreeEmpty="            |->"
-    tierThreeEnd="       |    |->"
-    tierThreeNoMiddle="  |         |->"
+def placeItem(item,showBeginning,showMiddle,last,fancy=False):
+    pipe="|"
+    branch="|->"
+    end="|->"
+    space="    "
+    if(fancy == True):
+        pipe="│"
+        branch="├─"
+        end="└─"
+
+    if(fancy == True):
+        tierThree="  │    │    ├─"
+        tierThreeEmpty="            ├─"
+        tierThreeEnd="       │    ├─"
+        tierThreeNoMiddle="  │         ├─"
+    else:
+        tierThree="  |    |    |->"
+        tierThreeEmpty="            |->"
+        tierThreeEnd="       |    |->"
+        tierThreeNoMiddle="  |         |->"
     if(len(item) > (79-len(tierThree))):
         if(last == True):
             item = f"{item[:76-(len(tierThreeEmpty))]}..."
         else:
             item = f"{item[:76-(len(tierThree))]}..."
-    if(middle == True):
-        if(last == True):
-            return (f"{tierThreeEmpty}{item}")
-        else:      
-            return (f"{tierThreeEnd}{item}")
-    else:
-        if(last == True):
-            return (f"{tierThreeNoMiddle}{item}")
-        else:      
-            return (f"{tierThree}{item}")
 
-def placeTitle(name,middle):
-    tierTwo="  |    |->"
-    tierTwoEmpty="       |->"
-
-    if(middle == True):
-        return (f"{tierTwoEmpty}{name}")
+    if(showBeginning == True):
+        string = f"  {pipe}"
     else:
-        return (f"{tierTwo}{name}")
+        string = f"   "
+
+    if(showMiddle == True):
+        string = f"{string}{space}{pipe}"
+    else:
+        string = f"{string}{space} "
+    if(last == True):
+        string = f"{string}{space}{end}"
+    else:
+        string = f"{string}{space}{branch}"
+    
+    return (f"{string}{item}")
+
+def placeTitle(name,showBeginning,last,fancy=False):
+
+    pipe="|"
+    branch="|->"
+    end="|->"
+    space="    "
+    if(fancy == True):
+        pipe="│"
+        branch="├─"
+        end="└─"
+
+    if(showBeginning == True):
+        string = f"  {pipe}"
+    else:
+        string = f"   "
+    if(last == True):
+        string = f"{string}{space}{end}"
+    else:
+        string = f"{string}{space}{branch}"
+    
+    return (f"{string}{name}")
+    
     
 
 
 
-def searchTree(search):
+def searchTree(search,fancy=False):
     """
     Returns a list of strings representing a tree-style view of a search
     """
@@ -356,18 +391,20 @@ def searchTree(search):
         if(not search.name == None):
             stringList.append(search.name)
             if(not search.subreddits == None):
-                tierOne="  |->"
-                tierTwo="  |    |->"
-                tierTwoEmpty="       |->"
-                tierThree="  |    |    |->"
-                tierThreeEmpty="            |->"
+                if(fancy == True):
+                    tierOne="  ├─"
+                    tierOneLast="  └─"
+                else:
+                    tierOne="  |->"
+                    tierOneLast=tierOne
+                
                 subNum=0
                 lastSub=len(search.subreddits)
-                finalSub=False
+                finalSub=True
                 for sub in search.subreddits:
                     subNum = subNum+1
                     if(subNum >= lastSub):
-                        finalSub = True
+                        finalSub = False
                     if(not sub.titleWL == None and len(sub.titleWL) > 0):
                         subLast = 0
                     if(not sub.titleBL == None and len(sub.titleBL) > 0):
@@ -381,54 +418,75 @@ def searchTree(search):
                     if(not sub.postBL == None and len(sub.postBL) > 0):
                         subLast = 5
                     
-                    stringList.append(f"{tierOne}{sub.name}")
+                    if(finalSub == False):
+                        stringList.append(f"{tierOneLast}{sub.name}")
+                    else:
+                        stringList.append(f"{tierOne}{sub.name}")
                     if(not sub.titleWL == None and len(sub.titleWL) > 0):
-                        stringList.append(placeTitle("Title whitelist",finalSub))
+                        stringList.append(placeTitle("Title whitelist",finalSub,subLast==0,fancy))
+                        numItems = 0
                         for item in sub.titleWL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.titleWL))
                             if(subLast == 0):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
 
                     if(not sub.titleBL == None and len(sub.titleBL) > 0):
-                        stringList.append(placeTitle("Title blacklist",finalSub))
+                        stringList.append(placeTitle("Title blacklist",finalSub,subLast==1,fancy))
+                        numItems = 0
                         for item in sub.titleBL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.titleBL))
                             if(subLast == 1):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
 
                     if(not sub.flairWL == None and len(sub.flairWL) > 0):
-                        stringList.append(placeTitle("Flair whitelist",finalSub))
+                        numItems = 0
+                        stringList.append(placeTitle("Flair whitelist",finalSub,subLast==2,fancy))
                         for item in sub.flairWL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.flairWL))
                             if(subLast == 2):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
 
                     if(not sub.flairBL == None and len(sub.flairBL) > 0):
-                        stringList.append(placeTitle("Flair blacklist",finalSub))
+                        numItems = 0
+                        stringList.append(placeTitle("Flair blacklist",finalSub,subLast==3,fancy))
                         for item in sub.flairBL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.flairBL))
                             if(subLast == 3):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
 
                     if(not sub.postWL == None and len(sub.postWL) > 0):
-                        stringList.append(placeTitle("Post whitelist",finalSub))
+                        numItems = 0
+                        stringList.append(placeTitle("Post whitelist",finalSub,subLast==4,fancy))
                         for item in sub.postWL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.postWL))
                             if(subLast == 4):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
 
                     if(not sub.postBL == None and len(sub.postBL) > 0):
-                        stringList.append(placeTitle("Post blacklist",finalSub))
+                        numItems = 0
+                        stringList.append(placeTitle("Post blacklist",finalSub,subLast==5,fancy))
                         for item in sub.postBL:
+                            numItems = numItems + 1
+                            last = (numItems == len(sub.postBL))
                             if(subLast == 5):
-                                stringList.append(placeItem(item,finalSub,True))
+                                stringList.append(placeItem(item,finalSub,False,last,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,False))
+                                stringList.append(placeItem(item,finalSub,True,last,fancy))
         return stringList
     else:
         return None
