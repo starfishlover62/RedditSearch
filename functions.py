@@ -314,6 +314,42 @@ def createSearch(screen):
                             
     return returnSearch
 
+def placeItem(item,middle,last):
+    tierOne="  |->"
+    tierTwo="  |    |->"
+    tierTwoEmpty="       |->"
+    tierThree="  |    |    |->"
+    tierThreeEmpty="            |->"
+    tierThreeEnd="       |    |->"
+    tierThreeNoMiddle="  |         |->"
+    if(len(item) > (79-len(tierThree))):
+        if(last == True):
+            item = f"{item[:76-(len(tierThreeEmpty))]}..."
+        else:
+            item = f"{item[:76-(len(tierThree))]}..."
+    if(middle == True):
+        if(last == True):
+            return (f"{tierThreeEmpty}{item}")
+        else:      
+            return (f"{tierThreeEnd}{item}")
+    else:
+        if(last == True):
+            return (f"{tierThreeNoMiddle}{item}")
+        else:      
+            return (f"{tierThree}{item}")
+
+def placeTitle(name,middle):
+    tierTwo="  |    |->"
+    tierTwoEmpty="       |->"
+
+    if(middle == True):
+        return (f"{tierTwoEmpty}{name}")
+    else:
+        return (f"{tierTwo}{name}")
+    
+
+
+
 def searchTree(search):
     """
     Returns a list of strings representing a tree-style view of a search
@@ -325,45 +361,76 @@ def searchTree(search):
             if(not search.subreddits == None):
                 tierOne="  |->"
                 tierTwo="  |    |->"
+                tierTwoEmpty="       |->"
                 tierThree="  |    |    |->"
+                tierThreeEmpty="            |->"
+                subNum=0
+                lastSub=len(search.subreddits)
+                finalSub=False
                 for sub in search.subreddits:
+                    subNum = subNum+1
+                    if(subNum >= lastSub):
+                        finalSub = True
+                    if(not sub.titleWL == None and len(sub.titleWL) > 0):
+                        subLast = 0
+                    if(not sub.titleBL == None and len(sub.titleBL) > 0):
+                        subLast = 1
+                    if(not sub.flairWL == None and len(sub.flairWL) > 0):
+                        subLast = 2
+                    if(not sub.flairBL == None and len(sub.flairBL) > 0):
+                        subLast = 3
+                    if(not sub.postWL == None and len(sub.postWL) > 0):
+                        subLast = 4
+                    if(not sub.postBL == None and len(sub.postBL) > 0):
+                        subLast = 5
+                    
                     stringList.append(f"{tierOne}{sub.name}")
                     if(not sub.titleWL == None and len(sub.titleWL) > 0):
-                        stringList.append(f"{tierTwo}Title whitelist")
+                        stringList.append(placeTitle("Title whitelist",finalSub))
                         for item in sub.titleWL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 0):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
                     if(not sub.titleBL == None and len(sub.titleBL) > 0):
-                        stringList.append(f"{tierTwo}Title blacklist")
+                        stringList.append(placeTitle("Title blacklist",finalSub))
                         for item in sub.titleBL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 1):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
+
                     if(not sub.flairWL == None and len(sub.flairWL) > 0):
-                        stringList.append(f"{tierTwo}Flair whitelist")
+                        stringList.append(placeTitle("Flair whitelist",finalSub))
                         for item in sub.flairWL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 2):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
+
                     if(not sub.flairBL == None and len(sub.flairBL) > 0):
-                        stringList.append(f"{tierTwo}Flair blacklist")
+                        stringList.append(placeTitle("Flair blacklist",finalSub))
                         for item in sub.flairBL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 3):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
+
                     if(not sub.postWL == None and len(sub.postWL) > 0):
-                        stringList.append(f"{tierTwo}Post whitelist")
+                        stringList.append(placeTitle("Post whitelist",finalSub))
                         for item in sub.postWL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 5):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
+
                     if(not sub.postBL == None and len(sub.postBL) > 0):
-                        stringList.append(f"{tierTwo}Post blacklist")
+                        stringList.append(placeTitle("Post blacklist",finalSub))
                         for item in sub.postBL:
-                            if(len(item) > (79-len(tierThree))):
-                                item = f"{item[:76-(len(tierThree))]}..."
-                            stringList.append(f"{tierThree}{item}")
+                            if(subLast == 5):
+                                stringList.append(placeItem(item,finalSub,True))
+                            else:
+                                stringList.append(placeItem(item,finalSub,False))
         return stringList
     else:
         return None
