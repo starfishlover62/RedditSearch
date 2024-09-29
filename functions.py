@@ -315,9 +315,6 @@ def createSearch(screen):
     return returnSearch
 
 def placeItem(item,middle,last):
-    tierOne="  |->"
-    tierTwo="  |    |->"
-    tierTwoEmpty="       |->"
     tierThree="  |    |    |->"
     tierThreeEmpty="            |->"
     tierThreeEnd="       |    |->"
@@ -392,6 +389,7 @@ def searchTree(search):
                                 stringList.append(placeItem(item,finalSub,True))
                             else:
                                 stringList.append(placeItem(item,finalSub,False))
+
                     if(not sub.titleBL == None and len(sub.titleBL) > 0):
                         stringList.append(placeTitle("Title blacklist",finalSub))
                         for item in sub.titleBL:
@@ -419,7 +417,7 @@ def searchTree(search):
                     if(not sub.postWL == None and len(sub.postWL) > 0):
                         stringList.append(placeTitle("Post whitelist",finalSub))
                         for item in sub.postWL:
-                            if(subLast == 5):
+                            if(subLast == 4):
                                 stringList.append(placeItem(item,finalSub,True))
                             else:
                                 stringList.append(placeItem(item,finalSub,False))
