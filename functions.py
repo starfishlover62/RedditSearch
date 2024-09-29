@@ -157,7 +157,7 @@ def getSearchNum(screen, searches):
                         del searches[val]
                         return -3
                     elif(char == ord('v')):
-                        view = searchTree(searches[val],True)
+                        view = searchTree(searches[val],curses.COLS,True)
                         viewLine = 0
                         viewTool = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {viewLine + 1} -- >","press (q) to exit",80,0,curses.COLS-18)])
                         viewPage = scroll.ScrollingList(screen,view,viewLine,viewTool)
@@ -228,7 +228,7 @@ def createSearch(screen):
             curses.cbreak()
             returnSearch.update(name = string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch,True)
+            stringList = searchTree(returnSearch,curses.COLS,True)
             page.updateStrings(screen,stringList,0,toolTip)
 
         elif(questionIndex == 1):
@@ -252,7 +252,7 @@ def createSearch(screen):
                returnSearch.update(subreddits=returnSearch.subreddits.append(search.SubredditSearch()))
             returnSearch.subreddits[-1].update(sub=string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch,True)
+            stringList = searchTree(returnSearch,curses.COLS,True)
             page.updateStrings(screen,stringList,0,toolTip)
             
         else: # For all questions except name of search
@@ -309,41 +309,30 @@ def createSearch(screen):
                             returnSearch.subreddits[-1].update(postWL=temp)
                         elif(questionIndex == 7):
                             returnSearch.subreddits[-1].update(postBL=temp)
-                        stringList = searchTree(returnSearch,True)
+                        stringList = searchTree(returnSearch,curses.COLS,True)
                         page.updateStrings(screen,stringList,0,toolTip)
                             
     return returnSearch
 
-def placeItem(item,showBeginning,showMiddle,last,fancy=False):
+def placeItem(name,showBeginning,showMiddle,last,width=80,fancy=False):
     pipe="|"
     branch="|->"
     end="|->"
-    space="    "
+    space="  "
+    spaceStart=""
     if(fancy == True):
         pipe="│"
         branch="├─"
         end="└─"
+        space=" "
 
-    if(fancy == True):
-        tierThree="  │    │    ├─"
-        tierThreeEmpty="            ├─"
-        tierThreeEnd="       │    ├─"
-        tierThreeNoMiddle="  │         ├─"
-    else:
-        tierThree="  |    |    |->"
-        tierThreeEmpty="            |->"
-        tierThreeEnd="       |    |->"
-        tierThreeNoMiddle="  |         |->"
-    if(len(item) > (79-len(tierThree))):
-        if(last == True):
-            item = f"{item[:76-(len(tierThreeEmpty))]}..."
-        else:
-            item = f"{item[:76-(len(tierThree))]}..."
+    
+
 
     if(showBeginning == True):
-        string = f"  {pipe}"
+        string = f"{spaceStart}{pipe}"
     else:
-        string = f"   "
+        string = f"{spaceStart} "
 
     if(showMiddle == True):
         string = f"{string}{space}{pipe}"
@@ -354,23 +343,29 @@ def placeItem(item,showBeginning,showMiddle,last,fancy=False):
     else:
         string = f"{string}{space}{branch}"
     
-    return (f"{string}{item}")
+    lenTest = f"{spaceStart}{pipe}{space}{pipe}{space}{branch}"
+    if(len(name) > ((width-1)-len(lenTest))):
+        name = f"{name[:(width-4)-(len(lenTest))]}..."
+
+    return (f"{string}{name}")
 
 def placeTitle(name,showBeginning,last,fancy=False):
 
     pipe="|"
     branch="|->"
     end="|->"
-    space="    "
+    space="  "
+    spaceStart=""
     if(fancy == True):
         pipe="│"
         branch="├─"
         end="└─"
+        space=" "
 
     if(showBeginning == True):
-        string = f"  {pipe}"
+        string = f"{spaceStart}{pipe}"
     else:
-        string = f"   "
+        string = f"{spaceStart} "
     if(last == True):
         string = f"{string}{space}{end}"
     else:
@@ -382,7 +377,7 @@ def placeTitle(name,showBeginning,last,fancy=False):
 
 
 
-def searchTree(search,fancy=False):
+def searchTree(search,width=80,fancy=False):
     """
     Returns a list of strings representing a tree-style view of a search
     """
@@ -392,10 +387,10 @@ def searchTree(search,fancy=False):
             stringList.append(search.name)
             if(not search.subreddits == None):
                 if(fancy == True):
-                    tierOne="  ├─"
-                    tierOneLast="  └─"
+                    tierOne="├─"
+                    tierOneLast="└─"
                 else:
-                    tierOne="  |->"
+                    tierOne="|->"
                     tierOneLast=tierOne
                 
                 subNum=0
@@ -429,9 +424,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.titleWL))
                             if(subLast == 0):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
 
                     if(not sub.titleBL == None and len(sub.titleBL) > 0):
                         stringList.append(placeTitle("Title blacklist",finalSub,subLast==1,fancy))
@@ -440,9 +435,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.titleBL))
                             if(subLast == 1):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
 
                     if(not sub.flairWL == None and len(sub.flairWL) > 0):
                         numItems = 0
@@ -451,9 +446,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.flairWL))
                             if(subLast == 2):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
 
                     if(not sub.flairBL == None and len(sub.flairBL) > 0):
                         numItems = 0
@@ -462,9 +457,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.flairBL))
                             if(subLast == 3):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
 
                     if(not sub.postWL == None and len(sub.postWL) > 0):
                         numItems = 0
@@ -473,9 +468,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.postWL))
                             if(subLast == 4):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
 
                     if(not sub.postBL == None and len(sub.postBL) > 0):
                         numItems = 0
@@ -484,9 +479,9 @@ def searchTree(search,fancy=False):
                             numItems = numItems + 1
                             last = (numItems == len(sub.postBL))
                             if(subLast == 5):
-                                stringList.append(placeItem(item,finalSub,False,last,fancy))
+                                stringList.append(placeItem(item,finalSub,False,last,width,fancy))
                             else:
-                                stringList.append(placeItem(item,finalSub,True,last,fancy))
+                                stringList.append(placeItem(item,finalSub,True,last,width,fancy))
         return stringList
     else:
         return None
