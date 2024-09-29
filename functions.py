@@ -315,6 +315,9 @@ def createSearch(screen):
     return returnSearch
 
 def placeItem(name,showBeginning,showMiddle,last,width=80,fancy=False):
+    """
+    Used by search tree for the third tier items
+    """
     pipe="|"
     branch="|->"
     end="|->"
@@ -325,9 +328,6 @@ def placeItem(name,showBeginning,showMiddle,last,width=80,fancy=False):
         branch="├─"
         end="└─"
         space=" "
-
-    
-
 
     if(showBeginning == True):
         string = f"{spaceStart}{pipe}"
@@ -350,6 +350,9 @@ def placeItem(name,showBeginning,showMiddle,last,width=80,fancy=False):
     return (f"{string}{name}")
 
 def placeTitle(name,showBeginning,last,fancy=False):
+    """
+    Used by search tree for the second tier items
+    """
 
     pipe="|"
     branch="|->"
