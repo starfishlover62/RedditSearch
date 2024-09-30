@@ -91,10 +91,10 @@ def combineStrings(stringA,stringB,length,startA,startB):
 
     
 def spacesString(spaces):
-    st = ""
-    for i in range(spaces):
-        st += " "
-    return st
+    # st = ""
+    # for i in range(spaces):
+    #     st += " "
+    return "".zfill(spaces).replace("0"," ")
 
 def tabulate(string, terminalWidth = 80, spaces = 8):
     """
