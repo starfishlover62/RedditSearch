@@ -66,7 +66,7 @@ minTermCols = 80
 if(curses.LINES < minTermLines or curses.COLS < minTermCols):
     # curses.nocbreak(); screen.keypad(0); curses.echo()
     # curses.endwin()
-    functions.close()
+    functions.close(screen)
     print(f"The current terminal size {curses.LINES}x{curses.COLS} is too small. The minimum size supported is {minTermLines}x{minTermCols}")
     sys.exit()
 
@@ -316,4 +316,4 @@ try:
 finally:
     # curses.nocbreak(); screen.keypad(0); curses.echo()
     # curses.endwin()
-    functions.close()
+    functions.close(screen)
