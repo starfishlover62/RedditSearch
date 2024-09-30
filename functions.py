@@ -16,6 +16,8 @@ import PIL
 import prawcore
 import sys
 
+import config
+
 
 def close(screen):
     curses.nocbreak()
@@ -164,7 +166,7 @@ def getSearchNum(screen, searches):
                         del searches[val]
                         return -3
                     elif(char == ord('v')):
-                        view = searchTree(searches[val],curses.COLS,True)
+                        view = searchTree(searches[val],curses.COLS,config.fancy_characters)
                         viewLine = 0
                         viewTool = scroll.ToolTip(["",formatString.combineStrings(f"<-- Line {viewLine + 1} -- >","press (q) to exit",80,0,curses.COLS-18)])
                         viewPage = scroll.ScrollingList(screen,view,viewLine,viewTool)
@@ -235,7 +237,7 @@ def createSearch(screen):
             curses.cbreak()
             returnSearch.update(name = string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch,curses.COLS,True)
+            stringList = searchTree(returnSearch,curses.COLS,config.fancy_characters)
             page.updateStrings(screen,stringList,0,toolTip)
 
         elif(questionIndex == 1):
@@ -259,7 +261,7 @@ def createSearch(screen):
                returnSearch.update(subreddits=returnSearch.subreddits.append(search.SubredditSearch()))
             returnSearch.subreddits[-1].update(sub=string)
             questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch,curses.COLS,True)
+            stringList = searchTree(returnSearch,curses.COLS,config.fancy_characters)
             page.updateStrings(screen,stringList,0,toolTip)
             
         else: # For all questions except name of search
@@ -316,7 +318,7 @@ def createSearch(screen):
                             returnSearch.subreddits[-1].update(postWL=temp)
                         elif(questionIndex == 7):
                             returnSearch.subreddits[-1].update(postBL=temp)
-                        stringList = searchTree(returnSearch,curses.COLS,True)
+                        stringList = searchTree(returnSearch,curses.COLS,config.fancy_characters)
                         page.updateStrings(screen,stringList,0,toolTip)
                             
     return returnSearch

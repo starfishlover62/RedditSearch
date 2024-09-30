@@ -5,3 +5,6 @@ client_secret="your_client_secret" # your client secret
 user_agent="your_user_agent" # your user agent
 
 searches_file="searches.json" # Default is searches.json. Change this value to use a different file
+
+fancy_characters=True
+
