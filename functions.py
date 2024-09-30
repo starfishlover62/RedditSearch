@@ -55,12 +55,12 @@ def getSearches(JSONPath):
     
     return searches
 
-"""
-reddit is the reddit instance, searchCriteria is a search object, and numPosts is the number of posts to fetch per subreddit in
-searchCriteria
-
-"""
 def getNumPosts(reddit, searchCriteria, numPosts = 20):
+    """
+    reddit is the reddit instance, searchCriteria is a search object, and numPosts is the number of posts to fetch per subreddit in
+    searchCriteria
+
+    """
     posts = []
     for sub in searchCriteria.subreddits:
         subreddit = reddit.subreddit(sub.subreddit)
