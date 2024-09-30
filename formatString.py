@@ -192,8 +192,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     # Creates the top border of the box
     boxStr = topLeft
-    for i in range(boxWidth-2):
-        boxStr += horizontal
+    boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
     boxStr += topRight
     s.append(boxStr)
     boxStr = ""
@@ -203,8 +202,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
             # Creates a separating line in the box
             if(item == "%separator%"):
                 boxStr += sideLeft
-                for i in range(boxWidth-2):
-                    boxStr += horizontal
+                boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
                 boxStr += sideRight
                 s.append(boxStr)
                 boxStr = ""
@@ -221,8 +219,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
 
     
     boxStr += bottomLeft
-    for i in range(boxWidth-2):
-        boxStr += horizontal
+    boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
     boxStr += bottomRight
     s.append(boxStr)
     boxStr = ""
