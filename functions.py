@@ -14,7 +14,14 @@ from io import BytesIO
 from PIL import Image
 import PIL
 import prawcore
+import sys
 
+
+def close(screen):
+    curses.nocbreak()
+    screen.keypad(0)
+    curses.echo()
+    curses.endwin()
 
 
 def currentTimestamp():

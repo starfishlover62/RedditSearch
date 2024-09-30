@@ -5,6 +5,8 @@ import math
 import argparse
 
 import configparser
+from time import sleep
+import sys
 
 
 import functions
@@ -23,13 +25,13 @@ args = vars(parser.parse_args())
 # Checks that the config options are set
 if(config.client_id == ""):
     print("Please specify a client id in config.py")
-    exit(1)
+    sys.exit(1)
 if(config.client_secret == ""):
     print("Please specify a client secret in config.py")
-    exit(1)
+    sys.exit(1)
 if(config.user_agent == ""):
     print("Please specify a user agent in config.py")
-    exit(1)
+    sys.exit(1)
     
 
 # Read-only instance
@@ -44,13 +46,13 @@ try:
 except prawcore.exceptions.ResponseException:
     print("Bad HTTP Response")
     print("Please check that the client id, secret, and user agent are properly configured in config.py")
-    exit(1)
+    sys.exit(1)
 
 # Ensures that the path to the searches file has been set
 searchesPath = config.searches_file
 if(searchesPath == ""):
     print("Please specify a path to the searches file in config.py")
-    exit(1)
+    sys.exit(1)
 
 # Initialization work
 screen = curses.initscr()
@@ -62,10 +64,11 @@ screen.keypad(True) # Converts keys like arrow keys to a specific value
 minTermLines = 24
 minTermCols = 80
 if(curses.LINES < minTermLines or curses.COLS < minTermCols):
-    curses.nocbreak(); screen.keypad(0); curses.echo()
-    curses.endwin()
+    # curses.nocbreak(); screen.keypad(0); curses.echo()
+    # curses.endwin()
+    functions.close()
     print(f"The current terminal size {curses.LINES}x{curses.COLS} is too small. The minimum size supported is {minTermLines}x{minTermCols}")
-    exit()
+    sys.exit()
 
 searches = []
 try:
@@ -109,12 +112,14 @@ try:
                             searchIndex = item
                             break
                     if(not valid):
-                        curses.nocbreak(); screen.keypad(0); curses.echo()
-                        curses.endwin()
-                        print(f"No search by the name of {args["name"]} exists\nThe following are valid searches:")
+                        # curses.nocbreak(); screen.keypad(0); curses.echo()
+                        # curses.endwin()
+                        functions.close(screen)
+                        print(f"No search by the name of '{args["name"]}' exists\nThe following are valid searches:")
                         for item in searches:
                             print(f"\t{item.name}")
-                        exit(1)
+                        print("",flush=True)
+                        sys.exit(1)
 
                 else:
                     searchIndex = functions.getSearchNum(screen, searches)
@@ -180,15 +185,19 @@ try:
             for sub in searches[searchIndex].subreddits:
                 status = functions.isValidSubreddit(reddit_read_only,sub.name)
                 if(status == -1):
-                    curses.nocbreak(); screen.keypad(0); curses.echo()
-                    curses.endwin()
-                    print(f'Subreddit ({sub.name}) does not exist or has been banned')
-                    exit(1)
+                    functions.close(screen)
+                    # curses.nocbreak() 
+                    # screen.keypad(0)
+                    # curses.echo()
+                    # curses.endwin()
+                    print(f'Subreddit ({sub.name}) does not exist or has been banned',flush=True)
+                    sys.exit(1)
                 elif(status == -2):
-                    curses.nocbreak(); screen.keypad(0); curses.echo()
-                    curses.endwin()
-                    print(f'Subreddit ({sub.name}) is private or under quarantine')
-                    exit(1)
+                    # curses.nocbreak(); screen.keypad(0); curses.echo()
+                    # curses.endwin()
+                    functions.close(screen)
+                    print(f'Subreddit ({sub.name}) is private or under quarantine',flush=True)
+                    sys.exit(1)
             posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
             posts = functions.sortPosts(posts)
 
@@ -305,5 +314,6 @@ try:
             
 # Resets the terminal window for normal usage outside of the program
 finally:
-    curses.nocbreak(); screen.keypad(0); curses.echo()
-    curses.endwin()
+    # curses.nocbreak(); screen.keypad(0); curses.echo()
+    # curses.endwin()
+    functions.close()
