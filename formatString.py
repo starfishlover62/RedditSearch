@@ -76,9 +76,7 @@ def formatAge(age, suffix=""):
 def placeString(string,length,start = 0):
     if(len(string)>=length):
         return string
-    s = ""
-    s = s.zfill(length)
-    s = s.replace("0"," ")
+    s = spacesString(length)
     s = s[:start] + string + s[start+len(string):]
     return s
 
