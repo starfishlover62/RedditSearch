@@ -166,10 +166,15 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
 
 
 def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0,fancy=False):
+    """
+    Draws boxes around content. stringList is a list of strings of content. All entries in the list will be combined 
+    into the same box. Using "%separator%" as an entry in the list will draw a horizontal line. terminalWidth is the width of the box.
+    Padding is the number of spaces between side walls and content. 
+    Margin is the number of spaces between the edge of terminal and the side walls. 
+    fancy is whether fancy characters will be used or basic characters.
+    """
     boxWidth = terminalWidth - (leftMargin + rightMargin)
     textBoxWidth = boxWidth - (leftPadding + rightPadding)
-
-    s = []
 
     topLeft="+"
     topRight="+"
@@ -189,31 +194,26 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
         sideRight="┤"
         vertical="│"
         horizontal="─"
+    
+    s = []
 
     # Creates the top border of the box
     s.append(f"{topLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{topRight}")
 
-    for item in stringList:
+    for item in stringList: # Loops through each item in the content list.
         if(item != None):
             # Creates a separating line in the box
             if(item == "%separator%"):
-
+                # Adds a horizontal line
                 s.append(f"{sideLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{sideRight}")
-                boxStr = ""
             else:
-                tempStr = tabulate(item,textBoxWidth,leftPadding+1)
-                listStrings = tempStr.splitlines()
-                # print(listStrings)
+                # Breaks the content into lines that will fit in the text box.
+                listStrings = tabulate(item,textBoxWidth-1,leftPadding).splitlines()
                 for line in listStrings:
-                    line = vertical + line[1:]
-                    if(len(line) < boxWidth - 1):
-                        line += spacesString((boxWidth-len(line)-1))
-                    line += vertical
-                    s.append(line)
+                    # Adds the side walls and appends the line to the list of lines
+                    line = placeString(line,textBoxWidth,0)
+                    s.append(f"{vertical}{line}{vertical}")
 
-    
+    # Creates bottom line
     s.append(f"{bottomLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{bottomRight}")
-
-    boxStr = ""
-
     return s
