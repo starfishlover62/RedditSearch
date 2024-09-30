@@ -2,6 +2,9 @@ import constants
 import math
 
 def removeNonAscii(text):
+    """
+    Keeps only the first 256 characters of extended ASCII. Probably bad for portability
+    """
     newString = ""
     for char in text:
         if(ord(char) <= 255):
@@ -72,8 +75,11 @@ def formatAge(age, suffix=""):
         return "just now"
     
 
-# Places string at location start, and fills with spaces until it is size length
+
 def placeString(string,length,start = 0):
+    """
+    Places string at location start, and fills with spaces (at the end) until it is size length
+    """
     if(len(string)>=length):
         return string
     s = spacesString(length)
@@ -89,9 +95,9 @@ def combineStrings(stringA,stringB,length,startA,startB):
 
     
 def spacesString(spaces):
-    # st = ""
-    # for i in range(spaces):
-    #     st += " "
+    """
+    Returns a string of spaces, with length equal to spaces parameter
+    """
     return "".zfill(spaces).replace("0"," ")
 
 def tabulate(string, terminalWidth = 80, spaces = 8):
@@ -116,9 +122,7 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
             # If the word is longer than the amount of space for a single line
             if(len(word) > offset): 
                 # Finishes the work in progress line
-                tempstr = checkstr 
-                tempstr = spacesString(spaces) + tempstr + "\n"
-                tabulatedList.append(tempstr)
+                tabulatedList.append(f"{spacesString(spaces)}{checkstr}\n")
                 tempstr = ""
                 checkstr = ""
 
@@ -127,13 +131,11 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
 
                 # Splits word into offset sized lines
                 while(len(workingWord) > offset):
-                    addWord = spacesString(spaces) + workingWord[:offset] + "\n"
-                    tabulatedList.append(addWord)
+                    tabulatedList.append(f"{spacesString(spaces)}{workingWord[:offset]}\n")
                     workingWord = workingWord[offset:]
                 
                 # Gives the end of the word (the part less than offset length) its own line
-                addWord = spacesString(spaces) + workingWord + "\n"
-                tabulatedList.append(addWord)
+                tabulatedList.append(f"{spacesString(spaces)}{workingWord}\n")
                 continue
 
             # For normal words
@@ -143,20 +145,16 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
                 tempstr = tempstr + " "
                 checkstr = tempstr
             elif (len(checkstr) == offset): # Adds word, then pushes line to list and starts new line
-                tempstr = checkstr
-                tempstr = spacesString(spaces) + tempstr + "\n"
-                tabulatedList.append(tempstr)
+                tabulatedList.append(f"{spacesString(spaces)}{checkstr}\n")
                 tempstr = ""
                 checkstr = ""
             else: # Pushes current line to list, then starts a new line with word at the start
-                tempstr = spacesString(spaces) + tempstr + "\n"
-                tabulatedList.append(tempstr)
+                tabulatedList.append(f"{spacesString(spaces)}{tempstr}\n")
                 tempstr = word + " "
                 checkstr = tempstr
         
         # Adds leftover words at the end of paragraph
-        tempstr = spacesString(spaces) + tempstr + "\n"
-        tabulatedList.append(tempstr)
+        tabulatedList.append(f"{spacesString(spaces)}{tempstr}\n")
         tempstr = ""
         checkstr = ""
     
