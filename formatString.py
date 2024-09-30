@@ -191,20 +191,14 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
         horizontal="─"
 
     # Creates the top border of the box
-    boxStr = topLeft
-    boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
-    boxStr += topRight
-    s.append(boxStr)
-    boxStr = ""
+    s.append(f"{topLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{topRight}")
 
     for item in stringList:
         if(item != None):
             # Creates a separating line in the box
             if(item == "%separator%"):
-                boxStr += sideLeft
-                boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
-                boxStr += sideRight
-                s.append(boxStr)
+
+                s.append(f"{sideLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{sideRight}")
                 boxStr = ""
             else:
                 tempStr = tabulate(item,textBoxWidth,leftPadding+1)
@@ -218,10 +212,8 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
                     s.append(line)
 
     
-    boxStr += bottomLeft
-    boxStr = boxStr + "".zfill(boxWidth-2).replace("0",horizontal)
-    boxStr += bottomRight
-    s.append(boxStr)
+    s.append(f"{bottomLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{bottomRight}")
+
     boxStr = ""
 
     return s
