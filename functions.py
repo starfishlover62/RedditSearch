@@ -325,11 +325,11 @@ def createSearch(screen):
     return returnSearch
 
 
-
-
-
-
 def performSearch(reddit,search,screen = None):
+    """
+    Gathers posts that meat the search object criteria, using the reddit object. 
+    If a screen object is provided, displays a simple search in progress message.
+    """
     posts = []
     ticker = 0
     if(screen != None):
@@ -362,27 +362,14 @@ def performSearch(reddit,search,screen = None):
                     screen.addstr(8,13,string[:stringTicker])
                     
                 screen.refresh()
-                # startX = 13
-                # startY = 8
-                
-                # if(stringTicker > len(string)):
-                #     screen.addstr(startY,startX,string[stringTicker:])
-                # else: 
-                #     screen.addstr(startY,startX,string[:stringTicker])
-                
-                # # screen.addstr(10,10,str(ticker))
-                # screen.addstr(10,10,str(stringTicker))
-                # screen.refresh()
-                # stringTicker = stringTicker + 1
-                
-                # if(stringTicker > len(string)*2):
-                #     stringTicker = 0
-                
-                
 
     return posts
 
 def filterPost(post,subReddit):
+    """
+    Determines if the post should be included, based off of the filters. Blacklisted items are removed before 
+    whitelisted items are added.
+    """
 
     # Easier reference to post contents
     title = post.title
@@ -493,26 +480,6 @@ def copyToClipboard(string):
     pyperclip.copy(string)
 
 
-def getInput(prompt, lowerBound, upperBound, numAttempts = -1):
-    """
-    Gets an integer input from an user, verifies that it is within some bounds, and 
-    allows them a set number of attempts to get a valid input. Most likely unused, and able to be removed
-    """
-    if(lowerBound < 0  or upperBound < 0): # Makes sure both bounds are valid
-        return -1
-    attempts = 0
-    if(numAttempts <= 0):
-        attempts = numAttempts - 1
-    while(attempts < numAttempts):
-        try:
-            value = int(input(f"{prompt}\n"))
-        except ValueError:
-            attempts += 1
-            continue
-        return value
-    return -1
-
-
 def viewPost(post,screen):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
@@ -608,33 +575,6 @@ def placeCursor(screen,x,y):
     Moves the cursor to the specified location
     """
     screen.addstr(y,x,"")
-
-
-
-def convertHTML(original):
-    """
-    Takes a post's selftext_html, and converts to a list of strings, which are used in various other functions
-    """
-    stringsList = []
-
-    while(not original.find("<p>") == -1):
-        start = original.find("<p>")
-        end = original.find("</p>")
-        stringsList.append(original[start+3:end])
-        original = original[:start] + original[end+4:]
-        
-    print(original)
-    final = ""
-    for i in range(len(stringsList)):
-        while(not stringsList[i].find("&#39;") == -1):
-            apostrophe = stringsList[i].find("&#39;")
-            stringsList[i] = stringsList[i][:apostrophe] + "'" + stringsList[i][apostrophe+5:]
-        # print(stringsList[i])
-        # print()
-        final = final + stringsList[i] + "\n\n"
-    # print(final)
-    val = formatString.enbox([final],80,fancy=config.fancy_characters)
-    return val
 
 
 def isValidSubreddit(userReddit,name):
