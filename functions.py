@@ -21,6 +21,9 @@ import config
 
 
 def close(screen):
+    """
+    Closes the ncurses window and restores the terminal to its previous state
+    """
     curses.nocbreak()
     screen.keypad(0)
     curses.echo()
@@ -28,6 +31,9 @@ def close(screen):
 
 
 def currentTimestamp():
+    """
+    Returns the current UTC timestamp
+    """
     return datetime.datetime.now(timezone.utc).timestamp()
 
 
