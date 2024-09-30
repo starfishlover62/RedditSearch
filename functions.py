@@ -637,7 +637,7 @@ def getHeaders(posts):
                 author = author.name
 
             try:
-                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age,"ago")}"],curses.COLS))
+                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age,"ago")}"],curses.COLS,fancy=config.fancy_characters))
             except AttributeError:
                 continue
             ticker += 1
@@ -691,7 +691,7 @@ def viewPost(post,screen):
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
     age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
-    stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS)
+    stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS,fancy=config.fancy_characters)
     
     lineNum = 0
 
@@ -806,7 +806,7 @@ def convertHTML(original):
         # print()
         final = final + stringsList[i] + "\n\n"
     # print(final)
-    val = formatString.enbox([final],80)
+    val = formatString.enbox([final],80,fancy=config.fancy_characters)
     return val
 
 

@@ -167,17 +167,36 @@ def tabulate(string, terminalWidth = 80, spaces = 8):
 
 
 
-def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0):
+def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMargin = 0, rightMargin = 0,fancy=False):
     boxWidth = terminalWidth - (leftMargin + rightMargin)
     textBoxWidth = boxWidth - (leftPadding + rightPadding)
 
     s = []
 
+    topLeft="+"
+    topRight="+"
+    bottomLeft="+"
+    bottomRight="+"
+    sideLeft="+"
+    sideRight="+"
+    vertical="|"
+    horizontal="-"
+
+    if(fancy == True):
+        topLeft="┌"
+        topRight="┐"
+        bottomLeft="└"
+        bottomRight="┘"
+        sideLeft="├"
+        sideRight="┤"
+        vertical="│"
+        horizontal="─"
+
     # Creates the top border of the box
-    boxStr = "+"
+    boxStr = topLeft
     for i in range(boxWidth-2):
-        boxStr += "-"
-    boxStr += "+"
+        boxStr += horizontal
+    boxStr += topRight
     s.append(boxStr)
     boxStr = ""
 
@@ -185,10 +204,10 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
         if(item != None):
             # Creates a separating line in the box
             if(item == "%separator%"):
-                boxStr += "+"
+                boxStr += sideLeft
                 for i in range(boxWidth-2):
-                    boxStr += "-"
-                boxStr += "+"
+                    boxStr += horizontal
+                boxStr += sideRight
                 s.append(boxStr)
                 boxStr = ""
             else:
@@ -196,17 +215,17 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
                 listStrings = tempStr.splitlines()
                 # print(listStrings)
                 for line in listStrings:
-                    line = "|" + line[1:]
+                    line = vertical + line[1:]
                     if(len(line) < boxWidth - 1):
                         line += spacesString((boxWidth-len(line)-1))
-                    line += "|"
+                    line += vertical
                     s.append(line)
 
     
-    boxStr += "+"
+    boxStr += bottomLeft
     for i in range(boxWidth-2):
-        boxStr += "-"
-    boxStr += "+"
+        boxStr += horizontal
+    boxStr += bottomRight
     s.append(boxStr)
     boxStr = ""
 
