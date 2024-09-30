@@ -503,6 +503,11 @@ def searchTree(search,width=80,fancy=False):
 def performSearch(reddit,search,screen = None):
     posts = []
     ticker = 0
+    if(screen != None):
+        screen.clear()
+        screen.refresh()
+        string = "Searching..."
+        stringTicker = 0
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
@@ -514,29 +519,37 @@ def performSearch(reddit,search,screen = None):
                 if(filterPost(post,sub)):
                     posts.append(post)
             ticker = ticker + 1
+            # with open("output.txt","a") as f:
+            #     f.write(f"{ticker}\n")
+            
             if(screen != None):
-                startX = 13
-                startY = 8
                 screen.clear()
                 screen.addstr(curses.LINES-1,0," (This may take a while, depending on time since the search was last performed)")
-                screen.addstr(startY,startX,"                         _     _ ")
-                screen.addstr(startY+1,startX," ___  ___  __ _ _ __ ___| |__ (_)_ __   __ _ ")
-                screen.addstr(startY+2,startX,"/ __|/ _ \\/ _` | '__/ __| '_ \\| | '_ \\ / _` |")
-                if(ticker % 3 == 1):
-                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _")
-                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_)")
-
-                elif(ticker % 3 == 2):
-                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _   _")
-                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_) (_)")
-
-                if(ticker % 3 == 0):
-                    screen.addstr(startY+3,startX,"\\__ \\  __/ (_| | | | (__| | | | | | | | (_| |  _   _   _")
-                    screen.addstr(startY+4,startX,"|___/\\___|\\__,_|_|  \\___|_| |_|_|_| |_|\\__, | (_) (_) (_)")
-
-                screen.addstr(startY+5,startX,"                                       |___/ ")
-                screen.addstr(0,0,"")
+                stringTicker = int(ticker / 98)
+                stringTicker = stringTicker % (len(string)*2)
+                if(stringTicker >= len(string)):
+                    screen.addstr(8,13+stringTicker-len(string),string[stringTicker-len(string):])
+                else:
+                    screen.addstr(8,13,string[:stringTicker])
+                    
                 screen.refresh()
+                # startX = 13
+                # startY = 8
+                
+                # if(stringTicker > len(string)):
+                #     screen.addstr(startY,startX,string[stringTicker:])
+                # else: 
+                #     screen.addstr(startY,startX,string[:stringTicker])
+                
+                # # screen.addstr(10,10,str(ticker))
+                # screen.addstr(10,10,str(stringTicker))
+                # screen.refresh()
+                # stringTicker = stringTicker + 1
+                
+                # if(stringTicker > len(string)*2):
+                #     stringTicker = 0
+                
+                
 
     return posts
 
