@@ -16,11 +16,11 @@ import formatString
 import scroll
 
 
-parser = argparse.ArgumentParser(description="Gathers posts on Reddit that meets specific criteria. Note that the program can be run without any command-line options")
-parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-sensitive")
+parser = argparse.ArgumentParser(description="Gathers posts on Reddit that meets specific criteria. Note that the program can be run without any command-line options.")
+parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-sensitive.")
 parser.add_argument("-y", "--yes", action="store_true", help = "Automatically agrees to prompts for confirmation.")
+parser.add_argument("-d", "--dontSave", action="store_true", help = "Disables updating of last search time, leaving it how it was before performing the search.")
 args = vars(parser.parse_args())
-
 
 # Checks that the config options are set
 if(config.client_id == ""):
@@ -209,7 +209,8 @@ try:
                 screen.addstr(curses.LINES-1,0,"Press any key to exit")
                 screen.getch()
                 screen.refresh()
-                searches[searchIndex].lastSearchTime = time
+                if(not args["dontSave"] == True):
+                    searches[searchIndex].lastSearchTime = time
                 dump.saveSearches(searches,searchesPath)
                 break
 
@@ -218,7 +219,8 @@ try:
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 numPosts = len(posts)
                 page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
-                searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                if(not args["dontSave"] == True):
+                    searches[searchIndex].lastSearchTime = time # Sets the search time in the search variable
                 dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
 
            
@@ -270,7 +272,8 @@ try:
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 numPosts = len(posts)
                 page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
-                searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
+                if(not args["dontSave"] == True):
+                    searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
                 dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
      
             # Allows the user to input a post number
