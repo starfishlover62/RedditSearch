@@ -18,6 +18,7 @@ import scroll
 
 parser = argparse.ArgumentParser(description="Gathers posts on Reddit that meets specific criteria. Note that the program can be run without any command-line options")
 parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-sensitive")
+parser.add_argument("-y", "--yes", action="store_true", help = "Automatically agrees to prompts for confirmation.")
 args = vars(parser.parse_args())
 
 
@@ -156,12 +157,13 @@ try:
             # If search has never been performed
             if(searchTime == None or searchTime == 0):
                 screen.clear()
-                screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
-                screen.addstr(1,0,"Press q to quit or any other key to continue")
-                screen.refresh()
-                char = screen.getch()  
-                if char == ord('q'):
-                    break
+                if (not args["yes"] == True):
+                    screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
+                    screen.addstr(1,0,"Press q to quit or any other key to continue")
+                    screen.refresh()
+                    char = screen.getch()  
+                    if char == ord('q'):
+                        break
                 searches[searchIndex].lastSearchTime = math.floor(functions.currentTimestamp() - constants.DAY * 7)
 
             # If search was last performed over a week ago
