@@ -1,21 +1,20 @@
+# Libraries
 import praw
 import prawcore
 import curses
 import math
 import argparse
-
-import configparser
-from time import sleep
 import sys
+import json.decoder
 
-
+# Provided files
 import functions
 import config
 import dump
 import constants
 import formatString
 import scroll
-import json.decoder
+
 
 parser = argparse.ArgumentParser(description="Gathers posts on Reddit that meets specific criteria. Note that the program can be run without any command-line options")
 parser.add_argument("-n", "--name", metavar="NAME", help = "Name of the search to be performed. Case-sensitive")

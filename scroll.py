@@ -1,5 +1,5 @@
 import curses
-from formatString import placeString
+# from formatString import placeString
 class ScrollingList:
     """Represents a list that can be scrolled through. Useful for displaying a large amount of related data.
      Requires a list of strings, a curses window object, and optionally a starting line number and/or a 

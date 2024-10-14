@@ -1,21 +1,21 @@
+# Libraries
 import datetime
 from datetime import timezone
-import math
 import pyperclip
 import curses
 import webbrowser
-import search
 import json
-import dump
-import formatString
-import scroll
 import requests
 from io import BytesIO
 from PIL import Image
 import PIL
 import prawcore
-import sys
+
+# Provided
+import search
 from tree import searchTree
+import formatString
+import scroll
 
 import config
 
