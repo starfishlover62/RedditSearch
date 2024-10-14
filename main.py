@@ -230,7 +230,7 @@ try:
         elif(not browseMode):
             next = functions.viewPost(posts[postNum],screen)
             if(next == -1): # The user wants to view previous post
-                if(postNum - 1 >= 0):
+                if(postNum > 0):
                     postNum = postNum - 1
             elif(next == 1): # The user wants to view next post
                 if((postNum + 1) < len(posts)):
