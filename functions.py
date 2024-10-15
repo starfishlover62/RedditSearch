@@ -331,7 +331,7 @@ def createSearch(screen):
     return returnSearch
 
 
-def performSearch(reddit,search,screen = None):
+def performSearch(reddit,search,screen = None,minCols=80,minLines=24):
     """
     Gathers posts that meat the search object criteria, using the reddit object. 
     If a screen object is provided, displays a simple search in progress message.
@@ -360,7 +360,11 @@ def performSearch(reddit,search,screen = None):
             if(screen != None):
                 resize = eventListener(screen,False,5)
                 if(resize == "resize"):
-                    size = screen.getmaxyx()
+                    size = list(screen.getmaxyx())
+                    if(size[0] < minLines):
+                        size[0] = minLines
+                    if(size[1] < minCols):
+                        size[1] = minCols
                     curses.resize_term(size[0],size[1])
                 screen.clear()
                 waitMessage = "(This may take a while, depending on time since the search was last performed)"
@@ -494,7 +498,7 @@ def getPostInfo(post):
     
     return {"age":age,"sub":sub,"title":title,"flair":flair,"author":author}
 
-def viewPost(post,screen):
+def viewPost(post,screen,minCols=80,minLines=24):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
@@ -529,7 +533,11 @@ def viewPost(post,screen):
 
         elif char == "resize":
             resized = True
-            size = screen.getmaxyx()
+            size = list(screen.getmaxyx())
+            if(size[0] < minLines):
+                size[0] = minLines
+            if(size[1] < minCols):
+                size[1] = minCols
             curses.resize_term(size[0],size[1])
             try:
                 stringList = formatString.enbox([info["title"],info["author"],info["flair"],\
@@ -635,7 +643,7 @@ def isValidSubreddit(userReddit,name):
 
 
 
-def eventListener(screen,characters=True,timeout=1000):
+def eventListener(screen,characters=True,timeout=100):
     try:
         screen.timeout(timeout)
         char = screen.getch()

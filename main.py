@@ -199,7 +199,7 @@ try:
                     functions.close(screen)
                     print(f'Subreddit ({sub.name}) is private or under quarantine',flush=True)
                     sys.exit(1)
-            posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+            posts = functions.performSearch(reddit_read_only,searches[searchIndex],screen,minTermCols,minTermLines)
             posts = functions.sortPosts(posts)
 
             # If no posts matched the criteria
@@ -232,7 +232,7 @@ try:
         
         # Displays a single post
         elif(not browseMode):
-            next = functions.viewPost(posts[postNum],screen)
+            next = functions.viewPost(posts[postNum],screen,minTermCols,minTermLines)
             if(next[0] == -1): # The user wants to view previous post
                 if(postNum > 0):
                     postNum = postNum - 1
@@ -268,7 +268,11 @@ try:
                 break
 
             elif char == "resize":
-                size = screen.getmaxyx()
+                size = list(screen.getmaxyx())
+                if(size[0] < minTermLines):
+                    size[0] = minTermLines
+                if(size[1] < minTermCols):
+                    size[1] = minTermCols
                 curses.resize_term(size[0],size[1])
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 page.updateStrings(screen,headers,lineNum,toolTip) # Adds the headers list to the pagination controller
@@ -289,7 +293,7 @@ try:
             elif(char == "refresh"):
                 # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())
-                posts = posts + functions.performSearch(reddit_read_only,searches[searchIndex],screen)
+                posts = posts + functions.performSearch(reddit_read_only,searches[searchIndex],screen,minTermCols,minTermLines)
                 posts = functions.sortPosts(posts)
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 numPosts = len(posts)
