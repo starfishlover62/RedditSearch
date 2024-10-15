@@ -95,7 +95,7 @@ def getSearchNum(screen, searches):
         -1 : User pressed q to quit
         >=0: The index of the searches list that was chosen
     """
-    if searches:
+    if searches is not None:
         ls = []
         ticker = 1
         for item in searches:
@@ -132,64 +132,49 @@ def getSearchNum(screen, searches):
             )
             page.print()
 
-            char = screen.getch()  # Gets single character input from user
-            if char == ord("q"):  # Returns from function, signalling to quit program
+            # Gets single character input from user
+            char = eventListener(screen)
+            if char == "timeout":
+                continue
+
+            if char == "exit":  # Returns from function, signalling to quit program
                 return -1
 
-            elif char == curses.KEY_UP or char == ord("w"):  # Scrolls up
+            elif char == "scrollUp":  # Scrolls up
                 lineNum = page.scrollUp()
                 continue
 
-            elif char == curses.KEY_DOWN or char == ord("s"):  # Scrolls down
+            elif char == "scrollDown":  # Scrolls down
                 lineNum = page.scrollDown()
                 continue
 
-            elif char == ord("a"):
+            elif char == "scrollLeft": # 'a' was pressed. Adds a search
                 return -2
 
             # User either wants to perform a search/create one or delete a search.
             # Either way, input is gathered the same
-            elif char == ord("e") or char == ord("d") or char == ord("v"):
-                # Updates prompt(tooltip), then prints to screen
-                if char == ord("e"):
-                    toolTip.replace(
-                        [
-                            "~Selecting~",
-                            formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(press q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            ),
-                        ]
-                    )
-                elif char == ord("v"):
-                    toolTip.replace(
-                        [
-                            "~Viewing~",
-                            formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(press q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            ),
-                        ]
-                    )
+            elif char == "enter" or char == "scrollRight" or char == "view":
+                toolTip.update( # Updates bottom line
+                    formatString.combineStrings(
+                        "Enter a search number, then press enter: ",
+                        "(press q to exit)",
+                        curses.COLS,
+                        0,
+                        curses.COLS - 18,
+                    ),
+                    1
+                )
+
+                # Updates top line of tooltip, then prints to screen
+                if char == "enter":
+                    toolTip.update("~Selecting~")
+                    
+                elif char == "view":
+                    toolTip.update("~Viewing~")
+
                 else:
-                    toolTip.replace(
-                        [
-                            "~Deleting~",
-                            formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(press q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            ),
-                        ]
-                    )
+                    toolTip.update("~Deleting~")
+
                 page.print()
 
                 # Moves cursor to end of prompt
@@ -199,61 +184,28 @@ def getSearchNum(screen, searches):
                 c = screen.getch()  # Allows immediate exit if they press q
                 if c == ord("q"):
                     continue
-
+                
+                prompt = []
                 # Updates prompt(tooltip), then prints to screen
-                if char == ord("e"):
-                    toolTip.replace(
-                        [
-                            "~Selecting~",
-                            formatString.combineStrings(
+
+                prompt=["",formatString.combineStrings(
                                 "Enter a search number, then press enter: ",
                                 "(enter q to exit)",
                                 curses.COLS,
                                 0,
                                 curses.COLS - 18,
-                            ),
+                            )
                         ]
-                    )
-                elif char == ord("v"):
-                    toolTip.replace(
-                        [
-                            "~Viewing~",
-                            formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(enter q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            ),
-                        ]
-                    )
+                if char == "enter":
+                    prompt[0] = "~Selecting~"
+
+                elif char == "view":
+                    prompt[0] = "~Viewing~"
+
                 else:
-                    toolTip.replace(
-                        [
-                            "~Deleting~",
-                            formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(enter q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            ),
-                        ]
-                    )
-                page.print()
-
-                # Moves cursor to end of prompt
-                placeCursor(screen, x=41, y=curses.LINES - 1)
-
-                # Displays user's input, and requires they press enter to submit
-                curses.echo()
-                curses.nocbreak()
-                curses.ungetch(c)  # Adds the first character back to the buffer
-                string = screen.getstr()
-
-                # Undo displaying input and requiring enter be pressed
-                curses.noecho()
-                curses.cbreak()
+                    prompt[0] = "~Deleting~"
+                
+                string = getInput(prompt,screen,page,toolTip,unget=c,col=41)
 
                 # Attempts to convert their input to an integer
                 val = 0
@@ -264,68 +216,66 @@ def getSearchNum(screen, searches):
 
                 val -= 1  # Offsets input, so it is an index
                 if val >= 0 and val < len(searches):
-                    if char == ord("d"):
+                    if char == "scrollRight": # 'd' key for delete
                         del searches[val]
                         return -3
-                    elif char == ord("v"):
-                        view = searchTree(
-                            searches[val], curses.COLS, config.fancy_characters
-                        )
-                        viewLine = 0
-                        viewTool = scroll.ToolTip(
-                            [
-                                "",
-                                formatString.combineStrings(
-                                    f"<-- Line {viewLine + 1} -- >",
-                                    "press (q) to exit",
-                                    curses.COLS,
-                                    0,
-                                    curses.COLS - 18,
-                                ),
-                            ]
-                        )
-                        viewPage = scroll.ScrollingList(
-                            screen, view, viewLine, viewTool
-                        )
-                        while True:
-                            viewTool.replace(
-                                [
-                                    formatString.combineStrings(
-                                        f"<-- Line {viewLine + 1} -- >",
-                                        "press (q) to exit",
-                                        curses.COLS,
-                                        0,
-                                        curses.COLS - 18,
-                                    )
-                                ]
-                            )
-                            viewPage.print()
-                            viewChar = screen.getch()
-                            if viewChar == ord(
-                                "q"
-                            ):  # Returns from function, signalling to quit program
-                                break
-
-                            elif viewChar == curses.KEY_UP or viewChar == ord(
-                                "w"
-                            ):  # Scrolls up
-                                viewLine = viewPage.scrollUp()
-                                continue
-
-                            elif viewChar == curses.KEY_DOWN or viewChar == ord(
-                                "s"
-                            ):  # Scrolls down
-                                viewLine = viewPage.scrollDown()
-                                continue
-                    else:
+                    elif char == "view": # Views search
+                        viewSearch(screen,searches[val])
+                    else: # Selects search
                         return val
     else:
         return -2
 
 
+def viewSearch(screen,search):
+    if search is not None:
+        view = searchTree(search,curses.COLS,config.fancy_characters)
+        lineNum = 0
+        prompt = [
+                "",
+                formatString.combineStrings(
+                f"<-- Line {lineNum + 1} -- >",
+                "press (q) to exit",
+                curses.COLS,
+                0,
+                curses.COLS - 18,
+            )
+        ]
+        toolTip = scroll.ToolTip(prompt)
+        page = scroll.ScrollingList(
+            screen, view, lineNum, toolTip
+        )
+        while True:             
+            toolTip.replace(
+                [
+                    formatString.combineStrings(
+                        f"<-- Line {lineNum + 1} -- >",
+                        "press (q) to exit",
+                        curses.COLS,
+                        0,
+                        curses.COLS - 18,
+                    )
+                ]
+            )
+            page.print()
+            viewChar = eventListener(screen)
+            if viewChar == "exit":  # Returns from function, signalling to quit program
+                break
+
+            elif viewChar == "scrollUp":  # Scrolls up
+                lineNum = page.scrollUp()
+                continue
+
+            elif viewChar == "scrollDown":  # Scrolls down
+                lineNum = page.scrollDown()
+                continue
+
 
 def getInput(prompt,screen,page,tooltip,unget=None,row=None,col=None):
-    tooltip.replace([prompt])
+    if isinstance(prompt,list):
+        tooltip.replace(prompt)
+    else:
+        tooltip.replace([prompt])
     page.print()
     if(row is None):
         if(col is None):
@@ -931,6 +881,9 @@ def eventListener(screen, characters=True,anyChar=False, timeout=100):
             elif char == ord("e"):
                 screen.timeout(-1)
                 return "enter"
+            elif char == ord("v"):
+                screen.timeout(-1)
+                return "view"
             elif char == ord("h"):
                 screen.timeout(-1)
                 return "help"

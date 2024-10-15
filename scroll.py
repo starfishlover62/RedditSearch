@@ -105,5 +105,18 @@ class ToolTip:
             for item in lines:
                 self.lines.append(item)
 
+    def update(self,lines,index=0):
+        temp = self.lines
+        try:
+            if isinstance(lines,str): # Converts a string to a single element list
+                lines = [lines]
+            if isinstance(lines,list): # Loops through each item in list, replacing elements in self.lines with them
+                for item in lines: # Starts at index, and replaces elements until the end of lines has been reached
+                    self.lines[index] = item
+                    index = index + 1
+        except IndexError: # If lines was too long, reset self.lines back to its original value
+            self.lines = temp
+    
+    
     def height(self):
         return len(self.lines)
