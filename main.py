@@ -423,29 +423,31 @@ try:
 
                 else:  # Otherwise
                     # Update prompt to tell them to 'enter q" instead of 'press q"
-                    toolTip.replace(
-                        [
-                            formatString.combineStrings(
+                    prompt = formatString.combineStrings(
                                 f"Enter a post number (1-{len(posts)}), then press enter:",
                                 "(enter q to exit)",
                                 curses.COLS,
                                 0,
                                 curses.COLS - 18,
                             )
-                        ]
-                    )
-                    page.print()
-                    functions.placeCursor(screen, x=48, y=curses.LINES - 1)
+                    string = functions.getInput(prompt,screen,page,toolTip,c,col=48)
+                    # toolTip.replace(
+                    #     [
+                            
+                    #     ]
+                    # )
+                    # page.print()
+                    # functions.placeCursor(screen, x=48, y=curses.LINES - 1)
 
-                    # Gets input
-                    curses.echo()  # Displays what they type
-                    curses.nocbreak()  # Requires that they press enter
-                    curses.ungetch(c)  # Adds the first character back to the buffer
-                    string = screen.getstr()  # Their input
+                    # # Gets input
+                    # curses.echo()  # Displays what they type
+                    # curses.nocbreak()  # Requires that they press enter
+                    # curses.ungetch(c)  # Adds the first character back to the buffer
+                    # string = screen.getstr()  # Their input
 
-                    # Undo displaying input and requiring enter be pressed
-                    curses.noecho()
-                    curses.cbreak()
+                    # # Undo displaying input and requiring enter be pressed
+                    # curses.noecho()
+                    # curses.cbreak()
 
                     # Attempts to convert their input into an integer.
                     val = 0

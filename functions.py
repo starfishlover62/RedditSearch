@@ -323,6 +323,36 @@ def getSearchNum(screen, searches):
         return -2
 
 
+
+def getInput(prompt,screen,page,tooltip,unget=None,row=None,col=None):
+    tooltip.replace([prompt])
+    page.print()
+    if(row is None):
+        if(col is None):
+            placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
+        else:
+            placeCursor(screen, x=col, y=curses.LINES - 1)
+    else:
+        if(col is None):
+            placeCursor(screen, x=(len(prompt) + 1), y=row)
+        else:
+            placeCursor(screen, x=col, y=row)
+
+    # Gets input
+    curses.echo()  # Displays what they type
+    curses.nocbreak()  # Requires that they press enter
+    if(unget is not None):
+        curses.ungetch(unget)
+    string = screen.getstr().decode("ASCII")  # Their input
+
+    # Undo displaying input and requiring enter be pressed
+    curses.noecho()
+    curses.cbreak()
+
+    return string
+
+
+
 def createSearch(screen):
     """
     Creates a search object found in search.py. Prompts user to input data to create this object
@@ -373,18 +403,7 @@ def createSearch(screen):
         if questionIndex == 0:
             # Gets search name
             prompt = questions[questionIndex]
-            toolTip.replace([prompt])
-            page.print()
-            placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
-
-            # Gets input
-            curses.echo()  # Displays what they type
-            curses.nocbreak()  # Requires that they press enter
-            string = screen.getstr().decode("ASCII")  # Their input
-
-            # Undo displaying input and requiring enter be pressed
-            curses.noecho()
-            curses.cbreak()
+            string = getInput(prompt,screen,page,toolTip)
             returnSearch.update(name=string)
             questionIndex = questionIndex + 1
             stringList = searchTree(returnSearch, curses.COLS, config.fancy_characters)
@@ -393,18 +412,7 @@ def createSearch(screen):
         elif questionIndex == 1:
             # Gets first subreddit name
             prompt = questions[questionIndex]
-            toolTip.replace([prompt])
-            page.print()
-            placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
-
-            # Gets input
-            curses.echo()  # Displays what they type
-            curses.nocbreak()  # Requires that they press enter
-            string = screen.getstr().decode("ASCII")  # Their input
-
-            # Undo displaying input and requiring enter be pressed
-            curses.noecho()
-            curses.cbreak()
+            string = getInput(prompt,screen,page,toolTip)
             if (
                 returnSearch.subreddits is None
             ):  # If this is the first sub search, set subreddits value
@@ -446,18 +454,7 @@ def createSearch(screen):
                 elif c == ord("y"):  # Otherwise
                     # Update prompt to remove option to quit
                     prompt = f"{questions[questionIndex]}"
-                    toolTip.replace([prompt])
-                    page.print()
-                    placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
-
-                    # Gets input
-                    curses.echo()  # Displays what they type
-                    curses.nocbreak()  # Requires that they press enter
-                    string = screen.getstr().decode("ASCII")  # Their input
-
-                    # Undo displaying input and requiring enter be pressed
-                    curses.noecho()
-                    curses.cbreak()
+                    string = getInput(prompt,screen,page,toolTip)
                     if not string.strip() == "":
                         temp.append(string)
                         if questionIndex == 2:
