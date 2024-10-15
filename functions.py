@@ -10,6 +10,7 @@ from io import BytesIO
 from PIL import Image
 import PIL
 import prawcore
+import re
 
 # Provided
 import search
@@ -615,6 +616,10 @@ def viewPost(post,screen,minCols=80,minLines=24):
             with open(config.link_output,"a") as f:
                 f.write(f"{info["title"]}:\n")
                 f.write(f"\t{post.url}\n")
+                links = findURLs(post.selftext)
+                for link in links:
+                    f.write(f"\t{link}\n")
+
             screen.clear()
             screen.addstr(0,0,f"URL saved to {config.link_output}")
             screen.addstr(curses.LINES-1,curses.COLS-24,"(press any key to exit)")
@@ -622,6 +627,10 @@ def viewPost(post,screen,minCols=80,minLines=24):
             screen.refresh()
             char = screen.getch()
 
+def findURLs(text):
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex, text)
+    return [x[0] for x in url]
 
 def placeCursor(screen,x,y):
     """
