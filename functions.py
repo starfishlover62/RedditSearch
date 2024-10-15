@@ -541,7 +541,7 @@ def performSearch(reddit, search, screen=None, minCols=80, minLines=24):
     return posts
 
 
-def filterPost(post, subReddit):
+def filterPost(post, subSearch):
     """
     Determines if the post should be included, based off of the filters. Blacklisted items are removed before
     whitelisted items are added.
@@ -554,35 +554,35 @@ def filterPost(post, subReddit):
 
     # Check blacklists
 
-    if title is not None and subReddit.titleBL is not None:
-        for t in subReddit.titleBL:
+    if title is not None and subSearch.titleBL is not None:
+        for t in subSearch.titleBL:
             if t.lower() in title.lower():
                 return False
 
-    if flair is not None and subReddit.flairBL is not None:
-        for f in subReddit.flairBL:
+    if flair is not None and subSearch.flairBL is not None:
+        for f in subSearch.flairBL:
             if f.lower() in flair.lower():
                 return False
 
-    if content is not None and subReddit.postBL is not None:
-        for c in subReddit.postBL:
+    if content is not None and subSearch.postBL is not None:
+        for c in subSearch.postBL:
             if c.lower() in content.lower():
                 return False
 
     # Check whitelists
 
-    if title is not None and subReddit.titleWL is not None:
-        for t in subReddit.titleWL:
+    if title is not None and subSearch.titleWL is not None:
+        for t in subSearch.titleWL:
             if t.lower() in title.lower():
                 return True
 
-    if flair is not None and subReddit.flairWL is not None:
-        for f in subReddit.flairWL:
+    if flair is not None and subSearch.flairWL is not None:
+        for f in subSearch.flairWL:
             if f.lower() in flair.lower():
                 return True
 
-    if content is not None and subReddit.postWL is not None:
-        for c in subReddit.postWL:
+    if content is not None and subSearch.postWL is not None:
+        for c in subSearch.postWL:
             if c.lower() in content.lower():
                 return True
 
