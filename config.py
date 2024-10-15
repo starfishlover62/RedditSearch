@@ -6,5 +6,5 @@ user_agent="your_user_agent" # your user agent
 
 searches_file="searches.json" # Default is searches.json. Change this value to use a different file
 
-fancy_characters=True
+fancy_characters=True # Default is True. Change to False if there are issues with rendering the following: '┌ ┐ └ ┘ ├ ┤ │ ─'
 
