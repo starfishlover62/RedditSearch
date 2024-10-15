@@ -427,37 +427,10 @@ def getHeaders(posts):
     ticker = 1
     if (not posts == None):
         for post in posts:
-            # Age
-            age = post.created_utc
-            if(not age == None):
-                age = int(currentTimestamp() - age)
-            else:
-                age = 0
-
-            # Subreddit
-            sub = formatString.removeNonAscii(post.subreddit.display_name)
-            if(sub == None):
-                sub = "<NO SUBREDDIT>"
-
-            # Title
-            title = formatString.removeNonAscii(post.title)
-            if(title == None):
-                title = "<NO TITLE>"
-            
-            # Flair
-            flair = post.link_flair_text
-            if(flair == None):
-                flair = "<NO FLAIR>"
-            
-            # Author
-            author = post.author
-            if(author == None):
-                author = "deleted"
-            else:
-                author = author.name
+            info = getPostInfo(post)
 
             try:
-                headers += (formatString.enbox([f"{ticker}). {title}",flair,author,f"Posted in ({sub}), {formatString.formatAge(age,"ago")}"],curses.COLS,fancy=config.fancy_characters))
+                headers += (formatString.enbox([f"{ticker}). {info["title"]}",info["author"],info["flair"],f"Posted in ({info["sub"]}), {info["age"]}"],curses.COLS,fancy=config.fancy_characters))
             except AttributeError:
                 continue
             ticker += 1
@@ -486,12 +459,50 @@ def copyToClipboard(string):
     pyperclip.copy(string)
 
 
+def getPostInfo(post):
+    # Age
+    age = "<NONE>"
+    if(not post.created_utc == None):
+        age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
+
+    # Subreddit
+    sub = formatString.removeNonAscii(post.subreddit.display_name)
+    if(sub == None):
+        sub = "<NO SUBREDDIT>"
+
+    # Title
+    title = formatString.removeNonAscii(post.title)
+    if(title == None):
+        title = "<NO TITLE>"
+    
+    # Flair
+    flair = formatString.removeNonAscii(f"~Flair: {post.link_flair_text}~")
+    if(flair == None):
+        flair = "~<NO FLAIR>~"
+    
+    # Author
+    author = post.author
+    if(author == None):
+        author = "[deleted]"
+    else:
+        author = f"[{author.name}]"
+    
+    return {"age":age,"sub":sub,"title":title,"flair":flair,"author":author}
+
 def viewPost(post,screen):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
-    age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
-    stringList = formatString.enbox([formatString.removeNonAscii(post.title),post.author.name,f"Posted in ({formatString.removeNonAscii(post.subreddit.display_name)}), {age}","%separator%",formatString.removeNonAscii(post.selftext),"%separator%",post.url],curses.COLS,fancy=config.fancy_characters)
+
+    info = getPostInfo(post)
+    try:
+        stringList = formatString.enbox([info["title"],info["author"],info["flair"],\
+                                         f"Posted in ({info["sub"]}), {info["age"]}","%separator%",\
+                                            formatString.removeNonAscii(post.selftext),"%separator%",post.url],\
+                                                curses.COLS,fancy=config.fancy_characters)
+    except AttributeError:
+        stringList = ""
+    
     
     lineNum = 0
 
