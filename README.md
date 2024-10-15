@@ -98,10 +98,8 @@ On the screen listing searches, you have several options.
     ### Interacting
     * Pressing i will open up the image of the post, if it is an image post instead of a text post.
     * pressing o will open the post up on the official reddit website, in your default web browser
-    * Pressing u will shift to another screen that contains only the url of the post. Pressing any key will return from this screen.
+    * Pressing u will shift to another screen that displays a file name. All of the links in the post have been written to the file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.
     * Pressing m will open up the page of the author on the official reddit website, in your default web browser.
 
 
 # Issues:
-
-* links do not display right
