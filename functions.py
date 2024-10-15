@@ -122,11 +122,11 @@ def getSearchNum(screen, searches):
             elif char == ord('e') or char == ord('d') or char == ord('v'):
                 # Updates prompt(tooltip), then prints to screen
                 if(char == ord('e')):
-                    toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Selecting~",formatString.combineStrings("Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
                 elif(char == ord('v')):
-                    toolTip.replace(["~Viewing~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Viewing~",formatString.combineStrings("Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
                 else:
-                    toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Deleting~",formatString.combineStrings("Enter a search number, then press enter: ","(press q to exit)",curses.COLS,0,curses.COLS-18)])
                 page.print()
 
                 # Moves cursor to end of prompt
@@ -140,11 +140,11 @@ def getSearchNum(screen, searches):
 
                 # Updates prompt(tooltip), then prints to screen
                 if(char == ord('e')):
-                    toolTip.replace(["~Selecting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Selecting~",formatString.combineStrings("Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
                 elif(char == ord('v')):
-                    toolTip.replace(["~Viewing~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Viewing~",formatString.combineStrings("Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
                 else:
-                    toolTip.replace(["~Deleting~",formatString.combineStrings(f"Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
+                    toolTip.replace(["~Deleting~",formatString.combineStrings("Enter a search number, then press enter: ","(enter q to exit)",curses.COLS,0,curses.COLS-18)])
                 page.print()
 
                 # Moves cursor to end of prompt
@@ -209,12 +209,10 @@ def createSearch(screen):
 
     stringList = []
     questions = ["Name of search:","Subreddit:","Whitelisted title:","Blacklisted title:","Whitelisted flair:","Blacklisted flair:","Whitelisted word in post:","Blacklisted word in post:"]
-    searchBuild = [] # Saves the name, creation data, and the list of subreddit searches
     questionIndex = 0 # The current index of questions array
     returnSearch = search.Search()
     lineNum = 0
     quit = False
-    atLeastOneSub = False
     toolTip = scroll.ToolTip([questions[questionIndex],formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
     temp = []
@@ -263,7 +261,7 @@ def createSearch(screen):
             # Undo displaying input and requiring enter be pressed
             curses.noecho()
             curses.cbreak()
-            if(returnSearch.subreddits == None): # If this is the first sub search, set subreddits value
+            if(returnSearch.subreddits is None): # If this is the first sub search, set subreddits value
                returnSearch.update(subreddits=[search.SubredditSearch()])
             else: # Otherwise, append a new subreddit search
                returnSearch.update(subreddits=returnSearch.subreddits.append(search.SubredditSearch()))
@@ -286,7 +284,7 @@ def createSearch(screen):
                     questionIndex = questionIndex + 1
                     temp = []
                     if(questionIndex >= len(questions)):
-                        prompt = f"Add another Subreddit (y/n):"
+                        prompt = "Add another Subreddit (y/n):"
                         toolTip.replace([prompt])
                         page.print()
                         placeCursor(screen,x=(len(prompt) + 1),y=curses.LINES-1)
@@ -339,7 +337,7 @@ def performSearch(reddit,search,screen = None,minCols=80,minLines=24):
     """
     posts = []
     ticker = 0
-    if(screen != None):
+    if(screen is not None):
         screen.clear()
         screen.refresh()
         string = "Searching..."
@@ -347,7 +345,7 @@ def performSearch(reddit,search,screen = None,minCols=80,minLines=24):
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
         for post in subreddit.new(limit=None):
-            if(post.created_utc == None):
+            if(post.created_utc is None):
                 continue
             if(post.created_utc < search.lastSearchTime):
                 break
@@ -358,7 +356,7 @@ def performSearch(reddit,search,screen = None,minCols=80,minLines=24):
             # with open("output.txt","a") as f:
             #     f.write(f"{ticker}\n")
             
-            if(screen != None):
+            if(screen is not None):
                 resize = eventListener(screen,False,5)
                 if(resize == "resize"):
                     size = list(screen.getmaxyx())
@@ -394,34 +392,34 @@ def filterPost(post,subReddit):
 
     # Check blacklists
 
-    if(not title == None and not subReddit.titleBL == None):
+    if(title is not None and subReddit.titleBL is not None):
         for t in subReddit.titleBL:
             if(t.lower() in title.lower()):
                 return False
             
-    if(not flair == None and not subReddit.flairBL == None):
+    if(flair is not None and subReddit.flairBL is not None):
         for f in subReddit.flairBL:
             if(f.lower() in flair.lower()):
                 return False
     
-    if(not content == None and not subReddit.postBL == None):
+    if(content is not None and subReddit.postBL is not None):
         for c in subReddit.postBL:
             if(c.lower() in content.lower()):
                 return False
             
     # Check whitelists
 
-    if(not title == None and not subReddit.titleWL == None):
+    if(title is not None and subReddit.titleWL is not None):
         for t in subReddit.titleWL:
             if(t.lower() in title.lower()):
                 return True
             
-    if(not flair == None and not subReddit.flairWL == None):
+    if(flair is not None and subReddit.flairWL is not None):
         for f in subReddit.flairWL:
             if(f.lower() in flair.lower()):
                 return True
     
-    if(not content == None and not subReddit.postWL == None):
+    if(content is not None and subReddit.postWL is not None):
         for c in subReddit.postWL:
             if(c.lower() in content.lower()):
                 return True
@@ -435,7 +433,7 @@ def getHeaders(posts):
     """
     headers = []
     ticker = 1
-    if (not posts == None):
+    if (posts is not None):
         for post in posts:
             info = getPostInfo(post)
 
@@ -472,27 +470,27 @@ def copyToClipboard(string):
 def getPostInfo(post):
     # Age
     age = "<NONE>"
-    if(not post.created_utc == None):
+    if(post.created_utc is not None):
         age = f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
 
     # Subreddit
     sub = formatString.removeNonAscii(post.subreddit.display_name)
-    if(sub == None):
+    if(sub is None):
         sub = "<NO SUBREDDIT>"
 
     # Title
     title = formatString.removeNonAscii(post.title)
-    if(title == None):
+    if(title is None):
         title = "<NO TITLE>"
     
     # Flair
     flair = formatString.removeNonAscii(f"~Flair: {post.link_flair_text}~")
-    if(flair == None):
+    if(flair is None):
         flair = "~<NO FLAIR>~"
     
     # Author
     author = post.author
-    if(author == None):
+    if(author is None):
         author = "[deleted]"
     else:
         author = f"[{author.name}]"
@@ -516,7 +514,7 @@ def viewPost(post,screen,minCols=80,minLines=24):
     
     lineNum = 0
 
-    toolTip = scroll.ToolTip([formatString.combineStrings(f"<-- Line 1 -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
+    toolTip = scroll.ToolTip([formatString.combineStrings("<-- Line 1 -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
     skip = False
             
@@ -668,7 +666,7 @@ def eventListener(screen,characters=True,timeout=100):
     try:
         screen.timeout(timeout)
         char = screen.getch()
-        if(characters == True):
+        if(characters):
             if char == ord('q'):
                 screen.timeout(-1)
                 return "exit"
