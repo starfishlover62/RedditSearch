@@ -71,7 +71,8 @@ def getSearches(JSONPath):
 
 def getNumPosts(reddit, searchCriteria, numPosts=20):
     """
-    reddit is the reddit instance, searchCriteria is a search object, and numPosts is the number of posts to fetch per subreddit in
+    reddit is the reddit instance, searchCriteria is a search object, 
+    and numPosts is the number of posts to fetch per subreddit in
     searchCriteria
 
     """
@@ -86,8 +87,8 @@ def getNumPosts(reddit, searchCriteria, numPosts=20):
 
 def getSearchNum(screen, searches):
     """
-    Displays a list of searches, and has the user select one to be performed. Also allows the user
-    to create or delete searches.
+    Displays a list of searches, and has the user select one to be performed. 
+    Also allows the user to create or delete searches.
     Return Values:
         -3 : Search was deleted (therefore save)
         -2 : Searches parameter is empty, or the user selected to create a new search
