@@ -518,15 +518,17 @@ def viewPost(post,screen,minCols=80,minLines=24):
 
     toolTip = scroll.ToolTip([formatString.combineStrings(f"<-- Line 1 -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
     page = scroll.ScrollingList(screen,stringList,0,toolTip)
+    skip = False
             
     while(True):
-        toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
-        page.print()
-
-        # char = screen.getch()
-        char = eventListener(screen)
+        if(not skip):
+            toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
+            page.print()
+            char = eventListener(screen)
+        skip = False
         if char == "timeout":
             continue
+        
         
         # Exit viewing the post
         if char == "exit":
@@ -582,12 +584,19 @@ def viewPost(post,screen,minCols=80,minLines=24):
                 "(i) If post is an image, opens image",
                 "(o) Opens the post in a new tab of the default web browser",
                 "(c) Copies the post url to the clipboard",
-                "(u) Prints the post url to the screen (You will have to manually copy it)",
+                "(u) Prints the post urls to a file. (link_output in config.py)",
                 "(m) Opens the author's page in a new tab of the default web browser",
                 "Press any key to exit this screen"],0,None)
             placeCursor(screen,x=0,y=curses.LINES-1)
             helpPage.print()
-            char = screen.getch() # Help screen disappears when user presses any key
+            while True:
+                char = eventListener(screen) # Screen stays up until user does some action
+                if not (char == "timeout"):
+                    if(char == "resize"):
+                        skip = True
+                    else:
+                        skip = False
+                    break
 
         # Open post in web browser
         elif char == "open":
@@ -613,15 +622,15 @@ def viewPost(post,screen,minCols=80,minLines=24):
         
         # Displays url of post
         elif char == "url":
+            links = findURLs(post.selftext)
             with open(config.link_output,"a") as f:
                 f.write(f"{info["title"]}:\n")
                 f.write(f"\t{post.url}\n")
-                links = findURLs(post.selftext)
                 for link in links:
                     f.write(f"\t{link}\n")
 
             screen.clear()
-            screen.addstr(0,0,f"URL saved to {config.link_output}")
+            screen.addstr(0,0,f"URLs saved to {config.link_output}")
             screen.addstr(curses.LINES-1,curses.COLS-24,"(press any key to exit)")
             placeCursor(screen,x=0,y=curses.LINES-1)
             screen.refresh()
