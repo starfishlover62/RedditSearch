@@ -504,7 +504,7 @@ def performSearch(reddit, search, screen=None, minCols=80, minLines=24):
             #     f.write(f"{ticker}\n")
 
             if screen is not None:
-                resize = eventListener(screen, False, 5)
+                resize = eventListener(screen, characters=False, timeout=5)
                 if resize == "resize":
                     size = list(screen.getmaxyx())
                     if size[0] < minLines:
@@ -805,7 +805,8 @@ def viewPost(post, screen, minCols=80, minLines=24):
             helpPage.print()
             while True:
                 char = eventListener(
-                    screen
+                    screen,
+                    anyChar=True
                 )  # Screen stays up until user does some action
                 if not (char == "timeout"):
                     if char == "resize":
@@ -856,7 +857,19 @@ def viewPost(post, screen, minCols=80, minLines=24):
             screen.addstr(curses.LINES - 1, curses.COLS - 24, "(press any key to exit)")
             placeCursor(screen, x=0, y=curses.LINES - 1)
             screen.refresh()
-            char = screen.getch()
+            while True:
+                char = eventListener(
+                    screen,
+                    anyChar=True
+                )  # Screen stays up until user does some action
+                if not (char == "timeout"):
+                    if char == "resize":
+                        skip = True
+                    else:
+                        skip = False
+                    break
+            
+            
 
 
 def findURLs(text):
@@ -892,7 +905,7 @@ def isValidSubreddit(userReddit, name):
     return 1
 
 
-def eventListener(screen, characters=True, timeout=100):
+def eventListener(screen, characters=True,anyChar=False, timeout=100):
     try:
         screen.timeout(timeout)
         char = screen.getch()
@@ -940,7 +953,15 @@ def eventListener(screen, characters=True, timeout=100):
             screen.timeout(-1)
             return "resize"
         else:
-            screen.timeout(-1)
-            return "timeout"
+            if(anyChar):
+                if(char == -1):
+                    screen.timeout(-1)
+                    return "timeout"
+                else:
+                    screen.timeout(-1)
+                    return "any"
+            else:
+                screen.timeout(-1)
+                return "timeout"
     except curses.error:
         return "timeout"
