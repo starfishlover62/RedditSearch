@@ -233,14 +233,21 @@ try:
         # Displays a single post
         elif(not browseMode):
             next = functions.viewPost(posts[postNum],screen)
-            if(next == -1): # The user wants to view previous post
+            if(next[0] == -1): # The user wants to view previous post
                 if(postNum > 0):
                     postNum = postNum - 1
-            elif(next == 1): # The user wants to view next post
+            elif(next[0] == 1): # The user wants to view next post
                 if((postNum + 1) < len(posts)):
                     postNum = postNum + 1
             else: # User wanted to exit viewPost
                 browseMode = True
+                if(next[1] == True):
+                    headers = functions.getHeaders(posts) # Returns the boxes containing post info
+                    page.updateStrings(screen,headers,lineNum,toolTip) # Adds the headers list to the pagination controller
+                    temp = lineNum
+                    lineNum = page.scrollDown()
+                    if(not temp == lineNum):
+                        lineNum = page.scrollUp()
 
         # Displays post headers for browsing
         else:
@@ -249,22 +256,37 @@ try:
             page.print()           
             
             # Gets input from the user
-            char = screen.getch()
+            
+            # char = screen.getch()
+            char = functions.eventListener(screen)
+            
+            if char == "timeout":
+                continue
 
             # Quits the program
-            if char == ord('q'):
+            elif char == "exit":
                 break
 
+            elif char == "resize":
+                size = screen.getmaxyx()
+                curses.resize_term(size[0],size[1])
+                headers = functions.getHeaders(posts) # Returns the boxes containing post info
+                page.updateStrings(screen,headers,lineNum,toolTip) # Adds the headers list to the pagination controller
+                temp = lineNum
+                lineNum = page.scrollDown()
+                if(not temp == lineNum):
+                    lineNum = page.scrollUp()
+
             # Scrolls up if allowed
-            elif(char == curses.KEY_UP or char == ord('w')):
+            elif(char == "scrollUp"):
                 lineNum = page.scrollUp()
             
             # Scrolls down if allowed
-            elif(char == curses.KEY_DOWN or char == ord('s')):
+            elif(char == "scrollDown"):
                 lineNum = page.scrollDown()
 
             # Refreshes the search, gathering any new submissions that have been posted
-            elif(char == ord('r')):
+            elif(char == "refresh"):
                 # Records the current timestamp before performing the search, then performs the search
                 time = math.floor(functions.currentTimestamp())
                 posts = posts + functions.performSearch(reddit_read_only,searches[searchIndex],screen)
@@ -277,7 +299,7 @@ try:
                 dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
      
             # Allows the user to input a post number
-            elif char == ord('e'):
+            elif char == "enter":
                 # Updates the tooltip and places the cursor for input
                 toolTip.replace([formatString.combineStrings(f"Enter a post number (1-{len(posts)}), then press enter:","(press q to exit)",curses.COLS,0,curses.COLS-18)])
                 page.print()

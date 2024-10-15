@@ -358,14 +358,19 @@ def performSearch(reddit,search,screen = None):
             #     f.write(f"{ticker}\n")
             
             if(screen != None):
+                resize = eventListener(screen,False,5)
+                if(resize == "resize"):
+                    size = screen.getmaxyx()
+                    curses.resize_term(size[0],size[1])
                 screen.clear()
-                screen.addstr(curses.LINES-1,0," (This may take a while, depending on time since the search was last performed)")
+                waitMessage = "(This may take a while, depending on time since the search was last performed)"
+                screen.addstr(curses.LINES-1,int((curses.COLS-len(waitMessage))/2),waitMessage)
                 stringTicker = int(ticker / 98)
                 stringTicker = stringTicker % (len(string)*2)
                 if(stringTicker >= len(string)):
-                    screen.addstr(8,13+stringTicker-len(string),string[stringTicker-len(string):])
+                    screen.addstr(int((curses.LINES/2)-1),int((curses.COLS-len(string))/2)+stringTicker-len(string),string[stringTicker-len(string):])
                 else:
-                    screen.addstr(8,13,string[:stringTicker])
+                    screen.addstr(int((curses.LINES/2)-1),int((curses.COLS-len(string))/2),string[:stringTicker])
                     
                 screen.refresh()
 
@@ -493,7 +498,7 @@ def viewPost(post,screen):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
-
+    resized = False
     info = getPostInfo(post)
     try:
         stringList = formatString.enbox([info["title"],info["author"],info["flair"],\
@@ -513,30 +518,50 @@ def viewPost(post,screen):
         toolTip.replace([formatString.combineStrings(f"<-- Line {lineNum + 1} -- >","(press q to quit)",curses.COLS,0,curses.COLS-18)])
         page.print()
 
-        char = screen.getch()
+        # char = screen.getch()
+        char = eventListener(screen)
+        if char == "timeout":
+            continue
         
         # Exit viewing the post
-        if char == ord('q'):
-            break
+        if char == "exit":
+            return (0,resized)
+
+        elif char == "resize":
+            resized = True
+            size = screen.getmaxyx()
+            curses.resize_term(size[0],size[1])
+            try:
+                stringList = formatString.enbox([info["title"],info["author"],info["flair"],\
+                                                f"Posted in ({info["sub"]}), {info["age"]}","%separator%",\
+                                                    formatString.removeNonAscii(post.selftext),"%separator%",post.url],\
+                                                        curses.COLS,fancy=config.fancy_characters)
+            except AttributeError:
+                stringList = ""
+            page.updateStrings(screen,stringList,lineNum,toolTip) # Adds the headers list to the pagination controller
+            temp = lineNum
+            lineNum = page.scrollDown()
+            if(not temp == lineNum):
+                lineNum = page.scrollUp()
 
         # Scroll down in the post
-        elif(char == curses.KEY_DOWN or char == ord('s')):
+        elif(char == "scrollDown"):
             lineNum = page.scrollDown()
         
         # Scroll up in the post
-        elif(char == curses.KEY_UP or char == ord('w')):
+        elif(char == "scrollUp"):
             lineNum = page.scrollUp()
 
         # View previous post
-        elif(char == curses.KEY_LEFT or char == ord('a')):
-            return -1
+        elif(char == "scrollLeft"):
+            return (-1,resized)
         
         # View next post
-        elif(char == curses.KEY_RIGHT or char == ord('d')):
-            return 1
+        elif(char == "scrollRight"):
+            return (1,resized)
         
         # Display help screen
-        elif char == ord('h'):
+        elif char == "help":
             screen.clear()
             helpPage = scroll.ScrollingList(screen,[
                 "Press the button in () to execute its command",
@@ -556,15 +581,15 @@ def viewPost(post,screen):
             char = screen.getch() # Help screen disappears when user presses any key
 
         # Open post in web browser
-        elif char == ord('o'):
+        elif char == "open":
             webbrowser.open_new_tab(post.url)
 
         # Copy url to clipboard
-        elif char == ord('c'):
+        elif char == "copy":
             copyToClipboard(post.url)
         
         # Open image, if present
-        elif char == ord('i'):
+        elif char == "image":
             response = requests.get(post.url) # Gets information from Internet
             if(response.status_code == 200): # Code 200 means information was sucessfully gathered
                 try:
@@ -574,11 +599,11 @@ def viewPost(post,screen):
                     pass
         
         # Open author's page
-        elif char == ord('m'):
+        elif char == "message":
             webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
         
         # Displays url of post
-        elif char == ord('u'):
+        elif char == "url":
             screen.clear()
             screen.addstr(0,0,post.url)
             screen.addstr(curses.LINES-1,curses.COLS-24,"(press any key to exit)")
@@ -607,3 +632,59 @@ def isValidSubreddit(userReddit,name):
     except prawcore.exceptions.Forbidden:
         return -2
     return 1
+
+
+
+def eventListener(screen,characters=True,timeout=1000):
+    try:
+        screen.timeout(timeout)
+        char = screen.getch()
+        if(characters == True):
+            if char == ord('q'):
+                screen.timeout(-1)
+                return "exit"
+            elif (char == curses.KEY_UP or char == ord('w')):
+                screen.timeout(-1)
+                return "scrollUp"
+            elif (char == curses.KEY_DOWN or char == ord('s')):
+                screen.timeout(-1)
+                return "scrollDown"
+            elif(char == curses.KEY_LEFT or char == ord('a')):
+                screen.timeout(-1)
+                return "scrollLeft"
+            elif(char == curses.KEY_RIGHT or char == ord('d')):
+                screen.timeout(-1)
+                return "scrollRight"
+            elif(char == ord('r')):
+                screen.timeout(-1)
+                return "refresh"
+            elif char == ord('e'):
+                screen.timeout(-1)
+                return "enter"
+            elif char == ord('h'):
+                screen.timeout(-1)
+                return "help"
+            elif char == ord('o'):
+                screen.timeout(-1)
+                return "open"
+            elif char == ord('c'):
+                screen.timeout(-1)
+                return "copy"
+            elif char == ord('m'):
+                screen.timeout(-1)
+                return "message"
+            elif char == ord('u'):
+                screen.timeout(-1)
+                return "url"
+            elif char == ord('i'):
+                screen.timeout(-1)
+                return "image"
+        if(char == curses.KEY_RESIZE):
+            screen.timeout(-1)
+            return "resize"
+        else:
+            screen.timeout(-1)
+            return "timeout"
+    except curses.error:
+        return "timeout" 
+    
