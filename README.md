@@ -38,4 +38,3 @@ Pressing d will also allow you to enter a number, this search will be deleted fr
 # Issues:
 
 * links do not display right
-* Doesn't handle terminal resizing
