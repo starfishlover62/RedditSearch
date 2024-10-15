@@ -1,5 +1,7 @@
 import curses
 
+from formatString import combineStrings
+
 
 # from formatString import placeString
 class ScrollingList:
@@ -47,7 +49,8 @@ class ScrollingList:
             lines = self.lines[self.currentLine : self.currentLine + numLines]
             while len(lines) < numLines:
                 lines.append("")
-            lines = lines + self.tooltip.lines
+            for item in self.tooltip.lines:
+                lines = lines + [item.string]
             if (len(lines) == curses.LINES) and (len(lines[-1]) >= curses.COLS):
                 lines[-1] = lines[-1][:-1]
         else:
@@ -100,23 +103,91 @@ class ToolTip:
     def replace(self, lines):
         self.lines = []
         if isinstance(lines, str):
-            self.lines.append(lines)
+            self.lines.append(Line(lines,0))
         elif isinstance(lines, list):
             for item in lines:
-                self.lines.append(item)
+                if isinstance(item, str):
+                    self.lines.append(Line(item,0))
+                elif isinstance(item,Line):
+                    self.lines.append(item)
+        self.format = self.lines
 
     def update(self,lines,index=0):
         temp = self.lines
         try:
             if isinstance(lines,str): # Converts a string to a single element list
-                lines = [lines]
+                lines = [Line(lines,0)]
             if isinstance(lines,list): # Loops through each item in list, replacing elements in self.lines with them
                 for item in lines: # Starts at index, and replaces elements until the end of lines has been reached
-                    self.lines[index] = item
+                    if isinstance(item, str):
+                        self.lines[index] = Line(item,0)
+                    elif isinstance(item,Line):
+                        self.lines[index] = item
                     index = index + 1
         except IndexError: # If lines was too long, reset self.lines back to its original value
             self.lines = temp
+        
+        self.format = self.lines
     
+    def updateVars(self,values,index=0):
+        if values is not None:
+            if index < len(self.lines):
+                self.lines[index].updateVars(values)
+
+
     
+
     def height(self):
         return len(self.lines)
+
+
+class Line:
+    def __init__(self,sections,positions,length=80):
+        self.string = ""
+        self.sections = []
+        self.positions = []
+        self.length = 0
+        self.format = []
+        self.replace(sections,positions,length)
+        
+    
+    def replace(self,sections,positions,length=80):
+        if sections is not None and positions is not None:
+            if isinstance(sections,str):
+                sections = [sections]
+            if isinstance(sections,list):
+                if isinstance(positions,int):
+                    positions = [positions]
+                if isinstance(positions,list):
+                    if len(sections) == len(positions):
+                        self.sections = list(sections)
+                        self.format = sections
+                        self.positions = positions
+                        self.length = length
+                        for index in range(len(sections)):
+                            self.string = combineStrings(self.string,sections[index],length,0,positions[index])
+            
+    def place(self):
+        self.string = ""
+        for index in range(len(self.sections)):
+            self.string = combineStrings(self.string,self.sections[index],self.length,0,self.positions[index])
+
+    def updateVars(self,values):
+        if values is not None:
+            valIndex = 0
+            if not isinstance(values,list):
+                values = [values]
+            for section in range(len(self.format)):
+                text = self.format[section]
+                for index in range(len(self.format[section])-1):
+                    if valIndex >= len(values):
+                        self.place()
+                        return
+                    try:
+                        if text[index] == '%' and text[index+1] == 'i':
+                            self.sections[section] = f"{text[:index]}{values[valIndex]}{text[index+2:]}"
+                            valIndex = valIndex + 1
+                            
+                    except IndexError:
+                        break
+                        

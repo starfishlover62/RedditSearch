@@ -96,40 +96,52 @@ def getSearchNum(screen, searches):
         >=0: The index of the searches list that was chosen
     """
     if searches is not None:
+        # Defines the different tooltips
+        toolTipType = "main"
+        toolTipTypes = {
+            "main":[
+                scroll.Line("",0,curses.COLS),
+                scroll.Line(
+                    ["<-- Line %i -- >",
+                    "(a) add, (e) select, (d) delete, (v) view, or (q) quit"],
+                    [0,curses.COLS - 55],
+                    curses.COLS
+                )
+            ],
+            "press": [scroll.Line("",0,curses.COLS),
+                      scroll.Line(
+                                ["Enter a search number, then press enter: ",
+                                "(press q to exit)"],
+                                [0,curses.COLS - 18],
+                                curses.COLS
+                            )
+                        ],
+            "enter": [scroll.Line("",0,curses.COLS),
+                      scroll.Line(
+                                ["Enter a search number, then press enter: ",
+                                "(enter q to exit)"],
+                                [0,curses.COLS - 18],
+                                curses.COLS
+                            )
+                        ]
+            }
+        toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
+
+        # Creates the scrolling list page
         ls = []
         ticker = 1
         for item in searches:
             ls.append(f"{ticker}. {item.name}")
             ticker = ticker + 1
         lineNum = 0
-        toolTip = scroll.ToolTip(
-            [
-                "",
-                formatString.combineStrings(
-                    f"<-- Line {lineNum + 1} -- >",
-                    "((a) add, (e) select, (d) delete, (v) view, or (q) quit)",
-                    curses.COLS,
-                    0,
-                    curses.COLS - 57,
-                ),
-            ]
-        )
         page = scroll.ScrollingList(screen, ls, 0, toolTip)
 
         while True:
             # Updates tooltip and prints page to screen
-            toolTip.replace(
-                [
-                    "",
-                    formatString.combineStrings(
-                        f"<-- Line {lineNum + 1} -- >",
-                        "((a) add, (e) select, (d) delete, (v) view, or (q) quit)",
-                        curses.COLS,
-                        0,
-                        curses.COLS - 57,
-                    ),
-                ]
-            )
+            if not toolTipType == "main":
+                toolTipType = "main"
+                toolTip.replace(toolTipTypes[toolTipType])
+            toolTip.updateVars(lineNum+1,1)
             page.print()
 
             # Gets single character input from user
@@ -151,60 +163,40 @@ def getSearchNum(screen, searches):
             elif char == "scrollLeft": # 'a' was pressed. Adds a search
                 return -2
 
-            # User either wants to perform a search/create one or delete a search.
-            # Either way, input is gathered the same
+            
+            # User wants to perform, view, or delete a search
             elif char == "enter" or char == "scrollRight" or char == "view":
-                toolTip.update( # Updates bottom line
-                    formatString.combineStrings(
-                        "Enter a search number, then press enter: ",
-                        "(press q to exit)",
-                        curses.COLS,
-                        0,
-                        curses.COLS - 18,
-                    ),
-                    1
-                )
-
-                # Updates top line of tooltip, then prints to screen
+                toolTipType = "press" # Indicates that user will press 'q' to exit
+                text = ""
+                # Adds text describing which of the three actions they are performing
                 if char == "enter":
-                    toolTip.update("~Selecting~")
-                    
+                    text = "~Selecting~"
+
                 elif char == "view":
-                    toolTip.update("~Viewing~")
+                    text = "~Viewing~"
 
                 else:
-                    toolTip.update("~Deleting~")
-
+                    text = "~Deleting~"
+                
+                # Updates tooltip and prints page
+                prompt = toolTipTypes[toolTipType]
+                prompt[0] = scroll.Line(text,0,curses.COLS)
+                toolTip.update(prompt)
                 page.print()
 
                 # Moves cursor to end of prompt
                 placeCursor(screen, x=41, y=curses.LINES - 1)
 
-                # Display what they type, and require they press enter
+                # Gets a single character from user
                 c = screen.getch()  # Allows immediate exit if they press q
                 if c == ord("q"):
                     continue
                 
-                prompt = []
-                # Updates prompt(tooltip), then prints to screen
+                toolTipType = "enter" # User has to enter 'q' to exit
+                prompt = toolTipTypes[toolTipType]
+                prompt[0] = scroll.Line(text,0,curses.COLS)
 
-                prompt=["",formatString.combineStrings(
-                                "Enter a search number, then press enter: ",
-                                "(enter q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            )
-                        ]
-                if char == "enter":
-                    prompt[0] = "~Selecting~"
-
-                elif char == "view":
-                    prompt[0] = "~Viewing~"
-
-                else:
-                    prompt[0] = "~Deleting~"
-                
+                # Gets multi-character input from the user
                 string = getInput(prompt,screen,page,toolTip,unget=c,col=41)
 
                 # Attempts to convert their input to an integer
@@ -215,7 +207,7 @@ def getSearchNum(screen, searches):
                     continue
 
                 val -= 1  # Offsets input, so it is an index
-                if val >= 0 and val < len(searches):
+                if val >= 0 and val < len(searches): # The val must be a valid index in the list of searches
                     if char == "scrollRight": # 'd' key for delete
                         del searches[val]
                         return -3
@@ -648,28 +640,15 @@ def viewPost(post, screen, minCols=80, minLines=24):
     lineNum = 0
 
     toolTip = scroll.ToolTip(
-        [
-            formatString.combineStrings(
-                "<-- Line 1 -- >", "(press q to quit)", curses.COLS, 0, curses.COLS - 18
-            )
-        ]
+        [scroll.Line(["<-- Line %i -- >", "(press q to quit)"],[0, curses.COLS - 18],curses.COLS)]
     )
+    toolTip.updateVars(lineNum+1)
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
     skip = False
 
     while True:
         if not skip:
-            toolTip.replace(
-                [
-                    formatString.combineStrings(
-                        f"<-- Line {lineNum + 1} -- >",
-                        "(press q to quit)",
-                        curses.COLS,
-                        0,
-                        curses.COLS - 18,
-                    )
-                ]
-            )
+            toolTip.updateVars(lineNum+1)
             page.print()
             char = eventListener(screen)
         skip = False
