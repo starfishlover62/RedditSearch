@@ -9,19 +9,19 @@ class SubredditSearch:
         self.postBL = postBL
     def update(self,sub=None,titleWL=None,titleBL=None,flairWL=None,flairBL=None,postWL=None,postBL=None):
         # Updates values if they are presented
-        if(not sub == None):
+        if(sub is not None):
             self.name = sub
-        if(not titleWL == None):
+        if(titleWL is not None):
             self.titleWL = titleWL
-        if(not titleBL == None):
+        if(titleBL is not None):
             self.titleBL = titleBL
-        if(not flairWL == None):
+        if(flairWL is not None):
             self.flairWL = flairWL
-        if(not flairBL == None):
+        if(flairBL is not None):
             self.flairBL = flairBL
-        if(not postWL == None):
+        if(postWL is not None):
             self.postWL = postWL
-        if(not postBL == None):
+        if(postBL is not None):
             self.postBL = postBL
 
 class Search:
@@ -31,11 +31,11 @@ class Search:
         self.subreddits = subreddits
     def update(self,name=None,lastSearchTime=None,subreddits=None):
         # Updates values if they are presented
-        if(not name == None):
+        if(name is not None):
             self.name = name
-        if(not lastSearchTime == None):
+        if(lastSearchTime is not None):
             self.lastSearchTime = lastSearchTime
-        if(not subreddits == None):
+        if(subreddits is not None):
             self.subreddits = subreddits
 
     

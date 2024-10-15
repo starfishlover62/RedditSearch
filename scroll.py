@@ -40,7 +40,7 @@ class ScrollingList:
     
     def getLines(self):
         lines = []
-        if(not self.tooltip == None):
+        if(self.tooltip is not None):
             numLines = curses.LINES - self.tooltip.height()
             lines = self.lines[self.currentLine:self.currentLine+numLines]
             while(len(lines) < numLines):
@@ -60,7 +60,7 @@ class ScrollingList:
     def updateTooltip(self,tooltip):
         self.maxLine = curses.LINES
         self.tooltip = None
-        if(not tooltip == None):
+        if(tooltip is not None):
             self.tooltip = tooltip
             self.maxLine -= self.tooltip.height() # Applies line adjustment for new tooltip
 
@@ -73,13 +73,13 @@ class ScrollingList:
         """
         Prints the values returned by getLines to the screen. Prints numLines number of lines if specified
         """
-        if(numLines == None or numLines > 0):
+        if(numLines is None or numLines > 0):
             ticker = 0
             self.screen.clear()
             for item in self.getLines():
                 self.screen.addstr(ticker,0,f"{item}")
                 ticker = ticker + 1
-                if(not numLines == None and ticker >= numLines):
+                if(numLines is not None and ticker >= numLines):
                     self.screen.refresh()
                     break
             self.screen.refresh()
@@ -95,9 +95,9 @@ class ToolTip:
 
     def replace(self,lines):
         self.lines = []
-        if(type(lines) == str):
+        if(isinstance(lines,str)):
             self.lines.append(lines)
-        elif(type(lines) == list):
+        elif(isinstance(lines,list)):
             for item in lines:
                 self.lines.append(item)
 

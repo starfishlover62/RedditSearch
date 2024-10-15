@@ -127,8 +127,8 @@ try:
                 screen.addstr(0,0,"No searches found at the current searches file:")
                 screen.addstr(1,4,f"{searchesPath}")
                 screen.addstr(2,0,"If this is not the correct path, edit the value of 'searches_file' in config.py.")
-                screen.addstr(3,0,f"Press q to quit the program.")
-                screen.addstr(4,0,f"Press any other key to create a new search in the above search file")
+                screen.addstr(3,0,"Press q to quit the program.")
+                screen.addstr(4,0,"Press any other key to create a new search in the above search file")
                 char = screen.getch()  
                 if char == ord('q'):
                     break
@@ -155,9 +155,9 @@ try:
                 searchTime = searches[searchIndex].lastSearchTime # Gets the last time the specified search was performed
 
             # If search has never been performed
-            if(searchTime == None or searchTime == 0):
+            if(searchTime is None or searchTime == 0):
                 screen.clear()
-                if (not args["yes"] == True):
+                if (not args["yes"]):
                     screen.addstr(0,0,"This search has never been performed. Gathering posts from the last week.")
                     screen.addstr(1,0,"Press q to quit or any other key to continue")
                     screen.refresh()
@@ -209,7 +209,7 @@ try:
                 screen.addstr(curses.LINES-1,0,"Press any key to exit")
                 screen.getch()
                 screen.refresh()
-                if(not args["dontSave"] == True):
+                if(not args["dontSave"]):
                     searches[searchIndex].lastSearchTime = time
                 dump.saveSearches(searches,searchesPath)
                 break
@@ -219,7 +219,7 @@ try:
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 numPosts = len(posts)
                 page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
-                if(not args["dontSave"] == True):
+                if(not args["dontSave"]):
                     searches[searchIndex].lastSearchTime = time # Sets the search time in the search variable
                 dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
 
@@ -241,7 +241,7 @@ try:
                     postNum = postNum + 1
             else: # User wanted to exit viewPost
                 browseMode = True
-                if(next[1] == True):
+                if(next[1]): # Terminal was resized while viewing a post
                     headers = functions.getHeaders(posts) # Returns the boxes containing post info
                     page.updateStrings(screen,headers,lineNum,toolTip) # Adds the headers list to the pagination controller
                     temp = lineNum
@@ -298,7 +298,7 @@ try:
                 headers = functions.getHeaders(posts) # Returns the boxes containing post info
                 numPosts = len(posts)
                 page.updateStrings(screen,headers,0,toolTip) # Adds the headers list to the pagination controller
-                if(not args["dontSave"] == True):
+                if(not args["dontSave"]):
                     searches[searchIndex].lastSearchTime = time # Sets the search time in the searc variable
                 dump.saveSearches(searches,searchesPath) # Writes the search variable to the file
      

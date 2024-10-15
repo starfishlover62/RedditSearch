@@ -183,7 +183,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
     vertical="|"
     horizontal="-"
 
-    if(fancy == True):
+    if(fancy):
         topLeft="┌"
         topRight="┐"
         bottomLeft="└"
@@ -199,7 +199,7 @@ def enbox(stringList, terminalWidth, leftPadding = 1, rightPadding = 1, leftMarg
     s.append(f"{topLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{topRight}")
 
     for item in stringList: # Loops through each item in the content list.
-        if(item != None):
+        if(item is not None):
             # Creates a separating line in the box
             if(item == "%separator%"):
                 # Adds a horizontal line

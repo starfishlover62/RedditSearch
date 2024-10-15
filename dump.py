@@ -32,9 +32,9 @@ def serializeSearches(searches):
     """
     Serializes a list of Search objects into a string format
     """
-    if(not type(searches) == list):
+    if(not isinstance(searches,list)):
         searches = [searches]
-    string = f'"searches":['
+    string = '"searches":['
     for item in searches:
         string = string + serializeSearch(item) + ","
     
