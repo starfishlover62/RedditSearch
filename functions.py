@@ -612,8 +612,11 @@ def viewPost(post,screen,minCols=80,minLines=24):
         
         # Displays url of post
         elif char == "url":
+            with open(config.link_output,"a") as f:
+                f.write(f"{info["title"]}:\n")
+                f.write(f"\t{post.url}\n")
             screen.clear()
-            screen.addstr(0,0,post.url)
+            screen.addstr(0,0,f"URL saved to {config.link_output}")
             screen.addstr(curses.LINES-1,curses.COLS-24,"(press any key to exit)")
             placeCursor(screen,x=0,y=curses.LINES-1)
             screen.refresh()
