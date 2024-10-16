@@ -196,7 +196,7 @@ def getSearchNum(screen, searches):
                 prompt[0] = scroll.Line(text,0,curses.COLS)
 
                 # Gets multi-character input from the user
-                string = getInput(prompt,screen,page,toolTip,unget=c,col=41)
+                string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip,unget=c,col=41)
 
                 # Attempts to convert their input to an integer
                 val = 0
@@ -261,11 +261,12 @@ def viewSearch(screen,search):
                 continue
 
 
-def getInput(prompt,screen,page,tooltip,unget=None,row=None,col=None):
-    if isinstance(prompt,list):
-        tooltip.replace(prompt)
-    else:
-        tooltip.replace([prompt])
+def getInput(screen,page,tooltip,prompt=None,unget=None,row=None,col=None):
+    if prompt is not None:
+        if isinstance(prompt,list):
+            tooltip.replace(prompt)
+        else:
+            tooltip.replace([prompt])
     page.print()
     if(row is None):
         if(col is None):
@@ -342,7 +343,7 @@ def createSearch(screen):
         if questionIndex == 0:
             # Gets search name
             prompt = questions[questionIndex]
-            string = getInput(prompt,screen,page,toolTip)
+            string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
             returnSearch.update(name=string)
             questionIndex = questionIndex + 1
             stringList = searchTree(returnSearch, curses.COLS, config.fancy_characters)
@@ -351,7 +352,7 @@ def createSearch(screen):
         elif questionIndex == 1:
             # Gets first subreddit name
             prompt = questions[questionIndex]
-            string = getInput(prompt,screen,page,toolTip)
+            string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
             if (
                 returnSearch.subreddits is None
             ):  # If this is the first sub search, set subreddits value
@@ -393,7 +394,7 @@ def createSearch(screen):
                 elif c == ord("y"):  # Otherwise
                     # Update prompt to remove option to quit
                     prompt = f"{questions[questionIndex]}"
-                    string = getInput(prompt,screen,page,toolTip)
+                    string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
                     if not string.strip() == "":
                         temp.append(string)
                         if questionIndex == 2:
@@ -616,9 +617,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
     """
     resized = False
     info = getPostInfo(post)
-    try:
-        stringList = formatString.enbox(
-            [
+    content = [
                 info["title"],
                 info["author"],
                 info["flair"],
@@ -627,7 +626,10 @@ def viewPost(post, screen, minCols=80, minLines=24):
                 formatString.removeNonAscii(post.selftext),
                 "%separator%",
                 post.url,
-            ],
+            ]
+    try:
+        stringList = formatString.enbox(
+            content,
             curses.COLS,
             fancy=config.fancy_characters,
         )
@@ -636,16 +638,24 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
     lineNum = 0
 
-    toolTip = scroll.ToolTip(
-        [scroll.Line(["<-- Line %i -- >", "(press q to quit)"],[0, curses.COLS - 18],curses.COLS)]
-    )
-    toolTip.updateVars(lineNum+1)
+    toolTipType = "main"
+    toolTipTypes = {
+            "main":[scroll.Line(
+                        ["<-- Line %i/%i -- >",
+                        "press (q) to exit"],
+                        [0,curses.COLS - 18],
+                        curses.COLS
+                    )
+                ]
+            }
+    toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
+
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
     skip = False
 
     while True:
         if not skip:
-            toolTip.updateVars(lineNum+1)
+            toolTip.updateVars([lineNum+1,page.maxLine+1],0)
             page.print()
             char = eventListener(screen)
         skip = False
@@ -666,16 +676,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             curses.resize_term(size[0], size[1])
             try:
                 stringList = formatString.enbox(
-                    [
-                        info["title"],
-                        info["author"],
-                        info["flair"],
-                        f"Posted in ({info["sub"]}), {info["age"]}",
-                        "%separator%",
-                        formatString.removeNonAscii(post.selftext),
-                        "%separator%",
-                        post.url,
-                    ],
+                    content,
                     curses.COLS,
                     fancy=config.fancy_characters,
                 )
@@ -683,7 +684,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
                 stringList = ""
             page.updateStrings(
                 screen, stringList, lineNum, toolTip
-            )  # Adds the headers list to the pagination controller
+            )  # Refreshes the page with the new lines
             temp = lineNum
             lineNum = page.scrollDown()
             if not temp == lineNum:
