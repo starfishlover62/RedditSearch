@@ -99,31 +99,30 @@ def getSearchNum(screen, searches):
         # Defines the different tooltips
         toolTipType = "main"
         toolTipTypes = {
-            "main":[
-                scroll.Line("",0,curses.COLS),
-                scroll.Line(
-                    ["<-- Line %i -- >",
-                    "(a) add, (e) select, (d) delete, (v) view, or (q) quit"],
-                    [0,curses.COLS - 55],
-                    curses.COLS
-                )
-            ],
-            "press": [scroll.Line("",0,curses.COLS),
-                      scroll.Line(
-                                ["Enter a search number, then press enter: ",
-                                "(press q to exit)"],
-                                [0,curses.COLS - 18],
-                                curses.COLS
-                            )
-                        ],
-            "enter": [scroll.Line("",0,curses.COLS),
-                      scroll.Line(
-                                ["Enter a search number, then press enter: ",
-                                "(enter q to exit)"],
-                                [0,curses.COLS - 18],
-                                curses.COLS
-                            )
-                        ]
+            "main":[scroll.Line("",0,curses.COLS),
+                    scroll.Line(
+                        ["<-- Line %i -- >",
+                        "(a) add, (e) select, (d) delete, (v) view, or (q) quit"],
+                        [0,curses.COLS - 55],
+                        curses.COLS
+                    )
+                ],
+            "press":[scroll.Line("",0,curses.COLS),
+                    scroll.Line(
+                        ["Enter a search number, then press enter: ",
+                        "(press q to exit)"],
+                        [0,curses.COLS - 18],
+                        curses.COLS
+                    )
+                ],
+            "enter":[scroll.Line("",0,curses.COLS),
+                    scroll.Line(
+                        ["Enter a search number, then press enter: ",
+                        "(enter q to exit)"],
+                        [0,curses.COLS - 18],
+                        curses.COLS
+                    )
+                ]
             }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
@@ -223,33 +222,32 @@ def viewSearch(screen,search):
     if search is not None:
         view = searchTree(search,curses.COLS,config.fancy_characters)
         lineNum = 0
-        prompt = [
-                "",
-                formatString.combineStrings(
-                f"<-- Line {lineNum + 1} -- >",
-                "press (q) to exit",
-                curses.COLS,
-                0,
-                curses.COLS - 18,
-            )
-        ]
-        toolTip = scroll.ToolTip(prompt)
+        toolTipType = "main"
+        toolTipTypes = {
+            "main":[scroll.Line("",0,curses.COLS),
+                    scroll.Line(
+                        ["<-- Line %i -- >",
+                        "press (q) to exit"],
+                        [0,curses.COLS - 18],
+                        curses.COLS
+                    )
+                ]
+            }
+        toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
         page = scroll.ScrollingList(
             screen, view, lineNum, toolTip
         )
-        while True:             
-            toolTip.replace(
-                [
-                    formatString.combineStrings(
-                        f"<-- Line {lineNum + 1} -- >",
-                        "press (q) to exit",
-                        curses.COLS,
-                        0,
-                        curses.COLS - 18,
-                    )
-                ]
-            )
+        while True:
+            # Changes toolTip if necessary
+            if not toolTipType == "main":
+                toolTipType = "main"
+                toolTip.replace(toolTipTypes[toolTipType])
+
+            # Updates line number and prints page
+            toolTip.updateVars([lineNum+1],1)
             page.print()
+
+            # Gets input from user
             viewChar = eventListener(screen)
             if viewChar == "exit":  # Returns from function, signalling to quit program
                 break
