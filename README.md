@@ -110,3 +110,10 @@ On the screen listing searches, you have several options.
     * pressing o will open the post up on the official reddit website, in your default web browser
     * Pressing u will shift to another screen that displays a file name. All of the links in the post have been written to the file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.
     * Pressing m will open up the page of the author on the official reddit website, in your default web browser.
+
+
+## Advanced
+
+* If you know which search you want to perform ahead of time, you can save time by specifying it in the command line. To do this, run `python3 main.py -n <search_name>` Do note that search names are case sensitive, such that "mysearch" is not the same as "MYSEARCH". If you specify a search that does not exist, the program will list out all available searches that are present in the specified search file. 
+* Adding a -d flag prevents the lastSearchTime from being modified. This is useful if you want to run the search over the same timeframe multiple times.
+* Adding a -y flag will automatically agree to prompts asking if you want to run a search that hasn't be run in a while (typically over a week)
