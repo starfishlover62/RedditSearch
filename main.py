@@ -111,28 +111,28 @@ posts = []  # List of all the posts meeting criteria
 page = scroll.ScrollingList(screen, [""])
 toolTipType = "main"
 toolTipTypes = {
-    "main":[scroll.Line(
-                ["<-- Line %i/%i -- >",
-                "(press e to view a post or q to quit)"],
-                [0,curses.COLS - 38],
-                curses.COLS
-            )
-        ],
-    "press":[scroll.Line(
-                ["Enter a post number (1-%i), then press enter:",
-                "(press q to exit)"],
-                [0,curses.COLS - 18],
-                curses.COLS
-            )
-        ],
-    "enter":[scroll.Line(
-                ["Enter a post number (1-%i), then press enter:",
-                "(enter q to exit)"],
-                [0,curses.COLS - 18],
-                curses.COLS
-            )
-        ]
-    }
+    "main": [
+        scroll.Line(
+            ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
+            [0, curses.COLS - 38],
+            curses.COLS,
+        )
+    ],
+    "press": [
+        scroll.Line(
+            ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
+            [0, curses.COLS - 18],
+            curses.COLS,
+        )
+    ],
+    "enter": [
+        scroll.Line(
+            ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
+            [0, curses.COLS - 18],
+            curses.COLS,
+        )
+    ],
+}
 toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
 
@@ -227,7 +227,7 @@ try:
             # If search was last performed over a week ago
             elif currentTime - searchTime > constants.DAY * 7:
                 screen.clear()
-                char = 'y'
+                char = "y"
                 if not args["yes"]:
                     screen.addstr(
                         0,
@@ -243,7 +243,7 @@ try:
 
                     char = screen.getch()
                 if char == ord("q"):
-                        break
+                    break
                 elif not char == ord("y"):
                     searches[searchIndex].lastSearchTime = math.floor(
                         functions.currentTimestamp() - constants.DAY * 7
@@ -343,7 +343,7 @@ try:
             if not toolTipType == "main":
                 toolTipType = "main"
                 toolTip.replace(toolTipTypes[toolTipType])
-            toolTip.updateVars([lineNum+1,page.maxLine+1])
+            toolTip.updateVars([lineNum + 1, page.maxLine + 1])
             page.print()
 
             # Gets input from the user
@@ -416,13 +416,13 @@ try:
             # Allows the user to input a post number
             elif char == "enter":
                 # Updates the tooltip and places the cursor for input
-                
+
                 if not toolTipType == "press":
                     toolTipType = "press"
                     toolTip.replace(toolTipTypes[toolTipType])
                 toolTip.updateVars(len(posts))
                 page.print()
-                
+
                 functions.placeCursor(screen, x=48, y=curses.LINES - 1)
                 c = screen.getch()  # Gets the character they type
                 if c == ord("q"):  # Immediately exits if they pressed q
@@ -434,8 +434,10 @@ try:
                         toolTipType = "enter"
                         toolTip.replace(toolTipTypes[toolTipType])
                     toolTip.updateVars(len(posts))
-                    string = functions.getInput(screen=screen,page=page,tooltip=toolTip,unget=c,col=48)
-                
+                    string = functions.getInput(
+                        screen=screen, page=page, tooltip=toolTip, unget=c, col=48
+                    )
+
                     # Attempts to convert their input into an integer.
                     val = 0
                     try:
