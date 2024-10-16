@@ -117,3 +117,8 @@ On the screen listing searches, you have several options.
 * If you know which search you want to perform ahead of time, you can save time by specifying it in the command line. To do this, run `python3 main.py -n <search_name>` Do note that search names are case sensitive, such that "mysearch" is not the same as "MYSEARCH". If you specify a search that does not exist, the program will list out all available searches that are present in the specified search file. 
 * Adding a -d flag prevents the lastSearchTime from being modified. This is useful if you want to run the search over the same timeframe multiple times.
 * Adding a -y flag will automatically agree to prompts asking if you want to run a search that hasn't be run in a while (typically over a week)
+
+
+# Known Issues:
+
+* Terminal resizing is only supported on the search in progress, browsing, and post viewing screens.
