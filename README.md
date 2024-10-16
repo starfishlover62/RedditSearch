@@ -11,17 +11,27 @@ Tested Python versions: 3.12.3
 
 Utilizes ncurses library, which must be installed if it isn't already.
 
+
 # Installation
 
 
 * Clone the repository locally or download and extract the zipped folder.
+* Open config.py
 * Navigate to https://old.reddit.com/prefs/apps/
     * If you have an account, login, if not, create an account
-* Open config.py
-* Copy the ID to client_id, the secret to client_secret, and your user agent to user_agent
-* Note that the user agent can be found here https://whatmyuseragent.com/
+    * Click on "are you a developer? Create an app..."
+    * Enter "better-search" for the name of the app
+    * Enter "Searches multiple subreddits and filters results" for the description
+    * Enter "http://localhost:8080" for the redirect uri
+    * Click on "create app"
+    * In the top left will be a picture of a question mark inside of a diamond
+        * To the right of this should be "better-search" and then "personal use script" below that. Below this will be a string of random characters. This is your client id. Navigate to config.py and replace the text that says "your_client_id" with this string.
+        * Back on the website, below the client id, should be a section labelled "secret" copy this and replay "your_client_secret" with it.
+        * Finally, within the user agent section on config.py, replace your_username with your username. If you have forgotten what it is, it should be located in the top right of the reddit website, to the left of a letter icon.
+    * It is now safe to close the browser window.
 * (Optional) the path in searches_file can be edited to specify a different file to store saved searches
-
+* (Optional) the path in link_output can be edited to specify a different file to save urls too. See the Results - Interacting section for more information about this.
+* (Optional) If you prefer to not use fancy characters, or your computer does not support them, change the value of fancy_characters to false. This will force the app to use only ASCII characters.
 
 * Linux
 * Windows
@@ -33,7 +43,7 @@ Utilizes ncurses library, which must be installed if it isn't already.
     * For ubuntu or Debian based systems:
         ```sudo apt install python3 python3-pip```
 2. Install required libraries. They can be found in requirements.txt (Run `pip install -r requirements.txt`)
-3. For clipboard functionality, either xclip or xsel is needed. Check if they are installed with ```sudo apt show xclip``` or `sudo apt show xsel` See 
+3. For clipboard functionality, either xclip or xsel is needed. Check if they are installed with ```sudo apt show xclip``` or `sudo apt show xsel` See the pyperclip documentation (https://pypi.org/project/pyperclip/) for more information.
 
 
 # Usage
@@ -41,7 +51,7 @@ Utilizes ncurses library, which must be installed if it isn't already.
 The program can be started by executing the following command:
     `python3 main.py`
 
-The next screen should be a list of names of searches. If this does not appear, and instead the screen describes 
+The next screen should be a list of names of searches. If the screen states that no searches were found, double check the path to the searches file in config.py. Is that the correct path? If it is, press any key in the terminal to start the process of creating a new search. If it is not, edit the value in config.py, press 'q' in the terminal, and relaunch the program.
 
 ## Creating a search
 
@@ -100,6 +110,3 @@ On the screen listing searches, you have several options.
     * pressing o will open the post up on the official reddit website, in your default web browser
     * Pressing u will shift to another screen that displays a file name. All of the links in the post have been written to the file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.
     * Pressing m will open up the page of the author on the official reddit website, in your default web browser.
-
-
-# Issues:
