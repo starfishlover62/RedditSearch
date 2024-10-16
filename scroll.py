@@ -174,20 +174,23 @@ class Line:
 
     def updateVars(self,values):
         if values is not None:
+            lines = []
             valIndex = 0
+            index = 0
             if not isinstance(values,list):
                 values = [values]
             for section in range(len(self.format)):
                 text = self.format[section]
-                for index in range(len(self.format[section])-1):
+                while True:
                     if valIndex >= len(values):
-                        self.place()
-                        return
-                    try:
-                        if text[index] == '%' and text[index+1] == 'i':
-                            self.sections[section] = f"{text[:index]}{values[valIndex]}{text[index+2:]}"
-                            valIndex = valIndex + 1
-                            
-                    except IndexError:
                         break
+                    index = text.find("%i")
+                    if index == -1:
+                        break
+                    text = f"{text[:index]}{values[valIndex]}{text[index+2:]}"
+                    valIndex = valIndex + 1
+                lines.append(text)
+            self.sections = lines
+            self.place()
+
                         
