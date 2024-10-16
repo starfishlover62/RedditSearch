@@ -71,7 +71,7 @@ def getSearches(JSONPath):
 
 def getNumPosts(reddit, searchCriteria, numPosts=20):
     """
-    reddit is the reddit instance, searchCriteria is a search object, 
+    reddit is the reddit instance, searchCriteria is a search object,
     and numPosts is the number of posts to fetch per subreddit in
     searchCriteria
 
@@ -87,7 +87,7 @@ def getNumPosts(reddit, searchCriteria, numPosts=20):
 
 def getSearchNum(screen, searches):
     """
-    Displays a list of searches, and has the user select one to be performed. 
+    Displays a list of searches, and has the user select one to be performed.
     Also allows the user to create or delete searches.
     Return Values:
         -3 : Search was deleted (therefore save)
@@ -99,31 +99,34 @@ def getSearchNum(screen, searches):
         # Defines the different tooltips
         toolTipType = "main"
         toolTipTypes = {
-            "main":[scroll.Line("",0,curses.COLS),
-                    scroll.Line(
-                        ["<-- Line %i -- >",
-                        "(a) add, (e) select, (d) delete, (v) view, or (q) quit"],
-                        [0,curses.COLS - 55],
-                        curses.COLS
-                    )
-                ],
-            "press":[scroll.Line("",0,curses.COLS),
-                    scroll.Line(
-                        ["Enter a search number, then press enter: ",
-                        "(press q to exit)"],
-                        [0,curses.COLS - 18],
-                        curses.COLS
-                    )
-                ],
-            "enter":[scroll.Line("",0,curses.COLS),
-                    scroll.Line(
-                        ["Enter a search number, then press enter: ",
-                        "(enter q to exit)"],
-                        [0,curses.COLS - 18],
-                        curses.COLS
-                    )
-                ]
-            }
+            "main": [
+                scroll.Line("", 0, curses.COLS),
+                scroll.Line(
+                    [
+                        "<-- Line %i -- >",
+                        "(a) add, (e) select, (d) delete, (v) view, or (q) quit",
+                    ],
+                    [0, curses.COLS - 55],
+                    curses.COLS,
+                ),
+            ],
+            "press": [
+                scroll.Line("", 0, curses.COLS),
+                scroll.Line(
+                    ["Enter a search number, then press enter: ", "(press q to exit)"],
+                    [0, curses.COLS - 18],
+                    curses.COLS,
+                ),
+            ],
+            "enter": [
+                scroll.Line("", 0, curses.COLS),
+                scroll.Line(
+                    ["Enter a search number, then press enter: ", "(enter q to exit)"],
+                    [0, curses.COLS - 18],
+                    curses.COLS,
+                ),
+            ],
+        }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
         # Creates the scrolling list page
@@ -140,7 +143,7 @@ def getSearchNum(screen, searches):
             if not toolTipType == "main":
                 toolTipType = "main"
                 toolTip.replace(toolTipTypes[toolTipType])
-            toolTip.updateVars(lineNum+1,1)
+            toolTip.updateVars(lineNum + 1, 1)
             page.print()
 
             # Gets single character input from user
@@ -159,13 +162,12 @@ def getSearchNum(screen, searches):
                 lineNum = page.scrollDown()
                 continue
 
-            elif char == "scrollLeft": # 'a' was pressed. Adds a search
+            elif char == "scrollLeft":  # 'a' was pressed. Adds a search
                 return -2
 
-            
             # User wants to perform, view, or delete a search
             elif char == "enter" or char == "scrollRight" or char == "view":
-                toolTipType = "press" # Indicates that user will press 'q' to exit
+                toolTipType = "press"  # Indicates that user will press 'q' to exit
                 text = ""
                 # Adds text describing which of the three actions they are performing
                 if char == "enter":
@@ -176,10 +178,10 @@ def getSearchNum(screen, searches):
 
                 else:
                     text = "~Deleting~"
-                
+
                 # Updates tooltip and prints page
                 prompt = toolTipTypes[toolTipType]
-                prompt[0] = scroll.Line(text,0,curses.COLS)
+                prompt[0] = scroll.Line(text, 0, curses.COLS)
                 toolTip.update(prompt)
                 page.print()
 
@@ -190,13 +192,20 @@ def getSearchNum(screen, searches):
                 c = screen.getch()  # Allows immediate exit if they press q
                 if c == ord("q"):
                     continue
-                
-                toolTipType = "enter" # User has to enter 'q' to exit
+
+                toolTipType = "enter"  # User has to enter 'q' to exit
                 prompt = toolTipTypes[toolTipType]
-                prompt[0] = scroll.Line(text,0,curses.COLS)
+                prompt[0] = scroll.Line(text, 0, curses.COLS)
 
                 # Gets multi-character input from the user
-                string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip,unget=c,col=41)
+                string = getInput(
+                    prompt=prompt,
+                    screen=screen,
+                    page=page,
+                    tooltip=toolTip,
+                    unget=c,
+                    col=41,
+                )
 
                 # Attempts to convert their input to an integer
                 val = 0
@@ -206,37 +215,37 @@ def getSearchNum(screen, searches):
                     continue
 
                 val -= 1  # Offsets input, so it is an index
-                if val >= 0 and val < len(searches): # The val must be a valid index in the list of searches
-                    if char == "scrollRight": # 'd' key for delete
+                if val >= 0 and val < len(
+                    searches
+                ):  # The val must be a valid index in the list of searches
+                    if char == "scrollRight":  # 'd' key for delete
                         del searches[val]
                         return -3
-                    elif char == "view": # Views search
-                        viewSearch(screen,searches[val])
-                    else: # Selects search
+                    elif char == "view":  # Views search
+                        viewSearch(screen, searches[val])
+                    else:  # Selects search
                         return val
     else:
         return -2
 
 
-def viewSearch(screen,search):
+def viewSearch(screen, search):
     if search is not None:
-        view = searchTree(search,curses.COLS,config.fancy_characters)
+        view = searchTree(search, curses.COLS, config.fancy_characters)
         lineNum = 0
         toolTipType = "main"
         toolTipTypes = {
-            "main":[scroll.Line("",0,curses.COLS),
-                    scroll.Line(
-                        ["<-- Line %i -- >",
-                        "press (q) to exit"],
-                        [0,curses.COLS - 18],
-                        curses.COLS
-                    )
-                ]
-            }
+            "main": [
+                scroll.Line("", 0, curses.COLS),
+                scroll.Line(
+                    ["<-- Line %i -- >", "press (q) to exit"],
+                    [0, curses.COLS - 18],
+                    curses.COLS,
+                ),
+            ]
+        }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
-        page = scroll.ScrollingList(
-            screen, view, lineNum, toolTip
-        )
+        page = scroll.ScrollingList(screen, view, lineNum, toolTip)
         while True:
             # Changes toolTip if necessary
             if not toolTipType == "main":
@@ -244,7 +253,7 @@ def viewSearch(screen,search):
                 toolTip.replace(toolTipTypes[toolTipType])
 
             # Updates line number and prints page
-            toolTip.updateVars([lineNum+1],1)
+            toolTip.updateVars([lineNum + 1], 1)
             page.print()
 
             # Gets input from user
@@ -261,20 +270,20 @@ def viewSearch(screen,search):
                 continue
 
 
-def getInput(screen,page,tooltip,prompt=None,unget=None,row=None,col=None):
+def getInput(screen, page, tooltip, prompt=None, unget=None, row=None, col=None):
     if prompt is not None:
-        if isinstance(prompt,list):
+        if isinstance(prompt, list):
             tooltip.replace(prompt)
         else:
             tooltip.replace([prompt])
     page.print()
-    if(row is None):
-        if(col is None):
+    if row is None:
+        if col is None:
             placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
         else:
             placeCursor(screen, x=col, y=curses.LINES - 1)
     else:
-        if(col is None):
+        if col is None:
             placeCursor(screen, x=(len(prompt) + 1), y=row)
         else:
             placeCursor(screen, x=col, y=row)
@@ -282,7 +291,7 @@ def getInput(screen,page,tooltip,prompt=None,unget=None,row=None,col=None):
     # Gets input
     curses.echo()  # Displays what they type
     curses.nocbreak()  # Requires that they press enter
-    if(unget is not None):
+    if unget is not None:
         curses.ungetch(unget)
     string = screen.getstr().decode("ASCII")  # Their input
 
@@ -343,7 +352,7 @@ def createSearch(screen):
         if questionIndex == 0:
             # Gets search name
             prompt = questions[questionIndex]
-            string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
+            string = getInput(prompt=prompt, screen=screen, page=page, tooltip=toolTip)
             returnSearch.update(name=string)
             questionIndex = questionIndex + 1
             stringList = searchTree(returnSearch, curses.COLS, config.fancy_characters)
@@ -352,7 +361,7 @@ def createSearch(screen):
         elif questionIndex == 1:
             # Gets first subreddit name
             prompt = questions[questionIndex]
-            string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
+            string = getInput(prompt=prompt, screen=screen, page=page, tooltip=toolTip)
             if (
                 returnSearch.subreddits is None
             ):  # If this is the first sub search, set subreddits value
@@ -394,7 +403,9 @@ def createSearch(screen):
                 elif c == ord("y"):  # Otherwise
                     # Update prompt to remove option to quit
                     prompt = f"{questions[questionIndex]}"
-                    string = getInput(prompt=prompt,screen=screen,page=page,tooltip=toolTip)
+                    string = getInput(
+                        prompt=prompt, screen=screen, page=page, tooltip=toolTip
+                    )
                     if not string.strip() == "":
                         temp.append(string)
                         if questionIndex == 2:
@@ -618,15 +629,15 @@ def viewPost(post, screen, minCols=80, minLines=24):
     resized = False
     info = getPostInfo(post)
     content = [
-                info["title"],
-                info["author"],
-                info["flair"],
-                f"Posted in ({info["sub"]}), {info["age"]}",
-                "%separator%",
-                formatString.removeNonAscii(post.selftext),
-                "%separator%",
-                post.url,
-            ]
+        info["title"],
+        info["author"],
+        info["flair"],
+        f"Posted in ({info["sub"]}), {info["age"]}",
+        "%separator%",
+        formatString.removeNonAscii(post.selftext),
+        "%separator%",
+        post.url,
+    ]
     try:
         stringList = formatString.enbox(
             content,
@@ -640,14 +651,14 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
     toolTipType = "main"
     toolTipTypes = {
-            "main":[scroll.Line(
-                        ["<-- Line %i/%i -- >",
-                        "press (q) to exit"],
-                        [0,curses.COLS - 18],
-                        curses.COLS
-                    )
-                ]
-            }
+        "main": [
+            scroll.Line(
+                ["<-- Line %i/%i -- >", "press (q) to exit"],
+                [0, curses.COLS - 18],
+                curses.COLS,
+            )
+        ]
+    }
     toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
@@ -655,7 +666,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
     while True:
         if not skip:
-            toolTip.updateVars([lineNum+1,page.maxLine+1],0)
+            toolTip.updateVars([lineNum + 1, page.maxLine + 1], 0)
             page.print()
             char = eventListener(screen)
         skip = False
@@ -732,8 +743,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             helpPage.print()
             while True:
                 char = eventListener(
-                    screen,
-                    anyChar=True
+                    screen, anyChar=True
                 )  # Screen stays up until user does some action
                 if not (char == "timeout"):
                     if char == "resize":
@@ -786,8 +796,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             screen.refresh()
             while True:
                 char = eventListener(
-                    screen,
-                    anyChar=True
+                    screen, anyChar=True
                 )  # Screen stays up until user does some action
                 if not (char == "timeout"):
                     if char == "resize":
@@ -795,8 +804,6 @@ def viewPost(post, screen, minCols=80, minLines=24):
                     else:
                         skip = False
                     break
-            
-            
 
 
 def findURLs(text):
@@ -832,7 +839,7 @@ def isValidSubreddit(userReddit, name):
     return 1
 
 
-def eventListener(screen, characters=True,anyChar=False, timeout=100):
+def eventListener(screen, characters=True, anyChar=False, timeout=100):
     try:
         screen.timeout(timeout)
         char = screen.getch()
@@ -883,8 +890,8 @@ def eventListener(screen, characters=True,anyChar=False, timeout=100):
             screen.timeout(-1)
             return "resize"
         else:
-            if(anyChar):
-                if(char == -1):
+            if anyChar:
+                if char == -1:
                     screen.timeout(-1)
                     return "timeout"
                 else:
