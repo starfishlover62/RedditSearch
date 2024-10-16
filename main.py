@@ -109,11 +109,31 @@ posts = []  # List of all the posts meeting criteria
 
 
 page = scroll.ScrollingList(screen, [""])
-toolTip = scroll.ToolTip(
-    formatString.combineStrings(
-        "<-- Line 1 -- >", "(press q to quit)", curses.COLS, 0, curses.COLS - 18
-    )
-)
+toolTipType = "main"
+toolTipTypes = {
+    "main":[scroll.Line(
+                ["<-- Line %i/%i -- >",
+                "(press e to view a post or q to quit)"],
+                [0,curses.COLS - 38],
+                curses.COLS
+            )
+        ],
+    "press":[scroll.Line(
+                ["Enter a post number (1-%i), then press enter:",
+                "(press q to exit)"],
+                [0,curses.COLS - 18],
+                curses.COLS
+            )
+        ],
+    "enter":[scroll.Line(
+                ["Enter a post number (1-%i), then press enter:",
+                "(enter q to exit)"],
+                [0,curses.COLS - 18],
+                curses.COLS
+            )
+        ]
+    }
+toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
 
 try:
@@ -233,10 +253,7 @@ try:
                 status = functions.isValidSubreddit(reddit_read_only, sub.name)
                 if status == -1:
                     functions.close(screen)
-                    # curses.nocbreak()
-                    # screen.keypad(0)
-                    # curses.echo()
-                    # curses.endwin()
+
                     print(
                         f"Subreddit ({sub.name}) does not exist or has been banned",
                         flush=True,
@@ -321,17 +338,10 @@ try:
         # Displays post headers for browsing
         else:
             # Updates the tooltip, and prints the headers to the screen
-            toolTip.replace(
-                [
-                    formatString.combineStrings(
-                        f"<-- Line {lineNum + 1} -- >",
-                        "(press e to view a post or q to quit)",
-                        curses.COLS,
-                        0,
-                        curses.COLS - 38,
-                    )
-                ]
-            )
+            if not toolTipType == "main":
+                toolTipType = "main"
+                toolTip.replace(toolTipTypes[toolTipType])
+            toolTip.updateVars([lineNum+1,page.maxLine+1])
             page.print()
 
             # Gets input from the user
@@ -404,18 +414,13 @@ try:
             # Allows the user to input a post number
             elif char == "enter":
                 # Updates the tooltip and places the cursor for input
-                toolTip.replace(
-                    [
-                        formatString.combineStrings(
-                            f"Enter a post number (1-{len(posts)}), then press enter:",
-                            "(press q to exit)",
-                            curses.COLS,
-                            0,
-                            curses.COLS - 18,
-                        )
-                    ]
-                )
+                
+                if not toolTipType == "press":
+                    toolTipType = "press"
+                    toolTip.replace(toolTipTypes[toolTipType])
+                toolTip.updateVars(len(posts))
                 page.print()
+                
                 functions.placeCursor(screen, x=48, y=curses.LINES - 1)
                 c = screen.getch()  # Gets the character they type
                 if c == ord("q"):  # Immediately exits if they pressed q
@@ -423,32 +428,12 @@ try:
 
                 else:  # Otherwise
                     # Update prompt to tell them to 'enter q" instead of 'press q"
-                    prompt = formatString.combineStrings(
-                                f"Enter a post number (1-{len(posts)}), then press enter:",
-                                "(enter q to exit)",
-                                curses.COLS,
-                                0,
-                                curses.COLS - 18,
-                            )
-                    string = functions.getInput(prompt,screen,page,toolTip,c,col=48)
-                    # toolTip.replace(
-                    #     [
-                            
-                    #     ]
-                    # )
-                    # page.print()
-                    # functions.placeCursor(screen, x=48, y=curses.LINES - 1)
-
-                    # # Gets input
-                    # curses.echo()  # Displays what they type
-                    # curses.nocbreak()  # Requires that they press enter
-                    # curses.ungetch(c)  # Adds the first character back to the buffer
-                    # string = screen.getstr()  # Their input
-
-                    # # Undo displaying input and requiring enter be pressed
-                    # curses.noecho()
-                    # curses.cbreak()
-
+                    if not toolTipType == "enter":
+                        toolTipType = "enter"
+                        toolTip.replace(toolTipTypes[toolTipType])
+                    toolTip.updateVars(len(posts))
+                    string = functions.getInput(screen=screen,page=page,tooltip=toolTip,unget=c,col=48)
+                
                     # Attempts to convert their input into an integer.
                     val = 0
                     try:
@@ -467,6 +452,4 @@ try:
 
 # Resets the terminal window for normal usage outside of the program
 finally:
-    # curses.nocbreak(); screen.keypad(0); curses.echo()
-    # curses.endwin()
     functions.close(screen)
