@@ -292,7 +292,6 @@ def getInput(prompt,screen,page,tooltip,unget=None,row=None,col=None):
     return string
 
 
-
 def createSearch(screen):
     """
     Creates a search object found in search.py. Prompts user to input data to create this object
