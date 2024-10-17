@@ -20,14 +20,18 @@ Utilizes ncurses library, which must be installed if it isn't already.
 * Navigate to https://old.reddit.com/prefs/apps/
     * If you have an account, login, if not, create an account
     * Click on "are you a developer? Create an app..."
+    ![image](media/apps.png)
     * Enter "better-search" for the name of the app
     * Enter "Searches multiple subreddits and filters results" for the description
     * Enter "http://localhost:8080" for the redirect uri
+    ![image](media/newApp.png)
     * Click on "create app"
     * In the top left will be a picture of a question mark inside of a diamond
         * To the right of this should be "better-search" and then "personal use script" below that. Below this will be a string of random characters. This is your client id. Navigate to config.py and replace the text that says "your_client_id" with this string.
         * Back on the website, below the client id, should be a section labelled "secret" copy this and replay "your_client_secret" with it.
         * Finally, within the user agent section on config.py, replace your_username with your username. If you have forgotten what it is, it should be located in the top right of the reddit website, to the left of a letter icon.
+        ![image](media/idAndSecret.png)
+        ![image](media/config.png)
     * It is now safe to close the browser window.
 * (Optional) the path in searches_file can be edited to specify a different file to store saved searches
 * (Optional) the path in link_output can be edited to specify a different file to save urls too. See the Results - Interacting section for more information about this.
@@ -62,10 +66,17 @@ Utilizes ncurses library, which must be installed if it isn't already.
 
 # Usage
 
+
+![image](media/badConfig.png)
+
 The program can be started by executing the following command:  
     `python3 main.py`
 
-The next screen should be a list of names of searches. If the screen states that no searches were found, double check the path to the searches file in config.py. Is that the correct path? If it is, press any key in the terminal to start the process of creating a new search. If it is not, edit the value in config.py, press 'q' in the terminal, and relaunch the program.
+The next screen should be a list of names of searches. If the screen states that no searches were found, double check the path to the searches file in config.py. 
+
+![image](media/noSearch.png)
+
+Is that the correct path? If it is, press any key in the terminal to start the process of creating a new search. If it is not, edit the value in config.py, press 'q' in the terminal, and relaunch the program.
 
 ## Creating a search
 
@@ -90,8 +101,10 @@ On the screen listing searches, you have several options.
 
 ## Results
 
-* While the search is being performed, you will see a screen that says "Searching..." simply wait and let the search commence
-* After the search is finished, you will see boxed stacked on top of each other vertically. These are the "headers" of your results. Each box contains corresponds to a single post within your criteria. They each contain the following: 
+* While the search is being performed, you will see a screen that says "Searching..." simply wait and let the search commences.
+
+![image](media/browse.png)
+* After the search is finished, you will see boxes stacked on top of each other vertically. These are the "headers" of your results. Each box corresponds to a single post within your criteria. They each contain the following: 
     * A number followed by ): This is the reference number in the list of results. More on this later
     * Immediately following the reference number is the title of the post.
     * On a new line is author of the post, surrounded by square brackets
@@ -110,6 +123,8 @@ On the screen listing searches, you have several options.
     * Head section. This is the first box. Notice that it contains the same contents as the headers found in the navigating results section. Reference the [Results](#results) section for a description of these.
     * Body section. This contains the actual text of the post.
     * Foot section. This contains the url of the post. Note that due to limitations of the terminal, this link can not be clicked on. You will have to manually copy it over if you want to use it. This link is simply for information. More efficient methods exist for opening the link in a brower, and are described in [Interacting](#interacting)
+
+![image](media/view.png)
 
 * There are numerous different shortcut keys for different actions that can be performed in this section:
     * Pressing 'h' will bring up a cheatsheet help menu with a description of the available shortcuts. Press any key after this to return to the post.
