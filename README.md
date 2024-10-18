@@ -112,8 +112,9 @@ On the screen listing searches, you have several options.
     * Finally, is the subreddit that the post is in, as well as its age. 
         * Note that the age is rounded down to the closest significant time period. For example a post that is 80 minutes old will be described as being 1 hour old. A post that is 3 days, 6 hours, and 42 minutes old will be described as being 3 days old.
 * The list of boxes can be scrolled through. Pressing the 'w' key or up arrow will scroll everything up a single line. Pressing the 's' or down arrow key will scroll everything down a single line. On most systems, these can also be held down to scroll quicker. Most systems also support mouse scrolling, which will perform the same function.
-* Besides scrolling through the list, you have two other options for input:
+* Besides scrolling through the list, you have three other options for input:
     * Pressing 'e' will allow you to enter a number. This number should correspond to a reference number of one of the posts. This will pull up a full screen view of the post, and will contain the actual body text of the post. Reference the Viewing a post section for the next steps.
+    * Pressing 'r' will refresh the page. The search will be performed again and any new posts since the last search will be added to the top of the list.
     * Pressing 'q' will quit the program.
 
 
@@ -140,6 +141,7 @@ On the screen listing searches, you have several options.
     ### Interacting
 
     * Pressing 'i' will open up the image of the post, if it is an image post instead of a text post.
+        * An image post can usually be discerened by the URL at the bottom. It will typically start with "i.redd.it/" and/or it will end with an image's file extension (ex: .jpg, .png)
     * pressing 'o' will open the post up on the official reddit website, in your default web browser
     * Pressing 'u' will shift to another screen that displays a file name. All of the links in the post have been written to the file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.
     * Pressing 'm' will open up the page of the author on the official reddit website, in your default web browser.
