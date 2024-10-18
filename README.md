@@ -26,7 +26,7 @@ This program is built for and has only been tested on Linux.
 
 1. Clone the repository locally or download and extract the zipped folder.
 2. Open config.py
-3. Navigate to https://old.reddit.com/prefs/apps/
+3. Navigate to https://old.reddit.com/prefs/apps/ and get some tokens for the API
     1. If you have an account, login, if not, create an account
     2. Click on "are you a developer? Create an app..."
     ![image](media/apps.png)
