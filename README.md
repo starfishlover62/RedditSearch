@@ -5,7 +5,7 @@
 Searches subreddits and filters by flair or title
 
 
-Currently only tested on linux, however it should work on Windows.
+This program is built for and has only been tested on Linux.
 
 Tested Python versions: 3.12.3
 
@@ -29,7 +29,7 @@ Utilizes ncurses library, which must be installed if it isn't already.
     * In the top left will be a picture of a question mark inside of a diamond
         * To the right of this should be "better-search" and then "personal use script" below that. Below this will be a string of random characters. This is your client id. Navigate to config.py and replace the text that says "your_client_id" with this string.
         * Back on the website, below the client id, should be a section labelled "secret" copy this and replay "your_client_secret" with it.
-        * Finally, within the user agent section on config.py, replace your_username with your username. If you have forgotten what it is, it should be located in the top right of the reddit website, to the left of a letter icon.
+        * Finally, within the user agent section on config.py, replace your_username with your Reddit username.
         ![image](media/idAndSecret.png)
         ![image](media/config.png)
     * It is now safe to close the browser window.
@@ -37,32 +37,12 @@ Utilizes ncurses library, which must be installed if it isn't already.
 * (Optional) the path in link_output can be edited to specify a different file to save urls too. See the Results - Interacting section for more information about this.
 * (Optional) If you prefer to not use fancy characters, or your computer does not support them, change the value of fancy_characters to false. This will force the app to use only ASCII characters.
 
-* [Linux](#linux) | [Windows](#windows) | [Mac](#mac)
-
-
-## Linux
-
 1. Install Python 3 and PIP
     * For ubuntu or Debian based systems:  
         ```sudo apt install python3 python3-pip```
 2. Install required libraries. They can be found in requirements.txt. Run:  
 `pip install -r requirements.txt`
 3. For clipboard functionality, either xclip or xsel is needed. Check if they are installed with ```sudo apt show xclip``` or `sudo apt show xsel` See the pyperclip documentation (https://pypi.org/project/pyperclip/) for more information.
-
-## Windows
-
-1. Navigate to the downloads page of the official Python website (https://www.python.org/downloads/)
-
-2. Download the latest version of Python
-
-3. Run the downloaded installer, and run through the installation process.
-
-4. Open up a command prompt, and enter:  
-`pip install -r requirements.txt`
-
-## Mac
-
-1. Incomplete
 
 # Usage
 
