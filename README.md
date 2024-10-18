@@ -6,6 +6,22 @@ This program is built for and has only been tested on Linux.
 
 **Tested Python versions**: 3.12-3.13
 
+**Table of Contents**:  
+* [Installation](#installation)  
+* [Usage](#usage)
+    * [Creating a search](#creating-a-search)
+        * [Filters](#filters)
+        * [In app](#in-app)
+        * [JSON](#json)
+    * [Search Selection](#search-selection)
+    * [Results](#results)
+    * [Viewing a Post](#viewing-a-post)
+        * [Navigation](#navigation)
+        * [Interacting](#interacting)
+    * [Advanced](#advanced)
+* [Known Issues](#known-issues)
+
+
 # Installation
 
 1. Clone the repository locally or download and extract the zipped folder.
