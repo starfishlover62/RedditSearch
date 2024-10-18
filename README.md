@@ -26,38 +26,37 @@ This program is built for and has only been tested on Linux.
 
 1. Clone the repository locally or download and extract the zipped folder.
 2. Open config.py
-3. Navigate to https://old.reddit.com/prefs/apps/ and get some tokens for the API
-    1. If you have an account, login, if not, create an account
-    2. Click on "are you a developer? Create an app..."
+3. Obtain tokens for the Reddit API
+    1. Navigate to https://old.reddit.com/prefs/apps/
+    2. If you have an account, login, if not, create an account
+    3. Click on "are you a developer? Create an app..."
     ![image](media/apps.png)
-    3. Enter "better-search" for the name of the app
-    4. Enter "Searches multiple subreddits and filters results" for the description
-    5. Enter "http://localhost:8080" for the redirect uri
+    4. Enter "better-search" for the name of the app
+    5. Enter "Searches multiple subreddits and filters results" for the description
+    6. Enter "http://localhost:8080" for the redirect uri
     ![image](media/newApp.png)
-    6. Click on "create app"
-    7. In the top left will be a picture of a question mark inside of a diamond
+    7. Click on "create app"
+    8. In the top left will be a picture of a question mark inside of a diamond
         * To the right of this should be "better-search" and then "personal use script" below that. Below this will be a string of random characters. This is your client id. Navigate to config.py and replace the text that says "your_client_id" with this string.
-        * Back on the website, below the client id, should be a section labelled "secret" copy this and replace "your_client_secret" with it.
+        * Back on the website, below the client id, should be a section labeled "secret" copy this and replace "your_client_secret" with it.
         * Finally, within the user agent section on config.py, replace your_username with your Reddit username.
         ![image](media/idAndSecret.png)
         ![image](media/config.png)
     * It is now safe to close the browser window.
-* (Optional) the path in searches_file can be edited to specify a different file to store saved searches
-* (Optional) the path in link_output can be edited to specify a different file to save urls too. See the [Interacting](#interacting) section for more information about this.
-* (Optional) If you prefer to not use fancy characters, or your computer does not support them, change the value of fancy_characters to false. This will force the app to use only ASCII characters.
+* (Optional) the path in "searches_file" can be edited to specify a different file to store saved searches
+* (Optional) the path in "link_output" can be edited to specify a different file to save urls too. See the [Interacting](#interacting) section for more information about this.
+* (Optional) If you prefer to not use fancy characters, or your computer does not support them, change the value of "fancy_characters" to false. This will force the app to use only ASCII characters.
 
 8. Install Python 3 and PIP
     * For ubuntu or Debian based systems:  
         `sudo apt install python3 python3-pip`
 9. Install required libraries. They can be found in requirements.txt. Run:  
 `pip install -r requirements.txt`
-10. For clipboard functionality, either xclip or xsel is needed. Check if they are installed with `sudo apt show xclip` or `sudo apt show xsel` See the pyperclip documentation (https://pypi.org/project/pyperclip/) for more information.
+10. For clipboard functionality, either xclip or xsel must be installed. Check if they are installed with `sudo apt show xclip` or `sudo apt show xsel` See the pyperclip documentation (https://pypi.org/project/pyperclip/) for more information.
 
 # Usage
 
-
-
-The program can be started by executing the following command:  
+The program can be started by executing the following command, while inside of the project folder:  
     `python3 main.py`
 
 If you receive a message stating that there was a bad HTTP response, you likely have a mistake in your config file. Ensure that the tokens are correct, in quotes, and do not have extra spaces within the quotes.
