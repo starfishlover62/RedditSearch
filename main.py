@@ -374,10 +374,11 @@ try:
             elif char == "scrollDown":
                 page.scrollDown()
 
+            # Scrolls to top
             elif char == "scrollTop":
                 page.scrollTop()
 
-            # Scrolls down if allowed
+            # Scrolls to bottom
             elif char == "scrollBottom":
                 page.scrollBottom()
 
