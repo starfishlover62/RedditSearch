@@ -414,11 +414,12 @@ try:
             elif char == "enter":
                 # Updates the tooltip and places the cursor for input
 
-                if not toolTipType == "press":
-                    toolTipType = "press"
-                    toolTip.replace(toolTipTypes[toolTipType])
-                toolTip.updateVars(len(posts))
-                page.print()
+                # if not toolTipType == "press":
+                #     toolTipType = "press"
+                #     toolTip.replace(toolTipTypes[toolTipType])
+                # toolTip.updateVars(len(posts))
+                # page.print()
+                browsePage.refreshTooltip("press",(len(posts)),print=True)
 
                 functions.placeCursor(screen, x=48, y=curses.LINES - 1)
                 c = screen.getch()  # Gets the character they type
@@ -427,10 +428,11 @@ try:
 
                 else:  # Otherwise
                     # Update prompt to tell them to 'enter q" instead of 'press q"
-                    if not toolTipType == "enter":
-                        toolTipType = "enter"
-                        toolTip.replace(toolTipTypes[toolTipType])
-                    toolTip.updateVars(len(posts))
+                    # if not toolTipType == "enter":
+                    #     toolTipType = "enter"
+                    #     toolTip.replace(toolTipTypes[toolTipType])
+                    # toolTip.updateVars(len(posts))
+                    browsePage.refreshTooltip("enter",(len(posts)),print=True)
                     string = functions.getInput(
                         screen=screen, page=page, tooltip=toolTip, unget=c, col=48
                     )

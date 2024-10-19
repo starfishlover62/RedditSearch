@@ -61,7 +61,7 @@ class Page:
     def switchTooltip(self,key):
         if self.tooltipType != key:
             try:
-                text = self.tooltipTypes[self.tooltipType]
+                text = self.tooltipTypes[key]
                 self.tooltipType = key
                 self.tooltip.replace(text)
             except KeyError:
