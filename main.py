@@ -271,46 +271,33 @@ try:
                         flush=True,
                     )
                     sys.exit(1)
-            posts = functions.performSearch(
-                reddit_read_only,
-                searches[searchIndex],
-                screen,
-                minTermCols,
-                minTermLines,
-            )
-            posts = functions.sortPosts(posts)
+
+            posts = posts + functions.completeSearch(
+                        reddit_read_only,
+                        searches,
+                        searchIndex,
+                        posts,
+                        screen,
+                        minTermCols,
+                        minTermLines,
+                        not args["dontSave"],
+                        searchesPath
+                    )
+            
+            numPosts = len(posts)
 
             # If no posts matched the criteria
-            if len(posts) <= 0:
+            if numPosts <= 0:
                 screen.clear()
                 screen.addstr(0, 0, "No posts found")
                 screen.addstr(curses.LINES - 1, 0, "Press any key to exit")
                 screen.getch()
                 screen.refresh()
-                if not args["dontSave"]:
-                    searches[searchIndex].lastSearchTime = time
-                dump.saveSearches(searches, searchesPath)
                 break
 
             # If at least one post matching the criteria was found
             else:
-                headers = functions.getHeaders(
-                    posts
-                )  # Returns the boxes containing post info
                 browsePage.updateContent(posts)
-                numPosts = len(posts)
-                # page.updateStrings(
-                #     screen, headers, 0, toolTip
-                # )  # Adds the headers list to the pagination controller
-                if not args["dontSave"]:
-                    searches[
-                        searchIndex
-                    ].lastSearchTime = (
-                        time  # Sets the search time in the search variable
-                    )
-                dump.saveSearches(
-                    searches, searchesPath
-                )  # Writes the search variable to the file
 
             # Clears screen after search choosing process
             screen.clear()
@@ -328,16 +315,7 @@ try:
             else:  # User wanted to exit viewPost
                 browseMode = True
                 if next[1]:  # Terminal was resized while viewing a post
-                    headers = functions.getHeaders(
-                        posts
-                    )  # Returns the boxes containing post info
-                    page.updateStrings(
-                        screen, headers, lineNum, toolTip
-                    )  # Adds the headers list to the pagination controller
-                    temp = lineNum
-                    lineNum = page.scrollDown()
-                    if not temp == lineNum:
-                        lineNum = page.scrollUp()
+                    browsePage.resize()
 
         # Displays post headers for browsing
         else:
@@ -346,9 +324,9 @@ try:
 
             # Gets input from the user
 
-            char = functions.eventListener(screen)
+            input = functions.eventListener(screen)
 
-            match char:
+            match input:
                 case "timeout":
                     continue
                 case "exit":
@@ -364,32 +342,19 @@ try:
                 case "scrollBottom":
                     page.scrollBottom()
                 case "refresh":
-                    # Records the current timestamp before performing the search, then performs the search
-                    time = math.floor(functions.currentTimestamp())
-                    posts = posts + functions.performSearch(
+                    posts = functions.completeSearch(
                         reddit_read_only,
-                        searches[searchIndex],
+                        searches,
+                        searchIndex,
+                        posts,
                         screen,
                         minTermCols,
                         minTermLines,
+                        not args["dontSave"],
+                        searchesPath
                     )
-                    posts = functions.sortPosts(posts)
-                    headers = functions.getHeaders(
-                        posts
-                    )  # Returns the boxes containing post info
+                    browsePage.updateContent(posts)
                     numPosts = len(posts)
-                    page.updateStrings(
-                        screen, headers, 0, toolTip
-                    )  # Adds the headers list to the pagination controller
-                    if not args["dontSave"]:
-                        searches[
-                            searchIndex
-                        ].lastSearchTime = (
-                            time  # Sets the search time in the searc variable
-                        )
-                    dump.saveSearches(
-                        searches, searchesPath
-                    )  # Writes the search variable to the file
                 case "enter":
                     # Updates the tooltip and places the cursor for input
                     browsePage.refreshTooltip("press",(len(posts)),print=True)

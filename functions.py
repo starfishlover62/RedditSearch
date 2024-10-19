@@ -1,4 +1,5 @@
 # Libraries
+import math
 import datetime
 from datetime import timezone
 import pyperclip
@@ -17,6 +18,7 @@ import search
 from tree import searchTree
 import formatString
 import scroll
+import dump
 
 import config
 
@@ -428,7 +430,23 @@ def createSearch(screen):
     return returnSearch
 
 
-def performSearch(reddit, search, screen=None, minCols=80, minLines=24):
+def completeSearch(reddit,searches,searchIndex,posts=None,screen=None,minCols=80,minLines=24,save=True,searchesPath=None):
+    time = math.floor(currentTimestamp())
+    posts = posts + performSearch(reddit,searches[searchIndex],screen,minCols,minLines)
+    posts = sortPosts(posts)
+    searches[
+                searchIndex
+            ].lastSearchTime = (
+                time  # Sets the search time in the search variable
+            )
+    if save and searchesPath is not None:
+        dump.saveSearches(
+            searches, searchesPath
+        )  # Writes the search variable to the file
+    return posts
+
+
+def performSearch(reddit,search,screen=None,minCols=80,minLines=24):
     """
     Gathers posts that meat the search object criteria, using the reddit object.
     If a screen object is provided, displays a simple search in progress message.
