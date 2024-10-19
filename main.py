@@ -342,117 +342,86 @@ try:
         # Displays post headers for browsing
         else:
             # Updates the tooltip, and prints the headers to the screen
-            # if not toolTipType == "main":
-            #     toolTipType = "main"
-            #     toolTip.replace(toolTipTypes[toolTipType])
-            # browsePage.switchTooltip("main")
-            # # toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
-            # browsePage.updateTooltip([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
-            # browsePage.print()
-
             browsePage.refreshTooltip("main",[browsePage.scrollingList.currentLine + 1, page.maxLine + 1],print=True)
 
             # Gets input from the user
 
             char = functions.eventListener(screen)
 
-            if char == "timeout":
-                continue
-
-            # Quits the program
-            elif char == "exit":
-                break
-
-            elif char == "resize":
-                browsePage.resize()
-
-            # Scrolls up if allowed
-            elif char == "scrollUp":
-                page.scrollUp()
-
-            # Scrolls down if allowed
-            elif char == "scrollDown":
-                page.scrollDown()
-
-            # Scrolls to top
-            elif char == "scrollTop":
-                page.scrollTop()
-
-            # Scrolls to bottom
-            elif char == "scrollBottom":
-                page.scrollBottom()
-
-            # Refreshes the search, gathering any new submissions that have been posted
-            elif char == "refresh":
-                # Records the current timestamp before performing the search, then performs the search
-                time = math.floor(functions.currentTimestamp())
-                posts = posts + functions.performSearch(
-                    reddit_read_only,
-                    searches[searchIndex],
-                    screen,
-                    minTermCols,
-                    minTermLines,
-                )
-                posts = functions.sortPosts(posts)
-                headers = functions.getHeaders(
-                    posts
-                )  # Returns the boxes containing post info
-                numPosts = len(posts)
-                page.updateStrings(
-                    screen, headers, 0, toolTip
-                )  # Adds the headers list to the pagination controller
-                if not args["dontSave"]:
-                    searches[
-                        searchIndex
-                    ].lastSearchTime = (
-                        time  # Sets the search time in the searc variable
-                    )
-                dump.saveSearches(
-                    searches, searchesPath
-                )  # Writes the search variable to the file
-
-            # Allows the user to input a post number
-            elif char == "enter":
-                # Updates the tooltip and places the cursor for input
-
-                # if not toolTipType == "press":
-                #     toolTipType = "press"
-                #     toolTip.replace(toolTipTypes[toolTipType])
-                # toolTip.updateVars(len(posts))
-                # page.print()
-                browsePage.refreshTooltip("press",(len(posts)),print=True)
-
-                functions.placeCursor(screen, x=48, y=curses.LINES - 1)
-                c = screen.getch()  # Gets the character they type
-                if c == ord("q"):  # Immediately exits if they pressed q
+            match char:
+                case "timeout":
                     continue
-
-                else:  # Otherwise
-                    # Update prompt to tell them to 'enter q" instead of 'press q"
-                    # if not toolTipType == "enter":
-                    #     toolTipType = "enter"
-                    #     toolTip.replace(toolTipTypes[toolTipType])
-                    # toolTip.updateVars(len(posts))
-                    browsePage.refreshTooltip("enter",(len(posts)),print=True)
-                    string = functions.getInput(
-                        screen=screen, page=page, tooltip=toolTip, unget=c, col=48
+                case "exit":
+                    break
+                case "resize":
+                    browsePage.resize()
+                case "scrollUp":
+                    page.scrollUp()
+                case "scrollTop":
+                    page.scrollTop()
+                case "scrollDown":
+                    page.scrollDown()
+                case "scrollBottom":
+                    page.scrollBottom()
+                case "refresh":
+                    # Records the current timestamp before performing the search, then performs the search
+                    time = math.floor(functions.currentTimestamp())
+                    posts = posts + functions.performSearch(
+                        reddit_read_only,
+                        searches[searchIndex],
+                        screen,
+                        minTermCols,
+                        minTermLines,
                     )
+                    posts = functions.sortPosts(posts)
+                    headers = functions.getHeaders(
+                        posts
+                    )  # Returns the boxes containing post info
+                    numPosts = len(posts)
+                    page.updateStrings(
+                        screen, headers, 0, toolTip
+                    )  # Adds the headers list to the pagination controller
+                    if not args["dontSave"]:
+                        searches[
+                            searchIndex
+                        ].lastSearchTime = (
+                            time  # Sets the search time in the searc variable
+                        )
+                    dump.saveSearches(
+                        searches, searchesPath
+                    )  # Writes the search variable to the file
+                case "enter":
+                    # Updates the tooltip and places the cursor for input
+                    browsePage.refreshTooltip("press",(len(posts)),print=True)
 
-                    # Attempts to convert their input into an integer.
-                    val = 0
-                    try:
-                        val = int(string)
-                    except ValueError:
+                    functions.placeCursor(screen, x=48, y=curses.LINES - 1)
+                    c = screen.getch()  # Gets the character they type
+                    if c == ord("q"):  # Immediately exits if they pressed q
                         continue
 
-                    # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
-                    val -= 1
-                    if val >= 0 and val < numPosts:
-                        browseMode = (
-                            False  # Will display post in full on next iteration
+                    else:  # Otherwise
+                        # Update prompt to tell them to 'enter q" instead of 'press q"
+                        browsePage.refreshTooltip("enter",(len(posts)),print=True)
+                        string = functions.getInput(
+                            screen=screen, page=page, tooltip=toolTip, unget=c, col=48
                         )
-                        postNum = val  # Index of the post to be viewed
 
+                        # Attempts to convert their input into an integer.
+                        val = 0
+                        try:
+                            val = int(string)
+                        except ValueError:
+                            continue
+
+                        # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
+                        val -= 1
+                        if val >= 0 and val < numPosts:
+                            browseMode = (
+                                False  # Will display post in full on next iteration
+                            )
+                            postNum = val  # Index of the post to be viewed
+                case _:
+                    continue    
 
 # Resets the terminal window for normal usage outside of the program
 finally:
