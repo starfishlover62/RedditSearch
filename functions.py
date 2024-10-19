@@ -19,6 +19,7 @@ from tree import searchTree
 import formatString
 import scroll
 import dump
+import page as p
 
 import config
 
@@ -640,6 +641,14 @@ def getPostInfo(post):
     return {"age": age, "sub": sub, "title": title, "flair": flair, "author": author}
 
 
+def viewPostUpdate(content):
+    return formatString.enbox(
+                    content,
+                    curses.COLS,
+                    fancy=config.fancy_characters,
+                )
+
+
 def viewPost(post, screen, minCols=80, minLines=24):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
@@ -657,15 +666,10 @@ def viewPost(post, screen, minCols=80, minLines=24):
         post.url,
     ]
     try:
-        stringList = formatString.enbox(
-            content,
-            curses.COLS,
-            fancy=config.fancy_characters,
-        )
+        stringList = viewPostUpdate(content)
     except AttributeError:
         stringList = ""
 
-    lineNum = 0
 
     toolTipType = "main"
     toolTipTypes = {
@@ -681,147 +685,120 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
     skip = False
+    viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewPostUpdate,content=content,minRows=minLines,minCols=minCols)
+    viewPage.switchTooltip("main")
 
     while True:
         if not skip:
-            toolTip.updateVars([lineNum + 1, page.maxLine + 1], 0)
-            page.print()
-            char = eventListener(screen)
+            viewPage.refreshTooltip("main",[viewPage.scrollingList.currentLine + 1, page.maxLine + 1], 0,print=True)
+            input = eventListener(screen)
         skip = False
-        if char == "timeout":
-            continue
 
-        # Exit viewing the post
-        if char == "exit":
-            return (0, resized)
-
-        elif char == "resize":
-            resized = True
-            size = list(screen.getmaxyx())
-            if size[0] < minLines:
-                size[0] = minLines
-            if size[1] < minCols:
-                size[1] = minCols
-            curses.resize_term(size[0], size[1])
-            try:
-                stringList = formatString.enbox(
-                    content,
-                    curses.COLS,
-                    fancy=config.fancy_characters,
+        match input:
+            case "timeout":
+                continue
+            case "exit":
+                return (0,resized)
+            case "resize":
+                viewPage.resize()
+                resized=True
+            case "scrollUp":
+                page.scrollUp()
+            case "scrollTop":
+                page.scrollTop()
+            case "scrollDown":
+                page.scrollDown()
+            case "scrollBottom":
+                page.scrollBottom()
+            case "scrollLeft":
+                return (-1, resized)
+            case "scrollRight":
+                return (1, resized)
+            case "help":
+                screen.clear()
+                helpPage = scroll.ScrollingList(
+                    screen,
+                    [
+                        "Press the button in () to execute its command",
+                        "(w) or (up arrow) scroll up",
+                        "(s) or (down arrow) scroll down",
+                        "(a) or (left arrow) view previous post",
+                        "(d) or (right arrow) view next post",
+                        "(h) Displays this menu",
+                        "(i) If post is an image, opens image",
+                        "(o) Opens the post in a new tab of the default web browser",
+                        "(c) Copies the post url to the clipboard",
+                        "(u) Prints the post urls to a file. (link_output in config.py)",
+                        "(m) Opens the author's page in a new tab of the default web browser",
+                        "Press any key to exit this screen",
+                    ],
+                    0,
+                    None,
                 )
-            except AttributeError:
-                stringList = ""
-            page.updateStrings(
-                screen, stringList, lineNum, toolTip
-            )  # Refreshes the page with the new lines
-            temp = lineNum
-            lineNum = page.scrollDown()
-            if not temp == lineNum:
-                lineNum = page.scrollUp()
+                placeCursor(screen, x=0, y=curses.LINES - 1)
+                helpPage.print()
+                while True:
+                    char = eventListener(
+                        screen, anyChar=True
+                    )  # Screen stays up until user does some action
+                    if not (char == "timeout"):
+                        if char == "resize":
+                            skip = True
+                        else:
+                            skip = False
+                        break
+            # Open post in web browser
+            case "open":
+                webbrowser.open_new_tab(post.url)
 
-        # Scroll down in the post
-        elif char == "scrollDown":
-            lineNum = page.scrollDown()
+            # Copy url to clipboard
+            case "copy":
+                copyToClipboard(post.url)
 
-        # Scroll up in the post
-        elif char == "scrollUp":
-            lineNum = page.scrollUp()
+            # Open image, if present
+            case "image":
+                response = requests.get(post.url)  # Gets information from Internet
+                if (
+                    response.status_code == 200
+                ):  # Code 200 means information was sucessfully gathered
+                    try:
+                        img = Image.open(
+                            BytesIO(response.content)
+                        )  # Converts binary data to image
+                        img.show()  # Opens the image in default image viewer
+                    except (
+                        PIL.UnidentifiedImageError
+                    ):  # Typically thrown if the link was not an image.
+                        pass
 
-        # View previous post
-        elif char == "scrollLeft":
-            return (-1, resized)
+            # Open author's page
+            case "message":
+                webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
 
-        # View next post
-        elif char == "scrollRight":
-            return (1, resized)
+            # Displays url of post
+            case "url":
+                links = findURLs(post.selftext)
+                with open(config.link_output, "a") as f:
+                    f.write(f"{info["title"]}:\n")
+                    f.write(f"\t{post.url}\n")
+                    for link in links:
+                        f.write(f"\t{link}\n")
 
-        # Display help screen
-        elif char == "help":
-            screen.clear()
-            helpPage = scroll.ScrollingList(
-                screen,
-                [
-                    "Press the button in () to execute its command",
-                    "(w) or (up arrow) scroll up",
-                    "(s) or (down arrow) scroll down",
-                    "(a) or (left arrow) view previous post",
-                    "(d) or (right arrow) view next post",
-                    "(h) Displays this menu",
-                    "(i) If post is an image, opens image",
-                    "(o) Opens the post in a new tab of the default web browser",
-                    "(c) Copies the post url to the clipboard",
-                    "(u) Prints the post urls to a file. (link_output in config.py)",
-                    "(m) Opens the author's page in a new tab of the default web browser",
-                    "Press any key to exit this screen",
-                ],
-                0,
-                None,
-            )
-            placeCursor(screen, x=0, y=curses.LINES - 1)
-            helpPage.print()
-            while True:
-                char = eventListener(
-                    screen, anyChar=True
-                )  # Screen stays up until user does some action
-                if not (char == "timeout"):
-                    if char == "resize":
-                        skip = True
-                    else:
-                        skip = False
-                    break
-
-        # Open post in web browser
-        elif char == "open":
-            webbrowser.open_new_tab(post.url)
-
-        # Copy url to clipboard
-        elif char == "copy":
-            copyToClipboard(post.url)
-
-        # Open image, if present
-        elif char == "image":
-            response = requests.get(post.url)  # Gets information from Internet
-            if (
-                response.status_code == 200
-            ):  # Code 200 means information was sucessfully gathered
-                try:
-                    img = Image.open(
-                        BytesIO(response.content)
-                    )  # Converts binary data to image
-                    img.show()  # Opens the image in default image viewer
-                except (
-                    PIL.UnidentifiedImageError
-                ):  # Typically thrown if the link was not an image.
-                    pass
-
-        # Open author's page
-        elif char == "message":
-            webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
-
-        # Displays url of post
-        elif char == "url":
-            links = findURLs(post.selftext)
-            with open(config.link_output, "a") as f:
-                f.write(f"{info["title"]}:\n")
-                f.write(f"\t{post.url}\n")
-                for link in links:
-                    f.write(f"\t{link}\n")
-
-            screen.clear()
-            screen.addstr(0, 0, f"URLs saved to {config.link_output}")
-            screen.addstr(curses.LINES - 1, curses.COLS - 24, "(press any key to exit)")
-            placeCursor(screen, x=0, y=curses.LINES - 1)
-            screen.refresh()
-            while True:
-                char = eventListener(
-                    screen, anyChar=True
-                )  # Screen stays up until user does some action
-                if not (char == "timeout"):
-                    if char == "resize":
-                        skip = True
-                    else:
-                        skip = False
-                    break
+                screen.clear()
+                screen.addstr(0, 0, f"URLs saved to {config.link_output}")
+                screen.addstr(curses.LINES - 1, curses.COLS - 24, "(press any key to exit)")
+                placeCursor(screen, x=0, y=curses.LINES - 1)
+                screen.refresh()
+                while True:
+                    char = eventListener(
+                        screen, anyChar=True
+                    )  # Screen stays up until user does some action
+                    if not (char == "timeout"):
+                        if char == "resize":
+                            skip = True
+                        else:
+                            skip = False
+                        break
 
 
 def findURLs(text):
