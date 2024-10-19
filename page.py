@@ -4,10 +4,10 @@ from scroll import ScrollingList, ToolTip, Line
 
 class Page:
 
-    def __init__(self,screen=None,scrollingList=None,tooltip=None,onUpdate=None,content=None,minRows=24,minCols=80):
-        self.update(screen=screen,scrollingList=scrollingList,tooltip=tooltip,onUpdate=onUpdate,content=content,minRows=minRows,minCols=minCols)
+    def __init__(self,screen=None,scrollingList=None,tooltip=None,tooltipTypes=None,onUpdate=None,content=None,minRows=24,minCols=80):
+        self.update(screen=screen,scrollingList=scrollingList,tooltip=tooltip,tooltipTypes=tooltipTypes,onUpdate=onUpdate,content=content,minRows=minRows,minCols=minCols)
 
-    def update(self,screen=None,scrollingList=None,tooltip=None,onUpdate=None,content=None,minRows=24,minCols=80):
+    def update(self,screen=None,scrollingList=None,tooltip=None,tooltipTypes=None,onUpdate=None,content=None,minRows=24,minCols=80):
         if isinstance(screen,curses.window):
             self.screen = screen
         else:
@@ -22,6 +22,8 @@ class Page:
             self.tooltip = tooltip
         else:
             self.tooltip = None
+        self.tooltipTypes = tooltipTypes
+        self.tooltipType = None
 
         self.content = content
         self.onUpdate = onUpdate
@@ -54,3 +56,16 @@ class Page:
 
     def print(self,numLines=None):
         self.scrollingList.print(numLines)
+    
+
+    def switchTooltip(self,key):
+        try:
+            if self.tooltipType != key:
+                text = self.tooltipTypes[self.tooltipType]
+                self.tooltipType = key
+                self.tooltip.replace(text)
+        except KeyError:
+            return
+    
+    def updateTooltip(self,vars,index=0):
+        self.tooltip.updateVars(vars,index)

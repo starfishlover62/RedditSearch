@@ -136,8 +136,8 @@ toolTipTypes = {
 }
 toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
-browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
-
+browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
+browsePage.switchTooltip("main")
 
 try:
     while True:
@@ -342,16 +342,16 @@ try:
         # Displays post headers for browsing
         else:
             # Updates the tooltip, and prints the headers to the screen
-            if not toolTipType == "main":
-                toolTipType = "main"
-                toolTip.replace(toolTipTypes[toolTipType])
-            toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
-            # page.print()
+            # if not toolTipType == "main":
+            #     toolTipType = "main"
+            #     toolTip.replace(toolTipTypes[toolTipType])
+            browsePage.switchTooltip("main")
+            # toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
+            browsePage.updateTooltip([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
             browsePage.print()
 
             # Gets input from the user
 
-            # char = screen.getch()
             char = functions.eventListener(screen)
 
             if char == "timeout":
@@ -362,31 +362,15 @@ try:
                 break
 
             elif char == "resize":
-                # size = list(screen.getmaxyx())
-                # if size[0] < minTermLines:
-                #     size[0] = minTermLines
-                # if size[1] < minTermCols:
-                #     size[1] = minTermCols
-                # curses.resize_term(size[0], size[1])
-                # headers = functions.getHeaders(
-                #     posts
-                # )  # Returns the boxes containing post info
-                # page.updateStrings(
-                #     screen, headers, lineNum, toolTip
-                # )  # Adds the headers list to the pagination controller
-                # temp = lineNum
-                # lineNum = page.scrollDown()
-                # if not temp == lineNum:
-                #     lineNum = page.scrollUp()
                 browsePage.resize()
 
             # Scrolls up if allowed
             elif char == "scrollUp":
-                lineNum = page.scrollUp()
+                page.scrollUp()
 
             # Scrolls down if allowed
             elif char == "scrollDown":
-                lineNum = page.scrollDown()
+                page.scrollDown()
 
             # Refreshes the search, gathering any new submissions that have been posted
             elif char == "refresh":
