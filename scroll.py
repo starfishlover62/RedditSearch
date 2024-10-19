@@ -34,12 +34,20 @@ class ScrollingList:
         else:
             self.currentLine += numLines
         return self.currentLine
+    
+    def scrollBottom(self):
+        self.currentLine = self.maxLine
+        return self.currentLine
 
     def scrollUp(self, numLines=1):
         if self.currentLine - numLines < 0:
             self.currentLine = 0
         else:
             self.currentLine = self.currentLine - numLines
+        return self.currentLine
+    
+    def scrollTop(self):
+        self.currentLine = 0
         return self.currentLine
 
     def getLines(self):

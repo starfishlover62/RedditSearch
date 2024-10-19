@@ -374,6 +374,13 @@ try:
             elif char == "scrollDown":
                 page.scrollDown()
 
+            elif char == "scrollTop":
+                page.scrollTop()
+
+            # Scrolls down if allowed
+            elif char == "scrollBottom":
+                page.scrollBottom()
+
             # Refreshes the search, gathering any new submissions that have been posted
             elif char == "refresh":
                 # Records the current timestamp before performing the search, then performs the search

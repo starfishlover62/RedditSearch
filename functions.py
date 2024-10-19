@@ -859,6 +859,12 @@ def eventListener(screen, characters=True, anyChar=False, timeout=100):
             elif char == curses.KEY_RIGHT or char == ord("d"):
                 screen.timeout(-1)
                 return "scrollRight"
+            elif char == ord("t"):
+                screen.timeout(-1)
+                return "scrollTop"
+            elif char == ord("b"):
+                screen.timeout(-1)
+                return "scrollBottom"
             elif char == ord("r"):
                 screen.timeout(-1)
                 return "refresh"
