@@ -59,13 +59,19 @@ class Page:
     
 
     def switchTooltip(self,key):
-        try:
-            if self.tooltipType != key:
+        if self.tooltipType != key:
+            try:
                 text = self.tooltipTypes[self.tooltipType]
                 self.tooltipType = key
                 self.tooltip.replace(text)
-        except KeyError:
-            return
+            except KeyError:
+                return
     
     def updateTooltip(self,vars,index=0):
         self.tooltip.updateVars(vars,index)
+    
+    def refreshTooltip(self,key,vars,index=0,print=False,numLines=None):
+        self.switchTooltip(key)
+        self.updateTooltip(vars,index)
+        if print:
+            self.print(numLines)

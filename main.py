@@ -345,10 +345,12 @@ try:
             # if not toolTipType == "main":
             #     toolTipType = "main"
             #     toolTip.replace(toolTipTypes[toolTipType])
-            browsePage.switchTooltip("main")
-            # toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
-            browsePage.updateTooltip([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
-            browsePage.print()
+            # browsePage.switchTooltip("main")
+            # # toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
+            # browsePage.updateTooltip([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
+            # browsePage.print()
+
+            browsePage.refreshTooltip("main",[browsePage.scrollingList.currentLine + 1, page.maxLine + 1],print=True)
 
             # Gets input from the user
 
