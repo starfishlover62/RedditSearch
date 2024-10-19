@@ -14,6 +14,7 @@ import dump
 import constants
 import formatString
 import scroll
+import page as p
 
 
 parser = argparse.ArgumentParser(
@@ -134,6 +135,8 @@ toolTipTypes = {
     ],
 }
 toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
+
+browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
 
 
 try:
@@ -262,8 +265,6 @@ try:
                     )
                     sys.exit(1)
                 elif status == -2:
-                    # curses.nocbreak(); screen.keypad(0); curses.echo()
-                    # curses.endwin()
                     functions.close(screen)
                     print(
                         f"Subreddit ({sub.name}) is private or under quarantine",
@@ -296,10 +297,11 @@ try:
                 headers = functions.getHeaders(
                     posts
                 )  # Returns the boxes containing post info
+                browsePage.updateContent(posts)
                 numPosts = len(posts)
-                page.updateStrings(
-                    screen, headers, 0, toolTip
-                )  # Adds the headers list to the pagination controller
+                # page.updateStrings(
+                #     screen, headers, 0, toolTip
+                # )  # Adds the headers list to the pagination controller
                 if not args["dontSave"]:
                     searches[
                         searchIndex
@@ -343,8 +345,9 @@ try:
             if not toolTipType == "main":
                 toolTipType = "main"
                 toolTip.replace(toolTipTypes[toolTipType])
-            toolTip.updateVars([lineNum + 1, page.maxLine + 1])
-            page.print()
+            toolTip.updateVars([browsePage.scrollingList.currentLine + 1, page.maxLine + 1])
+            # page.print()
+            browsePage.print()
 
             # Gets input from the user
 
@@ -359,22 +362,23 @@ try:
                 break
 
             elif char == "resize":
-                size = list(screen.getmaxyx())
-                if size[0] < minTermLines:
-                    size[0] = minTermLines
-                if size[1] < minTermCols:
-                    size[1] = minTermCols
-                curses.resize_term(size[0], size[1])
-                headers = functions.getHeaders(
-                    posts
-                )  # Returns the boxes containing post info
-                page.updateStrings(
-                    screen, headers, lineNum, toolTip
-                )  # Adds the headers list to the pagination controller
-                temp = lineNum
-                lineNum = page.scrollDown()
-                if not temp == lineNum:
-                    lineNum = page.scrollUp()
+                # size = list(screen.getmaxyx())
+                # if size[0] < minTermLines:
+                #     size[0] = minTermLines
+                # if size[1] < minTermCols:
+                #     size[1] = minTermCols
+                # curses.resize_term(size[0], size[1])
+                # headers = functions.getHeaders(
+                #     posts
+                # )  # Returns the boxes containing post info
+                # page.updateStrings(
+                #     screen, headers, lineNum, toolTip
+                # )  # Adds the headers list to the pagination controller
+                # temp = lineNum
+                # lineNum = page.scrollDown()
+                # if not temp == lineNum:
+                #     lineNum = page.scrollUp()
+                browsePage.resize()
 
             # Scrolls up if allowed
             elif char == "scrollUp":
