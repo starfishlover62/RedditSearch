@@ -149,6 +149,7 @@ class Line:
         self.positions = []
         self.length = 0
         self.format = []
+        
         self.replace(sections, positions, length)
 
     def replace(self, sections, positions, length=80):
@@ -172,6 +173,7 @@ class Line:
                                 0,
                                 positions[index],
                             )
+                        self.previousValues = None
 
     def place(self):
         self.string = ""
@@ -181,7 +183,7 @@ class Line:
             )
 
     def updateVars(self, values):
-        if values is not None:
+        if values is not None and self.previousValues != values:
             lines = []
             valIndex = 0
             index = 0
@@ -200,3 +202,4 @@ class Line:
                 lines.append(text)
             self.sections = lines
             self.place()
+            self.previousValues = values
