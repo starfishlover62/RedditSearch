@@ -2,7 +2,7 @@
 
 Searches subreddits and filters by flair or title.
 
-This program is built for and has only been tested on Linux.
+This program has only been tested on an Ubuntu-based Linux system. It should work on all Linux systems however.
 
 **Tested Python versions**: 3.12-3.13
 
@@ -256,25 +256,28 @@ Search objects are stored using Javascript Object Notation (JSON), and are store
 ## Search Selection
 
 On the screen listing searches, you have several options. 
-*   Pressing 'a' will allow you to create a new search. Reference the [Creating a search](#creating-a-search) section for help with this.
-*   Pressing 'e' will allow you to enter a number. This search will then be run. See the Results section for the next steps.
-*   Pressing 'd' will also allow you to enter a number, this search will be deleted from the list *Warning! This can not be undone*
-*   Pressing 'v' will allow you to enter a number. This search will then be displayed in a tree form. This is useful for seeing the filters and parameters of the search.
-*   Pressing 'q' will close the program.    
+*   Press 'a' to allow you to create a new search. Reference the [Creating a search](#creating-a-search) section for help with this.
+*   Press 'e', 'd', or 'v' to switch to a prompt asking for a number. The number you enter corresponds to the reference numbers of the searches.
+    *   If 'e' was pressed, this search will then be run. See the Results section for the next steps.
+    *   If 'd' was pressed, this search will be deleted from the list *Warning! This can not be undone*
+    *   If 'v' was pressed, this search will then be displayed in a tree form. This is useful for seeing the filters and parameters of the search.
+*   Press 'q' to close the program.    
 
 ## Results
 
-* While the search is being performed, you will see a screen that says "Searching..." simply wait and let the search commences.
+* While the search is being performed, you will see a screen that says "Searching..." simply wait and let the search commence.
 
-* After the search is finished, you will see boxes stacked on top of each other vertically. These are the "headers" of your results. Each box corresponds to a single post within your criteria. They each contain the following: 
-    * A number followed by ): This is the reference number in the list of results. More on this later
-    * Immediately following the reference number is the title of the post.
-    * On a new line is author of the post, surrounded by square brackets
-    * On another new line is the flairs that the author set for the post
-    * Finally, is the subreddit that the post is in, as well as its age. 
-        * Note that the age is rounded down to the closest significant time period. For example a post that is 80 minutes old will be described as being 1 hour old. A post that is 3 days, 6 hours, and 42 minutes old will be described as being 3 days old.
-
-![image](media/browse.png)
+* After the search is finished, you will see boxes stacked on top of each other vertically. These are the "headers" of your results. Each box corresponds to a single post within your criteria. Each header follows this general form:  
+    ```
+    +--------------------------------------------+  
+    | Number). Title of post                     |  
+    | [Author of post]                           |  
+    | ~Flair: flair~                             |  
+    | Posted in (subreddit), time minutes ago    |  
+    +--------------------------------------------+
+    ``` 
+    * The number followed by ')' is the reference number for the post. Viewing a post is discussed in the [Viewing a Post](#viewing-a-post) section.    
+    * The age is rounded down to the closest significant time period. For example a post that is 80 minutes old will be described as being 1 hour old. A post that is 3 days, 6 hours, and 42 minutes old will be described as being 3 days old.
 
 * The list of boxes can be scrolled through. Pressing the 'w' key or up arrow will scroll everything up a single line. Pressing the 's' or down arrow key will scroll everything down a single line. You can also hold down these keys to scroll faster, and most terminals should allow you to use a mousewheel as well.
 * Besides scrolling through the list, you have three other options for input:
@@ -285,31 +288,50 @@ On the screen listing searches, you have several options.
 
 ## Viewing a post
 
-* Posts viewed in full consist of three parts:
-    * Head section. This is the first box. Notice that it contains the same contents as the headers found in the navigating results section. Reference the [Results](#results) section for a description of these.
-    * Body section. This contains the actual text of the post.
-    * Foot section. This contains the url of the post. Note that due to limitations of the terminal, this link can not be clicked on. You will have to manually copy it over if you want to use it. This link is simply for information. More efficient methods exist for opening the link in a brower, and are described in [Interacting](#interacting)
+* Posts viewed in full consist of three sections:
+    * Head: This is the first box. Notice that it contains the same contents as the headers found in the navigating results section., except for the reference number. Reference the [Results](#results) section for a description of these.
+    * Body: This contains the actual text of the post.
+    * Foot: This contains the url of the post. Note that due to limitations of the terminal, this link typically can not be clicked on. You will have to manually copy it over if you want to use it. This link is simply for information. More efficient methods exist for opening the link in a brower, and are described in [Interacting](#interacting)
 
-![image](media/view.png)
+    ```
+    +--------------------------------------------+  
+    | Title of post. This is the head section    |  
+    | [Author of post]                           |  
+    | ~Flair: flair~                             |  
+    | Posted in (subreddit), time minutes ago    |  
+    +--------------------------------------------+
+    | This is the text of the post, it is the    |  
+    | main contents of it. Lorem ipsum dolor sit |
+    | amet, consectetur adipiscing elit, sed do  |   
+    | eiusmod tempor incididunt ut labore et     | 
+    | dolore magna aliqua.                       |    
+    +--------------------------------------------+
+    | https://www.reddit.com/link_to_the_post    |  
+    +--------------------------------------------+
+    ``` 
 
-* There are numerous different shortcut keys for different actions that can be performed in this section:
-    * Pressing 'h' will bring up a cheatsheet help menu with a description of the available shortcuts. Press any key after this to return to the post.
+Press 'h' to bring up a cheatsheet help menu with a description of the available shortcuts. Press any key after this to return to the post.
 
-    ### Navigation
+### Navigation
 
-    * Pressing or holding 'w' or the up arrow will scroll up through the post
-    * Pressing or holding 's' or the down arrow will scroll down through the post
-    * Pressing 'a' or the left arrow will shift to the previous post in the list.
-    * Pressing 'd' or the right arrow will shift to the next post in the list
-    * Press 'q' to return to the screen with all of the post headers. Refer to the [Results](#results) section for details on this area
+* Press or hold 'w' or the up arrow to scroll up
+* Press or hold 's' or the down arrow to scroll down
+* Press 'a' or the left arrow to shift to the previous post.
+* Press 'd' or the right arrow to shift to the next post
+* Press 'q' to return to the screen with all of the post headers. Refer to the [Results](#results) section for details on this area
 
-    ### Interacting
+### Interacting
 
-    * Pressing 'i' will open up the image of the post, if it is an image post instead of a text post.
-        * An image post can usually be discerened by the URL at the bottom. It will typically start with "i.redd.it/" and/or it will end with an image's file extension (ex: .jpg, .png)
-    * pressing 'o' will open the post up on the official Reddit website, in your default web browser
-    * Pressing 'u' will shift to another screen that displays a file name. All of the links in the post have been written to the file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.
-    * Pressing 'm' will open up the page of the author on the official Reddit website, in your default web browser.
+* Press 'i' to open up the image of the post. This will only do something if it is an image post instead of a text post.
+    * A post's type can usually be discerened by the URL at the bottom. 
+        * A text post will typically start with "www.reddit.com"
+        * A repost of an article from outside of reddit will typically have a url that does not have "www.reddit.com" in it.
+        * An image post will typically start with "i.redd.it/" and/or it will end with an image's file extension (ex: .jpg, .png)
+* Press 'u' to shift to another screen that displays a file name. All of the links in the post have been written to that file. Links are written in the order they are added. So the newest links will be at the bottom of the file. After you have viewed the links, it is safe to delete them from the file.  
+
+The following shortcuts will open a page on the official Reddit website, in your default web browser:
+* press 'o' to open the post
+* Press 'm' to open the post author's page
 
 
 ## Advanced
@@ -317,8 +339,8 @@ On the screen listing searches, you have several options.
 * If you know which search you want to perform ahead of time, you can save time by specifying it in the command line. To do this, run:  
 `python3 main.py -n <search_name>`  
  Do note that search names are case sensitive, such that "mysearch" is not the same as "MYSEARCH". If you specify a search that does not exist, the program will list out all available searches that are present in the specified search file. 
-* Adding a '-d' flag prevents the lastSearchTime from being modified. This is useful if you want to run the search over the same timeframe multiple times.
-* Adding a '-y' flag will automatically agree to prompts asking if you want to run a search that hasn't be run in a while (typically over a week)
+* Add a '-d' flag to prevent the lastSearchTime variable from being modified. This is useful if you want to run the search multiple times over the same timeframe.
+* Add a '-y' flag to automatically agree to prompts asking if you want to run a search that hasn't be run in a while (typically over a week)
 
 
 # Known Issues:
