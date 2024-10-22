@@ -1,17 +1,17 @@
 # Libraries
-import math
-import datetime
-from datetime import timezone
-import pyperclip
-import curses
-import webbrowser
-import json
-import requests
 from io import BytesIO
+import curses
+import datetime
+import math
+import json
 from PIL import Image
 import PIL
 import prawcore
+import pyperclip
 import re
+import requests
+from datetime import timezone
+import webbrowser
 
 # Provided
 import search
@@ -42,6 +42,9 @@ def currentTimestamp():
 
 
 def getSearches(JSONPath):
+    """
+    Gathers all search objects that can be found in the JSONPath file
+    """
     searches = []
     with open(JSONPath, "r") as read:
         data = json.load(read)
@@ -233,6 +236,10 @@ def getSearchNum(screen, searches):
 
 
 def viewSearch(screen, search):
+    """
+    Enters a screen with a tree depicting the specified search is displayed
+    """
+
     if search is not None:
         view = searchTree(search, curses.COLS, config.fancy_characters)
         lineNum = 0
@@ -274,12 +281,17 @@ def viewSearch(screen, search):
 
 
 def getInput(screen, page, tooltip, prompt=None, unget=None, row=None, col=None):
-    if prompt is not None:
+    """
+    Gets multi-character input from the user and returns it.
+    """
+    if prompt is not None: # Display the prompt for input that was specified
         if isinstance(prompt, list):
             tooltip.replace(prompt)
         else:
             tooltip.replace([prompt])
     page.print()
+
+    # Places the curser at the end of the prompt, or where specified by row and col
     if row is None:
         if col is None:
             placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
@@ -349,9 +361,6 @@ def createSearch(screen):
             break
 
         page.print()
-
-        # placeCursor(screen,x=16,y=curses.LINES-2)
-        # screen.refresh()
         if questionIndex == 0:
             # Gets search name
             prompt = questions[questionIndex]
@@ -432,6 +441,9 @@ def createSearch(screen):
 
 
 def completeSearch(reddit,searches,searchIndex,posts=None,screen=None,minCols=80,minLines=24,save=True,searchesPath=None):
+    """
+    Calls performSearch and saves the search timestamp to the searches file. Saving the timestamp can be disabled with the save parameter.
+    """
     time = math.floor(currentTimestamp())
     posts = posts + performSearch(reddit,searches[searchIndex],screen,minCols,minLines)
     posts = sortPosts(posts)
@@ -461,34 +473,41 @@ def performSearch(reddit,search,screen=None,minCols=80,minLines=24):
         stringTicker = 0
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
-        for post in subreddit.new(limit=None):
+        for post in subreddit.new(limit=None): # Gets all posts in the current subreddit
             if post.created_utc is None:
                 continue
-            if post.created_utc < search.lastSearchTime:
+            if post.created_utc < search.lastSearchTime: # continues until it finds a post older than the last search time
                 break
             else:
-                if filterPost(post, sub):
+                if filterPost(post, sub): # If post meets the specified filters, append it to the list
                     posts.append(post)
             ticker = ticker + 1
-            # with open("output.txt","a") as f:
-            #     f.write(f"{ticker}\n")
 
             if screen is not None:
-                resize = eventListener(screen, characters=False, timeout=5)
-                if resize == "resize":
+                resize = eventListener(screen, characters=False, timeout=5) # Gets input from user. Only listens for terminal resizing
+
+                if resize == "resize": # Resizes content if terminal was resized
                     size = list(screen.getmaxyx())
                     if size[0] < minLines:
                         size[0] = minLines
                     if size[1] < minCols:
                         size[1] = minCols
                     curses.resize_term(size[0], size[1])
+
                 screen.clear()
                 waitMessage = "(This may take a while, depending on time since the search was last performed)"
+                # Prints the wait message at the bottom of the screen
                 screen.addstr(
                     curses.LINES - 1,
                     int((curses.COLS - len(waitMessage)) / 2),
                     waitMessage,
                 )
+
+                # Displays searching... in the middle of the screen, with an animation.
+                # starts with s, and adds characters after that, then once it reaches the end of the string,
+                # starts removing characters from the beginning of the string. Once
+                # no characters remain, starts over
+
                 stringTicker = int(ticker / 98)
                 stringTicker = stringTicker % (len(string) * 2)
                 if stringTicker >= len(string):
@@ -566,11 +585,11 @@ def getHeaders(posts):
     headers = []
     ticker = 1
     if posts is not None:
-        for post in posts:
-            info = getPostInfo(post)
+        for post in posts: # Loops through each post
+            info = getPostInfo(post) # Gets the information about the post
 
             try:
-                headers += formatString.enbox(
+                headers += formatString.enbox( # Enboxes and stores the results
                     [
                         f"{ticker}). {info["title"]}",
                         info["author"],
@@ -609,6 +628,9 @@ def copyToClipboard(string):
 
 
 def getPostInfo(post):
+    """
+    Returns basic information about a post, including age, subreddit it was posted into, title, flair, and author
+    """
     # Age
     age = "<NONE>"
     if post.created_utc is not None:
@@ -642,6 +664,9 @@ def getPostInfo(post):
 
 
 def viewPostUpdate(content):
+    """
+    Used by viewPost to re-enbox its content. Necessary for its resize function
+    """
     return formatString.enbox(
                     content,
                     curses.COLS,
@@ -653,7 +678,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
-    resized = False
+    resized = False # Stores whether the terminal was resized while in this function.
+
+    # Gets information about the post, and puts it into the form for viewing
     info = getPostInfo(post)
     content = [
         info["title"],
@@ -666,11 +693,12 @@ def viewPost(post, screen, minCols=80, minLines=24):
         post.url,
     ]
     try:
-        stringList = viewPostUpdate(content)
+        stringList = viewPostUpdate(content) # Enboxes the content
     except AttributeError:
         stringList = ""
 
 
+    # Sets the tooltip
     toolTipType = "main"
     toolTipTypes = {
         "main": [
@@ -683,38 +711,59 @@ def viewPost(post, screen, minCols=80, minLines=24):
     }
     toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
+    # Creates a page with the content and tooltip
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
-    skip = False
     viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewPostUpdate,content=content,minRows=minLines,minCols=minCols)
     viewPage.switchTooltip("main")
 
+    skip = False # Stores whether gathering a character should be done. Used when exiting from the help screen
+
     while True:
-        if not skip:
+        if not skip: # Refreshes the tooltip's line number and gets input
             viewPage.refreshTooltip("main",[viewPage.scrollingList.currentLine + 1, page.maxLine + 1], 0,print=True)
             input = eventListener(screen)
         skip = False
 
         match input:
+            # User didn't enter anything within the window, repeats loop
             case "timeout":
                 continue
+
+            # Exits function
             case "exit":
                 return (0,resized)
+            
+            # Terminal was resized
             case "resize":
                 viewPage.resize()
                 resized=True
+
+            # Scrolls up through the content list
             case "scrollUp":
                 page.scrollUp()
+
+            # Scrolls to line 0 of the content
             case "scrollTop":
                 page.scrollTop()
+
+            # Scrolls down through the content list
             case "scrollDown":
                 page.scrollDown()
+
+            # Scrolls to the last line of the content list
             case "scrollBottom":
                 page.scrollBottom()
+
+            # Returns value specifying to view previous post
             case "scrollLeft":
                 return (-1, resized)
+            
+            # Returns value specifying to view next post
             case "scrollRight":
                 return (1, resized)
-            case "help":
+            
+            # Displays a help screen
+            case "help": 
                 screen.clear()
                 helpPage = scroll.ScrollingList(
                     screen,
@@ -802,6 +851,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
 
 def findURLs(text):
+    """
+    Returns a list of all the valid urls in the text
+    """
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
     url = re.findall(regex, text)
     return [x[0] for x in url]
@@ -816,12 +868,12 @@ def placeCursor(screen, x, y):
 
 def isValidSubreddit(userReddit, name):
     """
-    Pulls a single post from the subreddit specified in name, using the praw reddit instance userReddit.
+    Pulls a single post from the subreddit specified in name, using the praw reddit instance userReddit.  
     Returns 1 if sub is valid, -1 if it does not exist or has been banned, or -2 if it is private
     """
     try:
         for submission in userReddit.subreddit(name).new(limit=1):
-            s = submission.id
+            s = submission.id # Attempts to pull a submission from the subreddit
     except (
         prawcore.exceptions.NotFound,
         prawcore.exceptions.Redirect,
@@ -835,6 +887,12 @@ def isValidSubreddit(userReddit, name):
 
 
 def eventListener(screen, characters=True, anyChar=False, timeout=100):
+    """
+    Waits for a single character input from the user.  
+    characters: is whether it will listen for characters for input, or just terminal resizing.   
+    anyChar: will return any for any character input.   
+    timeout: is the number of milliseconds the function will wait for a response before returning timeout
+    """
     try:
         screen.timeout(timeout)
         char = screen.getch()
