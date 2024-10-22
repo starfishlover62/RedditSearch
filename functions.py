@@ -678,7 +678,6 @@ def viewPost(post, screen, minCols=80, minLines=24):
     """
     Enters a viewing mode for a single post. Arrow keys can be used to move through and between posts.
     """
-    resized = False # Stores whether the terminal was resized while in this function.
 
     # Gets information about the post, and puts it into the form for viewing
     info = getPostInfo(post)
@@ -731,12 +730,11 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
             # Exits function
             case "exit":
-                return (0,resized)
+                return 0
             
             # Terminal was resized
             case "resize":
                 viewPage.resize()
-                resized=True
 
             # Scrolls up through the content list
             case "scrollUp":
@@ -756,11 +754,11 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
             # Returns value specifying to view previous post
             case "scrollLeft":
-                return (-1, resized)
+                return -1
             
             # Returns value specifying to view next post
             case "scrollRight":
-                return (1, resized)
+                return 1
             
             # Displays a help screen
             case "help": 

@@ -305,17 +305,14 @@ try:
         # Displays a single post
         elif not browseMode:
             next = functions.viewPost(posts[postNum], screen, minTermCols, minTermLines)
-            if next[0] == -1:  # The user wants to view previous post
+            if next == -1:  # The user wants to view previous post
                 if postNum > 0:
                     postNum = postNum - 1
-            elif next[0] == 1:  # The user wants to view next post
+            elif next == 1:  # The user wants to view next post
                 if (postNum + 1) < len(posts):
                     postNum = postNum + 1
             else:  # User wanted to exit viewPost
                 browseMode = True
-                if next[1]:  # Terminal was resized while viewing a post
-                    # browsePage.resize()
-                    pass
 
         # Displays post headers for browsing
         else:
