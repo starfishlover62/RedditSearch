@@ -115,21 +115,21 @@ toolTipTypes = {
     "main": [
         scroll.Line(
             ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
-            [0, curses.COLS - 38],
+            [0, "max-38"],
             curses.COLS,
         )
     ],
     "press": [
         scroll.Line(
             ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
-            [0, curses.COLS - 18],
+            [0, "max-18"],
             curses.COLS,
         )
     ],
     "enter": [
         scroll.Line(
             ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
-            [0, curses.COLS - 18],
+            [0, "max-18"],
             curses.COLS,
         )
     ],
@@ -374,12 +374,12 @@ try:
                         # Attempts to convert their input into an integer.
                         val = 0
                         try:
-                            val = int(string)
+                            val = int(string) - 1
                         except ValueError:
                             continue
 
                         # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
-                        val -= 1
+                        # val -= 1
                         if val >= 0 and val < numPosts:
                             browseMode = (
                                 False  # Will display post in full on next iteration

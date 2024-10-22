@@ -704,7 +704,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
         "main": [
             scroll.Line(
                 ["<-- Line %i/%i -- >", "press (q) to exit"],
-                [0, curses.COLS - 18],
+                [0, "max-18"],
                 curses.COLS,
             )
         ]
