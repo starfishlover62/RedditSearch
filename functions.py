@@ -151,18 +151,9 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             match char:
                 case "timeout":
                     continue
-                
-                case "resize":
-                    page.resize()
-
+            
                 case "exit":  # Returns from function, signalling to quit program
                     return -1
-            
-                case "scrollUp":  # Scrolls up
-                    scrollList.scrollUp()
-
-                case "scrollDown":  # Scrolls down
-                    scrollList.scrollDown()
 
                 case "scrollLeft":  # 'a' was pressed. Adds a search
                     return -2
@@ -222,6 +213,8 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                             viewSearch(screen, searches[val])
                         else:  # Selects search
                             return val
+                case _:
+                    page.manipulate(char)
     else:
         return -2
     
@@ -727,26 +720,6 @@ def viewPost(post, screen, minCols=80, minLines=24):
             # Exits function
             case "exit":
                 return 0
-            
-            # Terminal was resized
-            case "resize":
-                viewPage.resize()
-
-            # Scrolls up through the content list
-            case "scrollUp":
-                page.scrollUp()
-
-            # Scrolls to line 0 of the content
-            case "scrollTop":
-                page.scrollTop()
-
-            # Scrolls down through the content list
-            case "scrollDown":
-                page.scrollDown()
-
-            # Scrolls to the last line of the content list
-            case "scrollBottom":
-                page.scrollBottom()
 
             # Returns value specifying to view previous post
             case "scrollLeft":
@@ -842,6 +815,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
                         else:
                             skip = False
                         break
+            
+            case _:
+                viewPage.manipulate(input)
 
 
 def browsePosts(posts, screen, minCols=80, minLines=24):
@@ -891,16 +867,6 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
                 continue
             case "exit":
                 break
-            case "resize":
-                browsePage.resize()
-            case "scrollUp":
-                page.scrollUp()
-            case "scrollTop":
-                page.scrollTop()
-            case "scrollDown":
-                page.scrollDown()
-            case "scrollBottom":
-                page.scrollBottom()
             case "refresh":
                 return -2
             case "enter":
@@ -931,7 +897,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
                     if val >= 0 and val < len(posts):
                         return val  # Index of the post to be viewed
             case _:
-                continue    
+                browsePage.manipulate(input)    
     return -1
 
 def findURLs(text):

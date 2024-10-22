@@ -68,6 +68,29 @@ class Page:
             return self.scrollingList.currentLine
         else:
             return -1
+    
+    def manipulate(self,method):
+        if isinstance(method,str):
+            match method:
+                # Terminal was resized
+                case "resize":
+                    self.resize()
+
+                # Scrolls up through the content list
+                case "scrollUp":
+                    self.scrollingList.scrollUp()
+
+                # Scrolls to line 0 of the content
+                case "scrollTop":
+                    self.scrollingList.scrollTop()
+
+                # Scrolls down through the content list
+                case "scrollDown":
+                    self.scrollingList.scrollDown()
+
+                # Scrolls to the last line of the content list
+                case "scrollBottom":
+                    self.scrollingList.scrollBottom()
 
     def print(self,numLines=None):
         self.scrollingList.print(numLines)
