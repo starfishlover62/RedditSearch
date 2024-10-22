@@ -267,13 +267,6 @@ def viewSearch(screen, search, minCols=80, minLines=24):
         while True:
             # Changes toolTip if necessary
             viewPage.refreshTooltip(toolTipType,[lineNum + 1],index=1,print=True)
-            # if not toolTipType == "main":
-            #     toolTipType = "main"
-            #     toolTip.replace(toolTipTypes[toolTipType])
-
-            # # Updates line number and prints page
-            # toolTip.updateVars()
-            # page.print()
 
             # Gets input from user
             viewChar = eventListener(screen)
