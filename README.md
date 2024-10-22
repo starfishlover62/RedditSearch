@@ -56,6 +56,8 @@ This program has only been tested on an Ubuntu-based Linux system. It should wor
 
 # Usage
 
+**Note that the minimum supported terminal size is 80 columns by 24 rows**
+
 The program can be started by executing the following command, while inside of the project folder:  
     `python3 main.py`
 
