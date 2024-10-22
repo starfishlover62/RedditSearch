@@ -109,35 +109,35 @@ searchIndex = 0  # Index of the search to be performed
 posts = []  # List of all the posts meeting criteria
 
 
-page = scroll.ScrollingList(screen, [""])
-toolTipType = "main"
-toolTipTypes = {
-    "main": [
-        scroll.Line(
-            ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
-            [0, "max-38"],
-            curses.COLS,
-        )
-    ],
-    "press": [
-        scroll.Line(
-            ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
-            [0, "max-18"],
-            curses.COLS,
-        )
-    ],
-    "enter": [
-        scroll.Line(
-            ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
-            [0, "max-18"],
-            curses.COLS,
-        )
-    ],
-}
-toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
+# page = scroll.ScrollingList(screen, [""])
+# toolTipType = "main"
+# toolTipTypes = {
+#     "main": [
+#         scroll.Line(
+#             ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
+#             [0, "max-38"],
+#             curses.COLS,
+#         )
+#     ],
+#     "press": [
+#         scroll.Line(
+#             ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
+#             [0, "max-18"],
+#             curses.COLS,
+#         )
+#     ],
+#     "enter": [
+#         scroll.Line(
+#             ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
+#             [0, "max-18"],
+#             curses.COLS,
+#         )
+#     ],
+# }
+# toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
-browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
-browsePage.switchTooltip("main")
+# browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
+# browsePage.switchTooltip("main")
 
 try:
     while True:
@@ -154,9 +154,7 @@ try:
                             valid = True
                             searchIndex = item
                             break
-                    if not valid:
-                        # curses.nocbreak(); screen.keypad(0); curses.echo()
-                        # curses.endwin()
+                    if not valid: # Closes window, then prints out all valid searches found in the file, and finally exits
                         functions.close(screen)
                         print(
                             f"No search by the name of '{args["name"]}' exists\nThe following are valid searches:"
@@ -297,7 +295,8 @@ try:
 
             # If at least one post matching the criteria was found
             else:
-                browsePage.updateContent(posts)
+                # browsePage.updateContent(posts)
+                pass
 
             # Clears screen after search choosing process
             screen.clear()
@@ -315,78 +314,32 @@ try:
             else:  # User wanted to exit viewPost
                 browseMode = True
                 if next[1]:  # Terminal was resized while viewing a post
-                    browsePage.resize()
+                    # browsePage.resize()
+                    pass
 
         # Displays post headers for browsing
         else:
-            # Updates the tooltip, and prints the headers to the screen
-            browsePage.refreshTooltip("main",[browsePage.scrollingList.currentLine + 1, page.maxLine + 1],print=True)
+            postNum = functions.browsePosts(posts,screen,minTermCols,minTermLines)
 
-            # Gets input from the user
-
-            input = functions.eventListener(screen)
-
-            match input:
-                case "timeout":
-                    continue
-                case "exit":
-                    break
-                case "resize":
-                    browsePage.resize()
-                case "scrollUp":
-                    page.scrollUp()
-                case "scrollTop":
-                    page.scrollTop()
-                case "scrollDown":
-                    page.scrollDown()
-                case "scrollBottom":
-                    page.scrollBottom()
-                case "refresh":
-                    posts = functions.completeSearch(
-                        reddit_read_only,
-                        searches,
-                        searchIndex,
-                        posts,
-                        screen,
-                        minTermCols,
-                        minTermLines,
-                        not args["dontSave"],
-                        searchesPath
-                    )
-                    browsePage.updateContent(posts)
-                    numPosts = len(posts)
-                case "enter":
-                    # Updates the tooltip and places the cursor for input
-                    browsePage.refreshTooltip("press",(len(posts)),print=True)
-
-                    functions.placeCursor(screen, x=48, y=curses.LINES - 1)
-                    c = screen.getch()  # Gets the character they type
-                    if c == ord("q"):  # Immediately exits if they pressed q
-                        continue
-
-                    else:  # Otherwise
-                        # Update prompt to tell them to 'enter q" instead of 'press q"
-                        browsePage.refreshTooltip("enter",(len(posts)),print=True)
-                        string = functions.getInput(
-                            screen=screen, page=page, tooltip=toolTip, unget=c, col=48
-                        )
-
-                        # Attempts to convert their input into an integer.
-                        val = 0
-                        try:
-                            val = int(string) - 1
-                        except ValueError:
-                            continue
-
-                        # If the input was an integer, converts to an index, and checks if it is within the bounds of post numbers
-                        # val -= 1
-                        if val >= 0 and val < numPosts:
-                            browseMode = (
-                                False  # Will display post in full on next iteration
-                            )
-                            postNum = val  # Index of the post to be viewed
-                case _:
-                    continue    
+            if postNum == -1:
+                break
+            elif postNum == -2:
+                posts = functions.completeSearch(
+                    reddit_read_only,
+                    searches,
+                    searchIndex,
+                    posts,
+                    screen,
+                    minTermCols,
+                    minTermLines,
+                    not args["dontSave"],
+                    searchesPath
+                )
+                # browsePage.updateContent(posts)
+                numPosts = len(posts)
+            else:
+                browseMode = False
+            
 
 # Resets the terminal window for normal usage outside of the program
 finally:
