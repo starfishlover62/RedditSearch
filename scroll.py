@@ -142,17 +142,14 @@ class ToolTip:
         """
         temp = self.lines
         try:
-            if isinstance(lines, str):  # Converts a string to a single element list
-                lines = [Line(lines, 0)]
-            if isinstance(
-                lines, list
-            ):  # Loops through each item in list, replacing elements in self.lines with them
-                for item in lines:  # Starts at index, and replaces elements until the end of lines has been reached
-                    if isinstance(item, str):
-                        self.lines[index] = Line(item, 0)
-                    elif isinstance(item, Line):
-                        self.lines[index] = item
-                    index = index + 1
+            lines = [lines]
+            # Loops through each item in list, replacing elements in self.lines with them
+            for item in lines:  # Starts at index, and replaces elements until the end of lines has been reached
+                if isinstance(item, str):
+                    self.lines[index] = Line(item, 0)
+                elif isinstance(item, Line):
+                    self.lines[index] = item
+                index = index + 1
         except (
             IndexError
         ):  # If lines was too long, reset self.lines back to its original value
@@ -208,7 +205,7 @@ class Line:
                 if isinstance(positions, list):
                     if len(sections) == len(positions): # The length of sections and positions must be the same
                         self.sections = list(sections) # Creates a separate list in memory to assign to self.sections
-                        self.format = sections # Stores the content before its variables (%i) have been replaced
+                        self.format = list(sections) # Stores the content before its variables (%i) have been replaced
                         self.positions = positions
                         self.length = length
                         self.place() # Combines all of the strings

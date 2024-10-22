@@ -134,6 +134,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                 ),
             ],
         }
+        mode = {"enter":"~Selecting~","view":"~Viewing~","scrollRight":"~Deleting~"}
         toolTip = scroll.ToolTip(toolTipTypes["main"])
 
         # Creates the scrolling list page
@@ -160,19 +161,10 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
 
                 # User wants to perform, view, or delete a search
                 case "enter" | "scrollRight" | "view":
-                    text = ""
-                    # Adds text describing which of the three actions they are performing
-                    match char:
-                        case "enter":
-                            text = "~Selecting~"
-                        case "view":
-                            text = "~Viewing~"
-                        case _:
-                            text = "~Deleting~"
 
                     # Tells user to press 'q' to exit
                     page.refreshTooltip("press",page.currentLine()+1,index=1,print=False)
-                    toolTip.update(scroll.Line(text, 0, curses.COLS))
+                    toolTip.update(scroll.Line(mode[char], 0, curses.COLS))
                     page.print()
 
                     # Moves cursor to end of prompt
@@ -185,7 +177,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
 
                     # Tells user to enter 'q' to exit
                     page.refreshTooltip("enter",page.currentLine()+1,index=1,print=False)
-                    toolTip.update(scroll.Line(text, 0, curses.COLS))
+                    page.tooltip.update(scroll.Line(mode[char], 0, curses.COLS))
                     page.print()
 
                     # Gets multi-character input from the user
