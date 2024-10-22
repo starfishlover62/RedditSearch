@@ -170,7 +170,7 @@ try:
                     searchIndex = functions.getSearchNum(screen, searches)
             else:  # If no searches were found in the file, or the file does not exist
                 screen.addstr(0, 0, "No searches found at the current searches file:")
-                screen.addstr(1, 4, f"{searchesPath}")
+                screen.addstr(1, 0, f">   {searchesPath}")
                 screen.addstr(
                     2,
                     0,
