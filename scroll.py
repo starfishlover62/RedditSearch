@@ -2,10 +2,9 @@ import curses
 
 from formatString import combineStrings
 
-
-# from formatString import placeString
 class ScrollingList:
-    """Represents a list that can be scrolled through. Useful for displaying a large amount of related data.
+    """
+    Represents a list that can be scrolled through. Useful for displaying a large amount of related data.
     Requires a list of strings, a curses window object, and optionally a starting line number and/or a
     ToolTip object.
     """
@@ -18,50 +17,58 @@ class ScrollingList:
         self.lines = stringList
         self.currentLine = line
         self.updateTooltip(tooltip)
-        # self.tooltip = tooltip
-        # self.maxLine = curses.LINES
-        # if(not self.tooltip == None):
-        #     self.maxLine -= self.tooltip.height()
-
-        # self.maxLine = len(self.lines) - self.maxLine
 
     def scrollDown(self, numLines=1):
-        """Moves the lines that will be shown down by numLines.
+        """
+        Moves the lines that will be shown down by numLines.
         Returns the current line number
         """
-        if self.currentLine + numLines > self.maxLine:
+        if self.currentLine + numLines > self.maxLine: # Checks if scrolling down by numLines will scroll down to far
             self.currentLine = self.maxLine
         else:
             self.currentLine += numLines
         return self.currentLine
     
     def scrollBottom(self):
+        """
+        Scrolls to the bottom of the list and returns the current line number
+        """
         self.currentLine = self.maxLine
         return self.currentLine
 
     def scrollUp(self, numLines=1):
-        if self.currentLine - numLines < 0:
+        """
+        Moves the lines that will be shown up by numLines and returns the current line number
+        """
+        if self.currentLine - numLines < 0: # checks if scrolling up by numLines will scroll above the first line
             self.currentLine = 0
         else:
             self.currentLine = self.currentLine - numLines
         return self.currentLine
     
     def scrollTop(self):
+        """
+        Scrolls to the top of the list and returns the current line number
+        """
         self.currentLine = 0
         return self.currentLine
 
     def getLines(self):
+        """
+        Returns a list of all the lines that can be fit in the terminal size - the size of the tooltip. Then appends
+        the lines of the tooltip after these lines.
+        """
         lines = []
-        if self.tooltip is not None:
-            numLines = curses.LINES - self.tooltip.height()
-            lines = self.lines[self.currentLine : self.currentLine + numLines]
-            while len(lines) < numLines:
+        if self.tooltip is not None: # Adds the lines of the tooltip if it exists
+            numLines = curses.LINES - self.tooltip.height() # Counts how many non-tooltip lines to get
+            lines = self.lines[self.currentLine : self.currentLine + numLines] # numlines lines from currentline onward
+            while len(lines) < numLines: # if there aren't enough lines of content to fill the screen, add blank lines
                 lines.append("")
-            for item in self.tooltip.lines:
+            for item in self.tooltip.lines: # Adds the lines of the tooltip
                 lines = lines + [item.string]
-            if (len(lines) == curses.LINES) and (len(lines[-1]) >= curses.COLS):
-                lines[-1] = lines[-1][:-1]
-        else:
+            if (len(lines) == curses.LINES) and (len(lines[-1]) >= curses.COLS): # If the last line is equal to the length of the terminal,
+                lines[-1] = lines[-1][:-1]  # Chops of the last character (otherwise curses would throw an error saying printing has happened outside of the terminal)
+        else: # Tooltip does not exist. Does samething as if it did exist, but prints content on all of the lines
             numLines = curses.LINES
             lines = self.lines[self.currentLine : self.currentLine + numLines]
             while len(lines) < numLines:
@@ -71,6 +78,10 @@ class ScrollingList:
         return lines
 
     def updateTooltip(self, tooltip):
+        """
+        Replaces the tooltip
+        """
+        # Adjusts the number of lines of content that can be printed, based off of the number of lines in the tooltip
         self.maxLine = curses.LINES
         self.tooltip = None
         if tooltip is not None:
@@ -101,7 +112,8 @@ class ScrollingList:
 
 
 class ToolTip:
-    """Represents the tooltip that is anchored to the bottom of a scrolling list. Items will be displayed
+    """
+    Represents the tooltip that is anchored to the bottom of a scrolling list. Items will be displayed
     in the order that they are added. Those added first will be above those added later
     """
 
@@ -109,18 +121,25 @@ class ToolTip:
         self.replace(lines)
 
     def replace(self, lines):
+        """
+        Replaces all of the lines of the tooltip with the new lines.
+        """
         self.lines = []
-        if isinstance(lines, str):
+        if isinstance(lines, str): # Converts a string to a Line object
             self.lines.append(Line(lines, 0))
-        elif isinstance(lines, list):
+        elif isinstance(lines, list): 
             for item in lines:
-                if isinstance(item, str):
+                if isinstance(item, str): # Converts a string to a Line object
                     self.lines.append(Line(item, 0))
                 elif isinstance(item, Line):
                     self.lines.append(item)
+        self.resize()
         self.format = self.lines
 
     def update(self, lines, index=0):
+        """
+        Updates the lines starting at index with the lines specified
+        """
         temp = self.lines
         try:
             if isinstance(lines, str):  # Converts a string to a single element list
@@ -139,18 +158,34 @@ class ToolTip:
         ):  # If lines was too long, reset self.lines back to its original value
             self.lines = temp
 
+        self.resize()
         self.format = self.lines
+    
+
+    def resize(self):
+        for line in self.lines:
+            line.resize()
 
     def updateVars(self, values, index=0):
+        """
+        Replaces %i in the lines starting at index with the values in values. The first %i encountered it replaced
+        with the first value in values, the second with the second, and so on.
+        """
         if values is not None:
             if index < len(self.lines):
                 self.lines[index].updateVars(values)
 
     def height(self):
+        """
+        Returns the number of lines taken up by the tooltip
+        """
         return len(self.lines)
 
 
 class Line:
+    """
+    Represents a single line of content made out of sections that are anchored at specific locations
+    """
     def __init__(self, sections, positions, length=80):
         self.string = ""
         self.sections = []
@@ -161,37 +196,73 @@ class Line:
         self.replace(sections, positions, length)
 
     def replace(self, sections, positions, length=80):
+        """
+        Replaces the content of the line
+        """
         if sections is not None and positions is not None:
-            if isinstance(sections, str):
+            if isinstance(sections, str): # Converts sections to a list
                 sections = [sections]
-            if isinstance(sections, list):
-                if isinstance(positions, int):
+            if isinstance(sections, list): # Ensures that a list was passed by sectionis
+                if isinstance(positions, int): # Converts positions to a string
                     positions = [positions]
                 if isinstance(positions, list):
-                    if len(sections) == len(positions):
-                        self.sections = list(sections)
-                        self.format = sections
+                    if len(sections) == len(positions): # The length of sections and positions must be the same
+                        self.sections = list(sections) # Creates a separate list in memory to assign to self.sections
+                        self.format = sections # Stores the content before its variables (%i) have been replaced
                         self.positions = positions
                         self.length = length
-                        for index in range(len(sections)):
-                            self.string = combineStrings(
-                                self.string,
-                                sections[index],
-                                length,
-                                0,
-                                positions[index],
-                            )
+                        self.place() # Combines all of the strings
                         self.previousValues = None
-
+    
     def place(self):
+        """
+        Combines all of the strings at their specified locations
+        """
         self.string = ""
         for index in range(len(self.sections)):
-            self.string = combineStrings(
-                self.string, self.sections[index], self.length, 0, self.positions[index]
-            )
+            if isinstance(self.positions[index],str):
+                string = self.positions[index].lower()
+                string.replace(" ","")
+                i = string.find("max")
+                if i != -1:
+                    try:
+                        if string[i+3] == "-":
+                            try:
+                                value = int(string[i+4:])
+                                value = curses.COLS - value
+                                
+                                if value < 0:
+                                    continue
+                                self.string = combineStrings(
+                                    self.string, self.sections[index], self.length, 0, value
+                                )
+                                with open("output.txt","a") as f:
+                                    f.write(f"{self.length}~{len(self.string)}: {self.string}\n")
+                            except AttributeError:
+                                continue
+                    except IndexError:
+                        continue
+                                
+            else:
+                self.string = combineStrings(
+                    self.string, self.sections[index], self.length, 0, self.positions[index]
+                )
+
+
+    def resize(self):
+        """
+        Alternative name for Line.place(), but also adjusts Line.length to be the size of curses.COLS if necessary
+        """
+        if self.length != curses.COLS:
+            self.length = curses.COLS
+            self.place()
 
     def updateVars(self, values):
-        if values is not None and self.previousValues != values:
+        """
+        Replaces variables markers with values
+        """
+        # Only updates if the value of any variable has changed. Prevents updating to the same value, which would waste time.
+        if values is not None and self.previousValues != values: 
             lines = []
             valIndex = 0
             index = 0

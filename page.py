@@ -46,6 +46,8 @@ class Page:
 
             newContent = self.onUpdate(self.content) # Gets the properly sized content
 
+            self.tooltip.resize()
+
             self.scrollingList.updateStrings(
                 self.screen, newContent, self.scrollingList.currentLine, self.tooltip
             )  # Adds the headers list to the pagination controller
