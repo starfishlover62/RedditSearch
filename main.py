@@ -318,9 +318,12 @@ try:
         else:
             postNum = functions.browsePosts(posts,screen,minTermCols,minTermLines)
 
-            if postNum == -1:
-                break
-            elif postNum == -2:
+            if postNum == -1: # User wanted to exit browsePosts
+                if args["name"]:
+                    break
+                else:
+                    choosingSearches = True
+            elif postNum == -2: # User refreshed posts
                 posts = functions.completeSearch(
                     reddit_read_only,
                     searches,
@@ -334,7 +337,7 @@ try:
                 )
                 # browsePage.updateContent(posts)
                 numPosts = len(posts)
-            else:
+            else: # User selected a post to view
                 browseMode = False
             
 
