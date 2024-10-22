@@ -1,6 +1,6 @@
 import curses
 
-from scroll import ScrollingList, ToolTip, Line
+from scroll import ScrollingList, ToolTip
 
 class Page:
 
@@ -36,7 +36,7 @@ class Page:
         self.scrollingList.updateStrings(self.screen,self.onUpdate(self.content),self.scrollingList.currentLine,self.tooltip)
 
     def resize(self):
-        if self.onUpdate is not None and self.screen is not None and self.scrollingList is not None:
+        if self.screen is not None:
             size = list(self.screen.getmaxyx())
             if size[0] < self.minRows:
                 size[0] = self.minRows
@@ -44,17 +44,30 @@ class Page:
                 size[1] = self.minCols
             curses.resize_term(size[0], size[1])
 
+        newContent = None
+        if self.onUpdate is not None:
             newContent = self.onUpdate(self.content) # Gets the properly sized content
 
+        if self.scrollingList is not None:
             self.tooltip.resize()
 
-            self.scrollingList.updateStrings(
-                self.screen, newContent, self.scrollingList.currentLine, self.tooltip
-            )  # Adds the headers list to the pagination controller
+            if newContent is not None:
+                self.scrollingList.updateStrings(
+                    self.screen, newContent, self.scrollingList.currentLine, self.tooltip
+                )
             temp = self.scrollingList.currentLine
             lineNum = self.scrollingList.scrollDown()
             if not temp == lineNum:
                 lineNum = self.scrollingList.scrollUp()
+    
+    def currentLine(self):
+        """
+        Returns the current line of the scrollingList object
+        """
+        if self.scrollingList is not None:
+            return self.scrollingList.currentLine
+        else:
+            return -1
 
     def print(self,numLines=None):
         self.scrollingList.print(numLines)
