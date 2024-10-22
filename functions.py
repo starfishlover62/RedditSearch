@@ -233,43 +233,55 @@ def getSearchNum(screen, searches):
                         return val
     else:
         return -2
+    
+
+def viewSearchUpdate(search):
+    return searchTree(search,curses.COLS,config.fancy_characters)
 
 
-def viewSearch(screen, search):
+def viewSearch(screen, search, minCols=80, minLines=24):
     """
     Enters a screen with a tree depicting the specified search is displayed
     """
 
     if search is not None:
-        view = searchTree(search, curses.COLS, config.fancy_characters)
-        lineNum = 0
         toolTipType = "main"
         toolTipTypes = {
             "main": [
                 scroll.Line("", 0, curses.COLS),
                 scroll.Line(
                     ["<-- Line %i -- >", "press (q) to exit"],
-                    [0, curses.COLS - 18],
+                    [0, "max-18"],
                     curses.COLS,
                 ),
             ]
         }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
+
+        lineNum = 0
+        view = viewSearchUpdate(search)
         page = scroll.ScrollingList(screen, view, lineNum, toolTip)
+        viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewSearchUpdate,content=search,minRows=minLines,minCols=minCols)
+        viewPage.switchTooltip("main")
+        
         while True:
             # Changes toolTip if necessary
-            if not toolTipType == "main":
-                toolTipType = "main"
-                toolTip.replace(toolTipTypes[toolTipType])
+            viewPage.refreshTooltip(toolTipType,[lineNum + 1],index=1,print=True)
+            # if not toolTipType == "main":
+            #     toolTipType = "main"
+            #     toolTip.replace(toolTipTypes[toolTipType])
 
-            # Updates line number and prints page
-            toolTip.updateVars([lineNum + 1], 1)
-            page.print()
+            # # Updates line number and prints page
+            # toolTip.updateVars()
+            # page.print()
 
             # Gets input from user
             viewChar = eventListener(screen)
             if viewChar == "exit":  # Returns from function, signalling to quit program
                 break
+
+            elif viewChar == "resize":  # Returns from function, signalling to quit program
+                viewPage.resize()
 
             elif viewChar == "scrollUp":  # Scrolls up
                 lineNum = page.scrollUp()
