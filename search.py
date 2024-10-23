@@ -42,7 +42,7 @@ class SubredditSearch:
             self.postWL = postWL
         if postBL is not None:
             self.postBL = postBL
-    
+
     def add(
         self,
         titleWL=None,
@@ -53,7 +53,7 @@ class SubredditSearch:
         postBL=None,
     ):
         if titleWL is not None:
-            if not isinstance(titleWL,list):
+            if not isinstance(titleWL, list):
                 titleWL = [titleWL]
             if self.titleWL is not None:
                 self.titleWL += titleWL
@@ -61,7 +61,7 @@ class SubredditSearch:
                 self.titleWL = titleWL
 
         if titleBL is not None:
-            if not isinstance(titleBL,list):
+            if not isinstance(titleBL, list):
                 titleBL = [titleBL]
             if self.titleBL is not None:
                 self.titleBL += titleBL
@@ -69,7 +69,7 @@ class SubredditSearch:
                 self.titleBL = titleBL
 
         if flairWL is not None:
-            if not isinstance(flairWL,list):
+            if not isinstance(flairWL, list):
                 flairWL = [flairWL]
             if self.flairWL is not None:
                 self.flairWL += flairWL
@@ -77,7 +77,7 @@ class SubredditSearch:
                 self.flairWL = flairWL
 
         if flairBL is not None:
-            if not isinstance(flairBL,list):
+            if not isinstance(flairBL, list):
                 flairBL = [flairBL]
             if self.flairBL is not None:
                 self.flairBL += flairBL
@@ -85,7 +85,7 @@ class SubredditSearch:
                 self.flairBL = flairBL
 
         if postWL is not None:
-            if not isinstance(postWL,list):
+            if not isinstance(postWL, list):
                 postWL = [postWL]
             if self.postWL is not None:
                 self.postWL += postWL
@@ -93,7 +93,7 @@ class SubredditSearch:
                 self.postWL = postWL
 
         if postBL is not None:
-            if not isinstance(postBL,list):
+            if not isinstance(postBL, list):
                 postBL = [postBL]
             if self.postBL is not None:
                 self.postBL += postBL
@@ -101,21 +101,22 @@ class SubredditSearch:
                 self.postBL = postBL
 
 
-
 class Search:
     def __init__(self, name=None, lastSearchTime=None, subreddits=None):
         self.name = name
         self.lastSearchTime = lastSearchTime
         self.subreddits = subreddits
+
     def addSub(self, subSearch):
-        if isinstance(subSearch,SubredditSearch):
+        if isinstance(subSearch, SubredditSearch):
             if self.subreddits is not None:
                 self.subreddits.append(subSearch)
             else:
-                if not isinstance(subSearch,list):
+                if not isinstance(subSearch, list):
                     self.subreddits = [subSearch]
                 else:
                     self.subreddits = subSearch
+
     def update(self, name=None, lastSearchTime=None, subreddits=None):
         # Updates values if they are presented
         if name is not None:

@@ -61,110 +61,83 @@ def placeTitle(name, showBeginning, last, fancy=False):
 
     return f"{string}{name}"
 
-def filterTree(name,filterName,filterContents, width=80, fancy=False, enumerate=False):
+
+def filterTree(
+    name, filterName, filterContents, width=80, fancy=False, enumerate=False
+):
     stringList = []
     stringList.append(name)
-    stringList.append(
-        placeTitle(filterName, False, True, fancy)
-    )
+    stringList.append(placeTitle(filterName, False, True, fancy))
     if filterContents is not None and len(filterContents) > 0:
         numItems = 0
         ticker = 0
         for item in filterContents:
             numItems = numItems + 1
             last = numItems == len(filterContents)
-            ticker = ticker+1
+            ticker = ticker + 1
             if enumerate:
                 stringList.append(
-                placeItem(f"{ticker}. {item}", False, False, last, width, fancy)
+                    placeItem(f"{ticker}. {item}", False, False, last, width, fancy)
                 )
             else:
-                stringList.append(
-                    placeItem(item, False, False, last, width, fancy)
-                    )
+                stringList.append(placeItem(item, False, False, last, width, fancy))
     return stringList
 
 
 def subTree(sub, width=80, fancy=False):
     stringList = []
     if sub is not None:
-        
         finalSub = False
 
         stringList.append(sub.name)
-        stringList.append(
-            placeTitle("1. Title whitelist", finalSub, False, fancy)
-        )
+        stringList.append(placeTitle("1. Title whitelist", finalSub, False, fancy))
         if sub.titleWL is not None and len(sub.titleWL) > 0:
             numItems = 0
             for item in sub.titleWL:
                 numItems = numItems + 1
                 last = numItems == len(sub.titleWL)
-                stringList.append(
-                    placeItem(item, finalSub, True, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, True, last, width, fancy))
 
-        stringList.append(
-            placeTitle("2. Title blacklist", finalSub, False, fancy)
-        )
+        stringList.append(placeTitle("2. Title blacklist", finalSub, False, fancy))
         if sub.titleBL is not None and len(sub.titleBL) > 0:
             numItems = 0
             for item in sub.titleBL:
                 numItems = numItems + 1
                 last = numItems == len(sub.titleBL)
-                stringList.append(
-                    placeItem(item, finalSub, True, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, True, last, width, fancy))
 
-        stringList.append(
-            placeTitle("3. Flair whitelist", finalSub, False, fancy)
-        )
+        stringList.append(placeTitle("3. Flair whitelist", finalSub, False, fancy))
         if sub.flairWL is not None and len(sub.flairWL) > 0:
             numItems = 0
             for item in sub.flairWL:
                 numItems = numItems + 1
                 last = numItems == len(sub.flairWL)
-                stringList.append(
-                    placeItem(item, finalSub, True, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, True, last, width, fancy))
 
-        stringList.append(
-            placeTitle("4. Flair blacklist", finalSub, False, fancy)
-        )
+        stringList.append(placeTitle("4. Flair blacklist", finalSub, False, fancy))
         if sub.flairBL is not None and len(sub.flairBL) > 0:
             numItems = 0
             for item in sub.flairBL:
                 numItems = numItems + 1
                 last = numItems == len(sub.flairBL)
-                stringList.append(
-                    placeItem(item, finalSub, True, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, True, last, width, fancy))
 
-        stringList.append(
-            placeTitle("5. Post whitelist", finalSub, False, fancy)
-        )
+        stringList.append(placeTitle("5. Post whitelist", finalSub, False, fancy))
         if sub.postWL is not None and len(sub.postWL) > 0:
             numItems = 0
             for item in sub.postWL:
                 numItems = numItems + 1
                 last = numItems == len(sub.postWL)
-                stringList.append(
-                    placeItem(item, finalSub, True, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, True, last, width, fancy))
 
-        stringList.append(
-            placeTitle("6. Post blacklist", finalSub, True, fancy)
-        )
+        stringList.append(placeTitle("6. Post blacklist", finalSub, True, fancy))
         if sub.postBL is not None and len(sub.postBL) > 0:
             numItems = 0
             for item in sub.postBL:
                 numItems = numItems + 1
                 last = numItems == len(sub.postBL)
-                stringList.append(
-                    placeItem(item, finalSub, False, last, width, fancy)
-                )
+                stringList.append(placeItem(item, finalSub, False, last, width, fancy))
     return stringList
-
 
 
 def searchTree(search, width=80, fancy=False, enumerate=False):
@@ -181,7 +154,7 @@ def searchTree(search, width=80, fancy=False, enumerate=False):
                     tierOneLast = "└─"
                 else:
                     tierOne = "|->"
-                    tierOneLast = tierOne                  
+                    tierOneLast = tierOne
 
                 subNum = 0
                 lastSub = len(search.subreddits)
