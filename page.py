@@ -75,22 +75,27 @@ class Page:
                 # Terminal was resized
                 case "resize":
                     self.resize()
+                    return 1
 
                 # Scrolls up through the content list
                 case "scrollUp":
                     self.scrollingList.scrollUp()
+                    return 2
 
                 # Scrolls to line 0 of the content
                 case "scrollTop":
                     self.scrollingList.scrollTop()
+                    return 3
 
                 # Scrolls down through the content list
                 case "scrollDown":
                     self.scrollingList.scrollDown()
+                    return 4
 
                 # Scrolls to the last line of the content list
                 case "scrollBottom":
                     self.scrollingList.scrollBottom()
+                    return 5
 
     def print(self,numLines=None):
         self.scrollingList.print(numLines)

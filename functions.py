@@ -15,11 +15,12 @@ import webbrowser
 
 # Provided
 import search
-from tree import searchTree
+from tree import searchTree, subTree, filterTree
 import formatString
 import scroll
 import dump
 import page as p
+import editSearch
 
 import config
 
@@ -234,31 +235,28 @@ def viewSearch(screen, search, minCols=80, minLines=24):
         }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
-        lineNum = 0
         view = viewSearchUpdate(search)
-        page = scroll.ScrollingList(screen, view, lineNum, toolTip)
+        page = scroll.ScrollingList(screen, view, 0, toolTip)
         viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewSearchUpdate,content=search,minRows=minLines,minCols=minCols)
         viewPage.switchTooltip("main")
         
         while True:
             # Changes toolTip if necessary
-            viewPage.refreshTooltip("main",[lineNum + 1],index=1,print=True)
+            viewPage.refreshTooltip("main",viewPage.currentLine()+1,index=1,print=True)
 
             # Gets input from user
             viewChar = eventListener(screen)
-            if viewChar == "exit":  # Returns from function, signalling to quit program
-                break
 
-            elif viewChar == "resize":  # Returns from function, signalling to quit program
-                viewPage.resize()
+            match viewChar:
 
-            elif viewChar == "scrollUp":  # Scrolls up
-                lineNum = page.scrollUp()
-                continue
+                case "exit":  # Returns from function, signalling to quit program
+                    break
 
-            elif viewChar == "scrollDown":  # Scrolls down
-                lineNum = page.scrollDown()
-                continue
+                case "enter":
+                    editSearch.EditSearch(screen,search,minCols,minLines)
+
+                case _:
+                    viewPage.manipulate(viewChar)
 
 
 def getInput(screen, page, tooltip, prompt=None, unget=None, row=None, col=None):

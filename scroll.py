@@ -233,8 +233,6 @@ class Line:
                                 self.string = combineStrings(
                                     self.string, self.sections[index], self.length, 0, value
                                 )
-                                with open("output.txt","a") as f:
-                                    f.write(f"{self.length}~{len(self.string)}: {self.string}\n")
                             except AttributeError:
                                 continue
                     except IndexError:
