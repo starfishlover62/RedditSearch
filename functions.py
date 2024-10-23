@@ -1,5 +1,6 @@
 # Libraries
 from io import BytesIO
+from copy import deepcopy
 import curses
 import datetime
 import math
@@ -15,7 +16,7 @@ import webbrowser
 
 # Provided
 import search
-from tree import searchTree, subTree, filterTree
+from tree import searchTree
 import formatString
 import scroll
 import dump
@@ -91,8 +92,10 @@ def getNumPosts(reddit, searchCriteria, numPosts=20):
 
     return posts
 
+
 def listSearches(searches):
     return [f"{n+1}. {searches[n].name}" for n in range(len(searches))]
+
 
 def getSearchNum(screen, searches, minCols=80, minLines=24):
     """
@@ -135,25 +138,38 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                 ),
             ],
         }
-        mode = {"enter":"~Selecting~","view":"~Viewing~","scrollRight":"~Deleting~"}
+        mode = {
+            "enter": "~Selecting~",
+            "view": "~Viewing~",
+            "scrollRight": "~Deleting~",
+        }
         toolTip = scroll.ToolTip(toolTipTypes["main"])
 
         # Creates the scrolling list page
         ls = listSearches(searches)
         scrollList = scroll.ScrollingList(screen, ls, 0, toolTip)
-        page = p.Page(screen=screen,scrollingList=scrollList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=listSearches,content=searches,minRows=minLines,minCols=minCols)
+        page = p.Page(
+            screen=screen,
+            scrollingList=scrollList,
+            tooltip=toolTip,
+            tooltipTypes=toolTipTypes,
+            onUpdate=listSearches,
+            content=searches,
+            minRows=minLines,
+            minCols=minCols,
+        )
         page.switchTooltip("main")
 
         while True:
             # Updates tooltip and prints page to screen
-            page.refreshTooltip("main",page.currentLine()+1,index=1,print=True)
+            page.refreshTooltip("main", page.currentLine() + 1, index=1, print=True)
 
             # Gets single character input from user
             char = eventListener(screen)
             match char:
                 case "timeout":
                     continue
-            
+
                 case "exit":  # Returns from function, signalling to quit program
                     return -1
 
@@ -162,9 +178,10 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
 
                 # User wants to perform, view, or delete a search
                 case "enter" | "scrollRight" | "view":
-
                     # Tells user to press 'q' to exit
-                    page.refreshTooltip("press",page.currentLine()+1,index=1,print=False)
+                    page.refreshTooltip(
+                        "press", page.currentLine() + 1, index=1, print=False
+                    )
                     toolTip.update(scroll.Line(mode[char], 0, curses.COLS))
                     page.print()
 
@@ -177,7 +194,9 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                         continue
 
                     # Tells user to enter 'q' to exit
-                    page.refreshTooltip("enter",page.currentLine()+1,index=1,print=False)
+                    page.refreshTooltip(
+                        "enter", page.currentLine() + 1, index=1, print=False
+                    )
                     page.tooltip.update(scroll.Line(mode[char], 0, curses.COLS))
                     page.print()
 
@@ -203,17 +222,18 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                             del searches[val]
                             return -3
                         elif char == "view":  # Views search
-                            viewSearch(screen, searches[val])
+                            if viewSearch(screen, searches[val]):
+                                return -3
                         else:  # Selects search
                             return val
                 case _:
                     page.manipulate(char)
     else:
         return -2
-    
+
 
 def viewSearchUpdate(search):
-    return searchTree(search,curses.COLS,config.fancy_characters)
+    return searchTree(search, curses.COLS, config.fancy_characters)
 
 
 def viewSearch(screen, search, minCols=80, minLines=24):
@@ -227,47 +247,76 @@ def viewSearch(screen, search, minCols=80, minLines=24):
             "main": [
                 scroll.Line("", 0, curses.COLS),
                 scroll.Line(
-                    ["<-- Line %i -- >", "press (q) to exit"],
-                    [0, "max-18"],
+                    ["<-- Line %i -- >", "press (e) to edit or (q) to exit"],
+                    [0, "max-33"],
                     curses.COLS,
                 ),
-            ]
+            ],
+            "save": [
+                scroll.Line(
+                    ["Would you like to save? [Y/N]:", "(press enter)"],
+                    [0, "max-14"],
+                    curses.COLS,
+                )
+            ],
         }
         toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
         view = viewSearchUpdate(search)
         page = scroll.ScrollingList(screen, view, 0, toolTip)
-        viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewSearchUpdate,content=search,minRows=minLines,minCols=minCols)
+        viewPage = p.Page(
+            screen=screen,
+            scrollingList=page,
+            tooltip=toolTip,
+            tooltipTypes=toolTipTypes,
+            onUpdate=viewSearchUpdate,
+            content=search,
+            minRows=minLines,
+            minCols=minCols,
+        )
         viewPage.switchTooltip("main")
-        
+
         while True:
             # Changes toolTip if necessary
-            viewPage.refreshTooltip("main",viewPage.currentLine()+1,index=1,print=True)
+            viewPage.refreshTooltip(
+                "main", viewPage.currentLine() + 1, index=1, print=True
+            )
 
             # Gets input from user
             viewChar = eventListener(screen)
 
             match viewChar:
-
-                case "exit":  # Returns from function, signalling to quit program
-                    break
+                case "exit":  # Returns from function, signalling to exit search view
+                    return False
 
                 case "enter":
-                    resized = editSearch.EditSearch(screen,search,minCols,minLines)
+                    originalSearch = deepcopy(search)
+                    resized = editSearch.EditSearch(screen, search, minCols, minLines)
                     if resized:
                         viewPage.resize()
                     else:
                         viewPage.updateContent()
+                    viewPage.refreshTooltip("save", print=True)
+                    answer = getInput(screen, col=31).lower()
+                    if not (answer == "y" or answer == "yes"):
+                        search = originalSearch
+                        return False
+                    else:
+                        return True
 
                 case _:
                     viewPage.manipulate(viewChar)
 
 
-def getInput(screen, page=None, tooltip=None, prompt=None, unget=None, row=None, col=None):
+def getInput(
+    screen, page=None, tooltip=None, prompt=None, unget=None, row=None, col=None
+):
     """
     Gets multi-character input from the user and returns it.
     """
-    if prompt is not None and tooltip is not None: # Display the prompt for input that was specified
+    if (
+        prompt is not None and tooltip is not None
+    ):  # Display the prompt for input that was specified
         if isinstance(prompt, list):
             tooltip.replace(prompt)
         else:
@@ -301,7 +350,7 @@ def getInput(screen, page=None, tooltip=None, prompt=None, unget=None, row=None,
     return string
 
 
-def createSearch(screen,minCols=80,minLines=24):
+def createSearch(screen, minCols=80, minLines=24):
     """
     Creates a search object found in search.py. Prompts user to input data to create this object
     """
@@ -317,7 +366,7 @@ def createSearch(screen,minCols=80,minLines=24):
                 ["Enter name of search, then press enter:", "(press q to exit)"],
                 [0, "max-18"],
                 curses.COLS,
-            )
+            ),
         ],
         "enter": [
             scroll.Line(
@@ -329,7 +378,7 @@ def createSearch(screen,minCols=80,minLines=24):
                 ["Enter name of search, then press enter:", "(enter q to exit)"],
                 [0, "max-18"],
                 curses.COLS,
-            )
+            ),
         ],
         "save": [
             scroll.Line(
@@ -340,11 +389,17 @@ def createSearch(screen,minCols=80,minLines=24):
         ],
     }
     toolTip = scroll.ToolTip(toolTipTypes["press"])
-    scrollingList = scroll.ScrollingList(screen,[],tooltip=toolTip)
+    scrollingList = scroll.ScrollingList(screen, [], tooltip=toolTip)
 
-    
-    page = p.Page(screen=screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,minRows=minLines,minCols=minCols)
-    page.refreshTooltip("press",print=True)
+    page = p.Page(
+        screen=screen,
+        scrollingList=scrollingList,
+        tooltip=toolTip,
+        tooltipTypes=toolTipTypes,
+        minRows=minLines,
+        minCols=minCols,
+    )
+    page.refreshTooltip("press", print=True)
 
     placeCursor(screen, x=40, y=curses.LINES - 1)
     c = screen.getch()  # Gets the character they type
@@ -353,37 +408,48 @@ def createSearch(screen,minCols=80,minLines=24):
 
     else:  # Otherwise
         # Update prompt to tell them to 'enter q" instead of 'press q"
-        page.refreshTooltip("enter",print=True)
-        name = getInput(screen,unget=c,col=40)
+        page.refreshTooltip("enter", print=True)
+        name = getInput(screen, unget=c, col=40)
         if name.lower == "q":
             return None
         newSearch = search.Search(name)
-        resized = editSearch.EditSearch(screen,newSearch,minCols=minCols,minLines=minLines)
+        resized = editSearch.EditSearch(
+            screen, newSearch, minCols=minCols, minLines=minLines
+        )
         if resized:
             page.resize()
         else:
             page.updateContent()
-        page.refreshTooltip("save",print=True)
-        answer = getInput(screen,col=31).lower()
+        page.refreshTooltip("save", print=True)
+        answer = getInput(screen, col=31).lower()
         if answer == "y" or answer == "yes":
             return newSearch
         else:
             return None
 
 
-
-def completeSearch(reddit,searches,searchIndex,posts=None,screen=None,minCols=80,minLines=24,save=True,searchesPath=None):
+def completeSearch(
+    reddit,
+    searches,
+    searchIndex,
+    posts=None,
+    screen=None,
+    minCols=80,
+    minLines=24,
+    save=True,
+    searchesPath=None,
+):
     """
     Calls performSearch and saves the search timestamp to the searches file. Saving the timestamp can be disabled with the save parameter.
     """
     time = math.floor(currentTimestamp())
-    posts = posts + performSearch(reddit,searches[searchIndex],screen,minCols,minLines)
+    posts = posts + performSearch(
+        reddit, searches[searchIndex], screen, minCols, minLines
+    )
     posts = sortPosts(posts)
     searches[
-                searchIndex
-            ].lastSearchTime = (
-                time  # Sets the search time in the search variable
-            )
+        searchIndex
+    ].lastSearchTime = time  # Sets the search time in the search variable
     if save and searchesPath is not None:
         dump.saveSearches(
             searches, searchesPath
@@ -391,7 +457,7 @@ def completeSearch(reddit,searches,searchIndex,posts=None,screen=None,minCols=80
     return posts
 
 
-def performSearch(reddit,search,screen=None,minCols=80,minLines=24):
+def performSearch(reddit, search, screen=None, minCols=80, minLines=24):
     """
     Gathers posts that meat the search object criteria, using the reddit object.
     If a screen object is provided, displays a simple search in progress message.
@@ -405,20 +471,28 @@ def performSearch(reddit,search,screen=None,minCols=80,minLines=24):
         stringTicker = 0
     for sub in search.subreddits:
         subreddit = reddit.subreddit(sub.name)
-        for post in subreddit.new(limit=None): # Gets all posts in the current subreddit
+        for post in subreddit.new(
+            limit=None
+        ):  # Gets all posts in the current subreddit
             if post.created_utc is None:
                 continue
-            if post.created_utc < search.lastSearchTime: # continues until it finds a post older than the last search time
+            if (
+                post.created_utc < search.lastSearchTime
+            ):  # continues until it finds a post older than the last search time
                 break
             else:
-                if filterPost(post, sub): # If post meets the specified filters, append it to the list
+                if filterPost(
+                    post, sub
+                ):  # If post meets the specified filters, append it to the list
                     posts.append(post)
             ticker = ticker + 1
 
             if screen is not None:
-                resize = eventListener(screen, characters=False, timeout=5) # Gets input from user. Only listens for terminal resizing
+                resize = eventListener(
+                    screen, characters=False, timeout=5
+                )  # Gets input from user. Only listens for terminal resizing
 
-                if resize == "resize": # Resizes content if terminal was resized
+                if resize == "resize":  # Resizes content if terminal was resized
                     size = list(screen.getmaxyx())
                     if size[0] < minLines:
                         size[0] = minLines
@@ -517,11 +591,11 @@ def getHeaders(posts):
     headers = []
     ticker = 1
     if posts is not None:
-        for post in posts: # Loops through each post
-            info = getPostInfo(post) # Gets the information about the post
+        for post in posts:  # Loops through each post
+            info = getPostInfo(post)  # Gets the information about the post
 
             try:
-                headers += formatString.enbox( # Enboxes and stores the results
+                headers += formatString.enbox(  # Enboxes and stores the results
                     [
                         f"{ticker}). {info["title"]}",
                         info["author"],
@@ -600,10 +674,10 @@ def viewPostUpdate(content):
     Used by viewPost to re-enbox its content. Necessary for its resize function
     """
     return formatString.enbox(
-                    content,
-                    curses.COLS,
-                    fancy=config.fancy_characters,
-                )
+        content,
+        curses.COLS,
+        fancy=config.fancy_characters,
+    )
 
 
 def viewPost(post, screen, minCols=80, minLines=24):
@@ -624,10 +698,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
         post.url,
     ]
     try:
-        stringList = viewPostUpdate(content) # Enboxes the content
+        stringList = viewPostUpdate(content)  # Enboxes the content
     except AttributeError:
         stringList = ""
-
 
     # Sets the tooltip
     toolTipType = "main"
@@ -644,14 +717,25 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
     # Creates a page with the content and tooltip
     page = scroll.ScrollingList(screen, stringList, 0, toolTip)
-    viewPage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=viewPostUpdate,content=content,minRows=minLines,minCols=minCols)
+    viewPage = p.Page(
+        screen=screen,
+        scrollingList=page,
+        tooltip=toolTip,
+        tooltipTypes=toolTipTypes,
+        onUpdate=viewPostUpdate,
+        content=content,
+        minRows=minLines,
+        minCols=minCols,
+    )
     viewPage.switchTooltip("main")
 
-    skip = False # Stores whether gathering a character should be done. Used when exiting from the help screen
+    skip = False  # Stores whether gathering a character should be done. Used when exiting from the help screen
 
     while True:
-        if not skip: # Refreshes the tooltip's line number and gets input
-            viewPage.refreshTooltip("main",[viewPage.currentLine() + 1, page.maxLine + 1], 0,print=True)
+        if not skip:  # Refreshes the tooltip's line number and gets input
+            viewPage.refreshTooltip(
+                "main", [viewPage.currentLine() + 1, page.maxLine + 1], 0, print=True
+            )
             input = eventListener(screen)
         skip = False
 
@@ -667,13 +751,13 @@ def viewPost(post, screen, minCols=80, minLines=24):
             # Returns value specifying to view previous post
             case "scrollLeft":
                 return -1
-            
+
             # Returns value specifying to view next post
             case "scrollRight":
                 return 1
-            
+
             # Displays a help screen
-            case "help": 
+            case "help":
                 screen.clear()
                 helpPage = scroll.ScrollingList(
                     screen,
@@ -732,7 +816,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
             # Open author's page
             case "message":
-                webbrowser.open_new_tab(f"https://www.reddit.com/user/{post.author.name}/")
+                webbrowser.open_new_tab(
+                    f"https://www.reddit.com/user/{post.author.name}/"
+                )
 
             # Displays url of post
             case "url":
@@ -745,7 +831,9 @@ def viewPost(post, screen, minCols=80, minLines=24):
 
                 screen.clear()
                 screen.addstr(0, 0, f"URLs saved to {config.link_output}")
-                screen.addstr(curses.LINES - 1, curses.COLS - 24, "(press any key to exit)")
+                screen.addstr(
+                    curses.LINES - 1, curses.COLS - 24, "(press any key to exit)"
+                )
                 placeCursor(screen, x=0, y=curses.LINES - 1)
                 screen.refresh()
                 while True:
@@ -758,14 +846,12 @@ def viewPost(post, screen, minCols=80, minLines=24):
                         else:
                             skip = False
                         break
-            
+
             case _:
                 viewPage.manipulate(input)
 
 
 def browsePosts(posts, screen, minCols=80, minLines=24):
-
-    
     toolTipType = "main"
     toolTipTypes = {
         "main": [
@@ -791,15 +877,26 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
         ],
     }
     toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
-    page = scroll.ScrollingList(screen,getHeaders(posts),tooltip=toolTip)
+    page = scroll.ScrollingList(screen, getHeaders(posts), tooltip=toolTip)
 
-    browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=getHeaders,content=posts,minRows=minLines,minCols=minCols)
+    browsePage = p.Page(
+        screen=screen,
+        scrollingList=page,
+        tooltip=toolTip,
+        tooltipTypes=toolTipTypes,
+        onUpdate=getHeaders,
+        content=posts,
+        minRows=minLines,
+        minCols=minCols,
+    )
     browsePage.switchTooltip("main")
     # browsePage.updateContent()
-            
+
     while True:
         # Updates the tooltip, and prints the headers to the screen
-        browsePage.refreshTooltip("main",[browsePage.currentLine() + 1, page.maxLine + 1],print=True)
+        browsePage.refreshTooltip(
+            "main", [browsePage.currentLine() + 1, page.maxLine + 1], print=True
+        )
 
         # Gets input from the user
 
@@ -814,7 +911,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
                 return -2
             case "enter":
                 # Updates the tooltip and places the cursor for input
-                browsePage.refreshTooltip("press",(len(posts)),print=True)
+                browsePage.refreshTooltip("press", (len(posts)), print=True)
 
                 placeCursor(screen, x=48, y=curses.LINES - 1)
                 c = screen.getch()  # Gets the character they type
@@ -823,7 +920,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
 
                 else:  # Otherwise
                     # Update prompt to tell them to 'enter q" instead of 'press q"
-                    browsePage.refreshTooltip("enter",(len(posts)),print=True)
+                    browsePage.refreshTooltip("enter", (len(posts)), print=True)
                     string = getInput(
                         screen=screen, page=page, tooltip=toolTip, unget=c, col=48
                     )
@@ -840,8 +937,9 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
                     if val >= 0 and val < len(posts):
                         return val  # Index of the post to be viewed
             case _:
-                browsePage.manipulate(input)    
+                browsePage.manipulate(input)
     return -1
+
 
 def findURLs(text):
     """
@@ -861,12 +959,12 @@ def placeCursor(screen, x, y):
 
 def isValidSubreddit(userReddit, name):
     """
-    Pulls a single post from the subreddit specified in name, using the praw reddit instance userReddit.  
+    Pulls a single post from the subreddit specified in name, using the praw reddit instance userReddit.
     Returns 1 if sub is valid, -1 if it does not exist or has been banned, or -2 if it is private
     """
     try:
         for submission in userReddit.subreddit(name).new(limit=1):
-            s = submission.id # Attempts to pull a submission from the subreddit
+            submission.id  # Attempts to pull a submission from the subreddit
     except (
         prawcore.exceptions.NotFound,
         prawcore.exceptions.Redirect,
@@ -881,9 +979,9 @@ def isValidSubreddit(userReddit, name):
 
 def eventListener(screen, characters=True, anyChar=False, timeout=100):
     """
-    Waits for a single character input from the user.  
-    characters: is whether it will listen for characters for input, or just terminal resizing.   
-    anyChar: will return any for any character input.   
+    Waits for a single character input from the user.
+    characters: is whether it will listen for characters for input, or just terminal resizing.
+    anyChar: will return any for any character input.
     timeout: is the number of milliseconds the function will wait for a response before returning timeout
     """
     try:

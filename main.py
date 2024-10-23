@@ -13,8 +13,6 @@ import config
 import dump
 import constants
 import formatString
-import scroll
-import page as p
 
 
 parser = argparse.ArgumentParser(
@@ -154,7 +152,7 @@ try:
                             valid = True
                             searchIndex = item
                             break
-                    if not valid: # Closes window, then prints out all valid searches found in the file, and finally exits
+                    if not valid:  # Closes window, then prints out all valid searches found in the file, and finally exits
                         functions.close(screen)
                         print(
                             f"No search by the name of '{args["name"]}' exists\nThe following are valid searches:"
@@ -193,8 +191,9 @@ try:
                 break
             elif searchIndex == -2:
                 newSearch = functions.createSearch(screen)
-                searches.append(newSearch)
-                dump.saveSearches(searches, searchesPath)
+                if newSearch is not None:
+                    searches.append(newSearch)
+                    dump.saveSearches(searches, searchesPath)
                 continue
             elif searchIndex == -3:
                 dump.saveSearches(searches, searchesPath)
@@ -271,17 +270,17 @@ try:
                     sys.exit(1)
 
             posts = posts + functions.completeSearch(
-                        reddit_read_only,
-                        searches,
-                        searchIndex,
-                        posts,
-                        screen,
-                        minTermCols,
-                        minTermLines,
-                        not args["dontSave"],
-                        searchesPath
-                    )
-            
+                reddit_read_only,
+                searches,
+                searchIndex,
+                posts,
+                screen,
+                minTermCols,
+                minTermLines,
+                not args["dontSave"],
+                searchesPath,
+            )
+
             numPosts = len(posts)
 
             # If no posts matched the criteria
@@ -316,14 +315,14 @@ try:
 
         # Displays post headers for browsing
         else:
-            postNum = functions.browsePosts(posts,screen,minTermCols,minTermLines)
+            postNum = functions.browsePosts(posts, screen, minTermCols, minTermLines)
 
-            if postNum == -1: # User wanted to exit browsePosts
+            if postNum == -1:  # User wanted to exit browsePosts
                 if args["name"]:
                     break
                 else:
                     choosingSearches = True
-            elif postNum == -2: # User refreshed posts
+            elif postNum == -2:  # User refreshed posts
                 posts = functions.completeSearch(
                     reddit_read_only,
                     searches,
@@ -333,13 +332,13 @@ try:
                     minTermCols,
                     minTermLines,
                     not args["dontSave"],
-                    searchesPath
+                    searchesPath,
                 )
                 # browsePage.updateContent(posts)
                 numPosts = len(posts)
-            else: # User selected a post to view
+            else:  # User selected a post to view
                 browseMode = False
-            
+
 
 # Resets the terminal window for normal usage outside of the program
 finally:
