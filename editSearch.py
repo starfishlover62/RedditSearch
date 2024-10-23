@@ -4,6 +4,7 @@ import config
 import functions
 import page as p
 import scroll
+import search
 import tree
 
 class EditSearch:
@@ -12,7 +13,7 @@ class EditSearch:
         self.subreddit = None
         
         if launch:
-            self.editSearch()
+            self.launch()
     
     def update(self,screen=None,search=None,minCols=None,minLines=None):
         if screen is not None:
@@ -23,6 +24,9 @@ class EditSearch:
             self.minCols = minCols
         if minLines is not None:
             self.minLines = minLines
+    
+    def launch(self):
+        self.editSearch()
 
     def editSearch(self):
     
@@ -50,14 +54,19 @@ class EditSearch:
                         curses.COLS,
                     )
                 ],
+                "input": [
+                    scroll.Line(
+                        ["Enter name of subreddit, then press enter:", "(enter q to exit)"],
+                        [0, "max-18"],
+                        curses.COLS,
+                    )
+                ],
             }
             toolTip = scroll.ToolTip(toolTipTypes["main"])
             scrollingList = scroll.ScrollingList(self.screen,self.viewSearchTree(self.search),tooltip=toolTip)
 
             page = p.Page(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.viewSearchTree,content=self.search,minRows=self.minLines,minCols=self.minCols)
             page.switchTooltip("main")
-            resized = False
-            # browsePage.updateContent()
                     
             while True:
                 # Updates the tooltip, and prints the headers to the screen
@@ -66,6 +75,7 @@ class EditSearch:
                 # Gets input from the user
 
                 input = functions.eventListener(self.screen)
+                resized = False
 
                 match input:
                     case "timeout":
@@ -76,7 +86,7 @@ class EditSearch:
                         # Updates the tooltip and places the cursor for input
                         page.refreshTooltip("press",(len(self.search.subreddits)),print=True)
 
-                        functions.placeCursor(self.screen, x=50, y=curses.LINES - 1)
+                        functions.placeCursor(self.screen, x=51, y=curses.LINES - 1)
                         c = self.screen.getch()  # Gets the character they type
                         if c == ord("q"):  # Immediately exits if they pressed q
                             continue
@@ -85,7 +95,7 @@ class EditSearch:
                             # Update prompt to tell them to 'enter q" instead of 'press q"
                             page.refreshTooltip("enter",(len(self.search.subreddits)),print=True)
                             string = functions.getInput(
-                                screen=self.screen, page=scrollingList, tooltip=toolTip, unget=c, col=50
+                                screen=self.screen, unget=c, col=51
                             )
 
                             # Attempts to convert their input into an integer.
@@ -97,11 +107,48 @@ class EditSearch:
 
                             # Checks if it is within the bounds of post numbersS
                             if val >= 0 and val < len(self.search.subreddits):
-                                if self.editSubreddit(val):
+                                changes = self.editSubreddit(val)
+                                if changes["resized"]:
                                     page.resize()
+                                    resized = True
+                                if changes["updated"]:
+                                    if not changes["resized"]:
+                                        page.updateContent()
+
+                    case "scrollLeft":
+                        page.refreshTooltip("input",print=True)
+                        name = functions.getInput(self.screen,col=43)
+                        self.search.addSub(search.SubredditSearch(name))
+                        page.updateContent()
+                    case "scrollRight":
+                        if self.search.subreddits is not None:
+                            # Updates the tooltip and places the cursor for input
+                            page.refreshTooltip("press",(len(self.search.subreddits)),print=True)
+
+                            functions.placeCursor(self.screen, x=51, y=curses.LINES - 1)
+                            c = self.screen.getch()  # Gets the character they type
+                            if c == ord("q"):  # Immediately exits if they pressed q
+                                continue
+                            else:
+                                # Update prompt to tell them to "enter q" instead of "press q"
+                                page.refreshTooltip("enter",(len(self.search.subreddits)),print=True)
+                                string = functions.getInput(
+                                    screen=self.screen, unget=c, col=51
+                                )
+
+                                # Attempts to convert their input into an integer.
+                                val = 0
+                                try:
+                                    val = int(string) - 1
+                                except ValueError:
+                                    continue
+
+                                if val >=0 and val < len(self.search.subreddits):
+                                    del self.search.subreddits[val]
+                                    page.updateContent()
+
                     case _:
-                        if page.manipulate(input)  == 1:
-                            resized = True  
+                        page.manipulate(input)
 
 
     def editSubreddit(self,index):
@@ -136,6 +183,7 @@ class EditSearch:
         page.switchTooltip("main")
 
         resized = False
+        updated = False
 
         while True:
             # Updates the tooltip, and prints the headers to the screen
@@ -149,7 +197,7 @@ class EditSearch:
                 case "timeout":
                     continue
                 case "exit":
-                    return resized
+                    return {"resized":resized,"updated":updated}
                 case "enter":
                     # Updates the tooltip and places the cursor for input
                     page.refreshTooltip("press",(6),print=True)
@@ -175,9 +223,15 @@ class EditSearch:
 
                         # Checks if it is within the bounds of post numbersS
                         if val >= 0 and val < 6:
-                            if self.editFilter(index,val):
-                                page.resize()
+                            changes = self.editFilter(index,val)
+                            if changes["resized"]:
                                 resized = True
+                                page.resize()
+                            if changes["updated"]:
+                                updated = True
+                                if not changes["resized"]:
+                                    page.updateContent()
+
                 case _:
                     if page.manipulate(filterInput) == 1:
                         resized = True
@@ -206,6 +260,13 @@ class EditSearch:
                     curses.COLS,
                 )
             ],
+            "input": [
+                scroll.Line(
+                    ["Enter the filter, then press enter:", "(enter q to exit)"],
+                    [0, "max-18"],
+                    curses.COLS,
+                )
+            ],
         }
         toolTip = scroll.ToolTip(toolTipTypes["main"])
         scrollingList = scroll.ScrollingList(self.screen,"",tooltip=toolTip)
@@ -213,28 +274,29 @@ class EditSearch:
         content = None
         match filterValue:
             case 0:
-                content = self.search.subreddits[index].titleWL
+                content = self.subreddit.titleWL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeWT,content=content,minRows=self.minLines,minCols=self.minCols)
             case 1:
-                content = self.search.subreddits[index].titleBL
+                content = self.subreddit.titleBL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeBT,content=content,minRows=self.minLines,minCols=self.minCols)
             case 2:
-                content = self.search.subreddits[index].flairWL
+                content = self.subreddit.flairWL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeWF,content=content,minRows=self.minLines,minCols=self.minCols)
             case 3:
-                content = self.search.subreddits[index].flairBL
+                content = self.subreddit.flairBL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeBF,content=content,minRows=self.minLines,minCols=self.minCols)
             case 4:
-                content = self.search.subreddits[index].postWL
+                content = self.subreddit.postWL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeWP,content=content,minRows=self.minLines,minCols=self.minCols)
             case 5:
-                content = self.search.subreddits[index].postBL
+                content = self.subreddit.postBL
                 page.update(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.treeBP,content=content,minRows=self.minLines,minCols=self.minCols)
             case _:
                 return False
         page.updateContent(content)
         page.switchTooltip("main")
         resized = False
+        updated = False
         
         while True:
             # Updates the tooltip, and prints the headers to the screen
@@ -248,10 +310,68 @@ class EditSearch:
                 case "timeout":
                     continue
                 case "exit":
-                    return resized
-                case "enter":
+                    return {"resized":resized,"updated":updated}
+                case "scrollLeft":
+                    page.refreshTooltip("input",print=True)
+                    name = functions.getInput(self.screen,col=36)
+                    match filterValue:
+                        case 0:
+                            self.subreddit.add(titleWL=name)
+                            content = self.subreddit.titleWL
+                        case 1:
+                            self.subreddit.add(titleBL=name)
+                            content = self.subreddit.titleBL
+                        case 2:
+                            self.subreddit.add(flairWL=name)
+                            content = self.subreddit.flairWL
+                        case 3:
+                            self.subreddit.add(flairBL=name)
+                            content = self.subreddit.flairBL
+                        case 4:
+                            self.subreddit.add(postWL=name)
+                            content = self.subreddit.postWL
+                        case 5:
+                            self.subreddit.add(postBL=name)
+                            content = self.subreddit.postBL
+                    page.updateContent(content)
+                    updated = True
+
+                    match filterValue:
+                        case 0:
+                            pass
+                case "scrollRight":
                     # Updates the tooltip and places the cursor for input
-                    page.refreshTooltip("press",len(content),print=True)
+                    match filterValue:
+                        case 0:
+                            if self.subreddit.titleWL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.titleWL),print=True)
+                            else:
+                                continue
+                        case 1:
+                            if self.subreddit.titleBL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.titleBL),print=True)
+                            else:
+                                continue
+                        case 2:
+                            if self.subreddit.flairWL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.flairWL),print=True)
+                            else:
+                                continue
+                        case 3:
+                            if self.subreddit.flairBL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.flairBL),print=True)
+                            else:
+                                continue
+                        case 4:
+                            if self.subreddit.postWL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.postWL),print=True)
+                            else:
+                                continue
+                        case 5:
+                            if self.subreddit.postBL is not None:
+                                page.refreshTooltip("press",len(self.subreddit.postBL),print=True)
+                            else:
+                                continue
 
                     functions.placeCursor(self.screen, x=48, y=curses.LINES - 1)
                     c = self.screen.getch()  # Gets the character they type
@@ -260,9 +380,40 @@ class EditSearch:
 
                     else:  # Otherwise
                         # Update prompt to tell them to 'enter q" instead of 'press q"
-                        page.refreshTooltip("enter",len(content),print=True)
+                        match filterValue:
+                            case 0:
+                                if self.subreddit.titleWL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.titleWL),print=True)
+                                else:
+                                    continue
+                            case 1:
+                                if self.subreddit.titleBL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.titleBL),print=True)
+                                else:
+                                    continue
+                            case 2:
+                                if self.subreddit.flairWL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.flairWL),print=True)
+                                else:
+                                    continue
+                            case 3:
+                                if self.subreddit.flairBL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.flairBL),print=True)
+                                else:
+                                    continue
+                            case 4:
+                                if self.subreddit.postWL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.postWL),print=True)
+                                else:
+                                    continue
+                            case 5:
+                                if self.subreddit.postBL is not None:
+                                    page.refreshTooltip("enter",len(self.subreddit.postBL),print=True)
+                                else:
+                                    continue
+                                
                         string = functions.getInput(
-                            screen=self.screen, page=scrollingList, tooltip=toolTip, unget=c, col=48
+                            screen=self.screen, unget=c, col=48
                         )
 
                         # Attempts to convert their input into an integer.
@@ -271,10 +422,31 @@ class EditSearch:
                             val = int(string) - 1
                         except ValueError:
                             continue
-
-                        # Checks if it is within the bounds of post numbersS
-                        if val >= 0 and val < 6:
-                            pass
+                        
+                        
+                        # Checks if it is within the bounds of post numbers
+                        match filterValue:
+                            case 0:
+                                if val >= 0 and val < len(self.subreddit.titleWL):
+                                    del (self.subreddit.titleWL[val])
+                            case 1:
+                                if val >= 0 and val < len(self.subreddit.titleBL):
+                                    del (self.subreddit.titleBL[val])
+                            case 2:
+                                if val >= 0 and val < len(self.subreddit.flairWL):
+                                    del (self.subreddit.flairWL[val])
+                            case 3:
+                                if val >= 0 and val < len(self.subreddit.flairBL):
+                                    del (self.subreddit.flairBL[val])
+                            case 4:
+                                if val >= 0 and val < len(self.subreddit.postWL):
+                                    del (self.subreddit.postWL[val])
+                            case 5:
+                                if val >= 0 and val < len(self.subreddit.postBL):
+                                   del (self.subreddit.postBL[val])
+                        
+                        page.updateContent()
+                        
                 case _:
                     if page.manipulate(input) == 1:
                         resized = True

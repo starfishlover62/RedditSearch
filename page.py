@@ -113,7 +113,7 @@ class Page:
     def updateTooltip(self,vars,index=0):
         self.tooltip.updateVars(vars,index)
     
-    def refreshTooltip(self,key,vars,index=0,print=False,numLines=None):
+    def refreshTooltip(self,key,vars=None,index=0,print=False,numLines=None):
         self.switchTooltip(key)
         self.updateTooltip(vars,index)
         if print:

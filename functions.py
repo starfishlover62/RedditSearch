@@ -253,22 +253,27 @@ def viewSearch(screen, search, minCols=80, minLines=24):
                     break
 
                 case "enter":
-                    editSearch.EditSearch(screen,search,minCols,minLines)
+                    resized = editSearch.EditSearch(screen,search,minCols,minLines)
+                    if resized:
+                        viewPage.resize()
+                    else:
+                        viewPage.updateContent()
 
                 case _:
                     viewPage.manipulate(viewChar)
 
 
-def getInput(screen, page, tooltip, prompt=None, unget=None, row=None, col=None):
+def getInput(screen, page=None, tooltip=None, prompt=None, unget=None, row=None, col=None):
     """
     Gets multi-character input from the user and returns it.
     """
-    if prompt is not None: # Display the prompt for input that was specified
+    if prompt is not None and tooltip is not None: # Display the prompt for input that was specified
         if isinstance(prompt, list):
             tooltip.replace(prompt)
         else:
             tooltip.replace([prompt])
-    page.print()
+    if page is not None:
+        page.print()
 
     # Places the curser at the end of the prompt, or where specified by row and col
     if row is None:
