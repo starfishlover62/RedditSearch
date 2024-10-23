@@ -33,8 +33,8 @@ class EditSearch:
         toolTipTypes = {
             "main": [
                 scroll.Line(
-                    ["<-- Line %i/%i -- >", "(press e to select a subreddit to edit)"],
-                    [0, "max-40"],
+                    ["<-- Line %i/%i -- >", "(a) add, (e) select, (d) delete, or (q) quit"],
+                    [0, "max-45"],
                     curses.COLS,
                 )
             ],
@@ -296,8 +296,8 @@ class EditSearch:
         toolTipTypes = {
             "main": [
                 scroll.Line(
-                    ["<-- Line %i/%i -- >", "(press e to select a filter to edit)"],
-                    [0, "max-37"],
+                    ["<-- Line %i/%i -- >", "(a) add, (d) delete, or (q) quit"],
+                    [0, "max-33"],
                     curses.COLS,
                 )
             ],
@@ -323,8 +323,8 @@ class EditSearch:
             ],
             "input": [
                 scroll.Line(
-                    ["Enter the filter, then press enter:", "(enter q to exit)"],
-                    [0, "max-18"],
+                    ["Enter the filter, then press enter:"],
+                    [0],
                     curses.COLS,
                 )
             ],
