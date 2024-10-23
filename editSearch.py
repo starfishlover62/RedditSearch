@@ -13,7 +13,7 @@ class EditSearch:
         self.subreddit = None
         
         if launch:
-            self.launch()
+            return self.launch()
     
     def update(self,screen=None,search=None,minCols=None,minLines=None):
         if screen is not None:
@@ -30,59 +30,59 @@ class EditSearch:
 
     def editSearch(self):
     
-        if self.search.subreddits is not None:
 
-            toolTipTypes = {
-                "main": [
-                    scroll.Line(
-                        ["<-- Line %i/%i -- >", "(press e to select a subreddit to edit)"],
-                        [0, "max-40"],
-                        curses.COLS,
-                    )
-                ],
-                "press": [
-                    scroll.Line(
-                        ["Enter a subreddit number (1-%i), then press enter:", "(press q to exit)"],
-                        [0, "max-18"],
-                        curses.COLS,
-                    )
-                ],
-                "enter": [
-                    scroll.Line(
-                        ["Enter a subreddit number (1-%i), then press enter:", "(enter q to exit)"],
-                        [0, "max-18"],
-                        curses.COLS,
-                    )
-                ],
-                "input": [
-                    scroll.Line(
-                        ["Enter name of subreddit, then press enter:", "(enter q to exit)"],
-                        [0, "max-18"],
-                        curses.COLS,
-                    )
-                ],
-            }
-            toolTip = scroll.ToolTip(toolTipTypes["main"])
-            scrollingList = scroll.ScrollingList(self.screen,self.viewSearchTree(self.search),tooltip=toolTip)
+        toolTipTypes = {
+            "main": [
+                scroll.Line(
+                    ["<-- Line %i/%i -- >", "(press e to select a subreddit to edit)"],
+                    [0, "max-40"],
+                    curses.COLS,
+                )
+            ],
+            "press": [
+                scroll.Line(
+                    ["Enter a subreddit number (1-%i), then press enter:", "(press q to exit)"],
+                    [0, "max-18"],
+                    curses.COLS,
+                )
+            ],
+            "enter": [
+                scroll.Line(
+                    ["Enter a subreddit number (1-%i), then press enter:", "(enter q to exit)"],
+                    [0, "max-18"],
+                    curses.COLS,
+                )
+            ],
+            "input": [
+                scroll.Line(
+                    ["Enter name of subreddit, then press enter:", "(enter q to exit)"],
+                    [0, "max-18"],
+                    curses.COLS,
+                )
+            ],
+        }
+        toolTip = scroll.ToolTip(toolTipTypes["main"])
+        scrollingList = scroll.ScrollingList(self.screen,self.viewSearchTree(self.search),tooltip=toolTip)
 
-            page = p.Page(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.viewSearchTree,content=self.search,minRows=self.minLines,minCols=self.minCols)
-            page.switchTooltip("main")
-                    
-            while True:
-                # Updates the tooltip, and prints the headers to the screen
-                page.refreshTooltip("main",[page.currentLine() + 1, scrollingList.maxLine + 1],print=True)
+        page = p.Page(screen=self.screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=self.viewSearchTree,content=self.search,minRows=self.minLines,minCols=self.minCols)
+        page.switchTooltip("main")
+                
+        while True:
+            # Updates the tooltip, and prints the headers to the screen
+            page.refreshTooltip("main",[page.currentLine() + 1, scrollingList.maxLine + 1],print=True)
 
-                # Gets input from the user
+            # Gets input from the user
 
-                input = functions.eventListener(self.screen)
-                resized = False
+            input = functions.eventListener(self.screen)
+            resized = False
 
-                match input:
-                    case "timeout":
-                        continue
-                    case "exit":
-                        return resized
-                    case "enter":
+            match input:
+                case "timeout":
+                    continue
+                case "exit":
+                    return resized
+                case "enter":
+                    if self.search.subreddits is not None and len(self.search.subreddits) > 0:
                         # Updates the tooltip and places the cursor for input
                         page.refreshTooltip("press",(len(self.search.subreddits)),print=True)
 
@@ -115,40 +115,40 @@ class EditSearch:
                                     if not changes["resized"]:
                                         page.updateContent()
 
-                    case "scrollLeft":
-                        page.refreshTooltip("input",print=True)
-                        name = functions.getInput(self.screen,col=43)
-                        self.search.addSub(search.SubredditSearch(name))
-                        page.updateContent()
-                    case "scrollRight":
-                        if self.search.subreddits is not None:
-                            # Updates the tooltip and places the cursor for input
-                            page.refreshTooltip("press",(len(self.search.subreddits)),print=True)
+                case "scrollLeft":
+                    page.refreshTooltip("input",print=True)
+                    name = functions.getInput(self.screen,col=43)
+                    self.search.addSub(search.SubredditSearch(name))
+                    page.updateContent()
+                case "scrollRight":
+                    if self.search.subreddits is not None and len(self.search.subreddits) > 0:
+                        # Updates the tooltip and places the cursor for input
+                        page.refreshTooltip("press",(len(self.search.subreddits)),print=True)
 
-                            functions.placeCursor(self.screen, x=51, y=curses.LINES - 1)
-                            c = self.screen.getch()  # Gets the character they type
-                            if c == ord("q"):  # Immediately exits if they pressed q
+                        functions.placeCursor(self.screen, x=51, y=curses.LINES - 1)
+                        c = self.screen.getch()  # Gets the character they type
+                        if c == ord("q"):  # Immediately exits if they pressed q
+                            continue
+                        else:
+                            # Update prompt to tell them to "enter q" instead of "press q"
+                            page.refreshTooltip("enter",(len(self.search.subreddits)),print=True)
+                            string = functions.getInput(
+                                screen=self.screen, unget=c, col=51
+                            )
+
+                            # Attempts to convert their input into an integer.
+                            val = 0
+                            try:
+                                val = int(string) - 1
+                            except ValueError:
                                 continue
-                            else:
-                                # Update prompt to tell them to "enter q" instead of "press q"
-                                page.refreshTooltip("enter",(len(self.search.subreddits)),print=True)
-                                string = functions.getInput(
-                                    screen=self.screen, unget=c, col=51
-                                )
 
-                                # Attempts to convert their input into an integer.
-                                val = 0
-                                try:
-                                    val = int(string) - 1
-                                except ValueError:
-                                    continue
+                            if val >=0 and val < len(self.search.subreddits):
+                                del self.search.subreddits[val]
+                                page.updateContent()
 
-                                if val >=0 and val < len(self.search.subreddits):
-                                    del self.search.subreddits[val]
-                                    page.updateContent()
-
-                    case _:
-                        page.manipulate(input)
+                case _:
+                    page.manipulate(input)
 
 
     def editSubreddit(self,index):

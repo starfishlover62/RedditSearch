@@ -109,7 +109,13 @@ class Search:
         self.subreddits = subreddits
     def addSub(self, subSearch):
         if isinstance(subSearch,SubredditSearch):
-            self.subreddits.append(subSearch)
+            if self.subreddits is not None:
+                self.subreddits.append(subSearch)
+            else:
+                if not isinstance(subSearch,list):
+                    self.subreddits = [subSearch]
+                else:
+                    self.subreddits = subSearch
     def update(self, name=None, lastSearchTime=None, subreddits=None):
         # Updates values if they are presented
         if name is not None:

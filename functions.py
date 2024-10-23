@@ -301,127 +301,75 @@ def getInput(screen, page=None, tooltip=None, prompt=None, unget=None, row=None,
     return string
 
 
-def createSearch(screen):
+def createSearch(screen,minCols=80,minLines=24):
     """
     Creates a search object found in search.py. Prompts user to input data to create this object
     """
 
-    # Clears out the screen to prepare it for creating the search
-    screen.clear()
-    screen.refresh()
-
-    stringList = []
-    questions = [
-        "Name of search:",
-        "Subreddit:",
-        "Whitelisted title:",
-        "Blacklisted title:",
-        "Whitelisted flair:",
-        "Blacklisted flair:",
-        "Whitelisted word in post:",
-        "Blacklisted word in post:",
-    ]
-    questionIndex = 0  # The current index of questions array
-    returnSearch = search.Search()
-    lineNum = 0
-    quit = False
-    toolTip = scroll.ToolTip(
-        [
-            questions[questionIndex],
-            formatString.combineStrings(
-                f"<-- Line {lineNum + 1} -- >",
-                "(press q to quit)",
+    toolTipTypes = {
+        "press": [
+            scroll.Line(
+                ['(name can not be "q")'],
+                [0],
                 curses.COLS,
-                0,
-                curses.COLS - 18,
             ),
-        ]
-    )
-    page = scroll.ScrollingList(screen, stringList, 0, toolTip)
-    temp = []
+            scroll.Line(
+                ["Enter name of search, then press enter:", "(press q to exit)"],
+                [0, "max-18"],
+                curses.COLS,
+            )
+        ],
+        "enter": [
+            scroll.Line(
+                ['(name can not be "q")'],
+                [0],
+                curses.COLS,
+            ),
+            scroll.Line(
+                ["Enter name of search, then press enter:", "(enter q to exit)"],
+                [0, "max-18"],
+                curses.COLS,
+            )
+        ],
+        "save": [
+            scroll.Line(
+                ["Would you like to save? [Y/N]:", "(press enter)"],
+                [0, "max-14"],
+                curses.COLS,
+            )
+        ],
+    }
+    toolTip = scroll.ToolTip(toolTipTypes["press"])
+    scrollingList = scroll.ScrollingList(screen,[],tooltip=toolTip)
 
-    while True:
-        if quit:
-            break
+    
+    page = p.Page(screen=screen,scrollingList=scrollingList,tooltip=toolTip,tooltipTypes=toolTipTypes,minRows=minLines,minCols=minCols)
+    page.refreshTooltip("press",print=True)
 
-        page.print()
-        if questionIndex == 0:
-            # Gets search name
-            prompt = questions[questionIndex]
-            string = getInput(prompt=prompt, screen=screen, page=page, tooltip=toolTip)
-            returnSearch.update(name=string)
-            questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch, curses.COLS, config.fancy_characters)
-            page.updateStrings(screen, stringList, 0, toolTip)
+    placeCursor(screen, x=40, y=curses.LINES - 1)
+    c = screen.getch()  # Gets the character they type
+    if c == ord("q"):  # Immediately exits if they pressed q
+        return None
 
-        elif questionIndex == 1:
-            # Gets first subreddit name
-            prompt = questions[questionIndex]
-            string = getInput(prompt=prompt, screen=screen, page=page, tooltip=toolTip)
-            if (
-                returnSearch.subreddits is None
-            ):  # If this is the first sub search, set subreddits value
-                returnSearch.update(subreddits=[search.SubredditSearch()])
-            else:  # Otherwise, append a new subreddit search
-                returnSearch.update(
-                    subreddits=returnSearch.subreddits.append(search.SubredditSearch())
-                )
-            returnSearch.subreddits[-1].update(sub=string)
-            questionIndex = questionIndex + 1
-            stringList = searchTree(returnSearch, curses.COLS, config.fancy_characters)
-            page.updateStrings(screen, stringList, 0, toolTip)
+    else:  # Otherwise
+        # Update prompt to tell them to 'enter q" instead of 'press q"
+        page.refreshTooltip("enter",print=True)
+        name = getInput(screen,unget=c,col=40)
+        if name.lower == "q":
+            return None
+        newSearch = search.Search(name)
+        resized = editSearch.EditSearch(screen,newSearch,minCols=minCols,minLines=minLines)
+        if resized:
+            page.resize()
+        else:
+            page.updateContent()
+        page.refreshTooltip("save",print=True)
+        answer = getInput(screen,col=31).lower()
+        if answer == "y" or answer == "yes":
+            return newSearch
+        else:
+            return None
 
-        else:  # For all questions except name of search
-            while True:
-                prompt = f"Add a {questions[questionIndex]} (y/n):"
-                toolTip.replace([prompt])
-                page.print()
-                placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
-                c = screen.getch()  # Gets the character they type
-
-                # User entered n. Moves on to next question. If this was the last question, asks
-                # user if they want to add another subreddit.
-                if c == ord("n"):
-                    questionIndex = questionIndex + 1
-                    temp = []
-                    if questionIndex >= len(questions):
-                        prompt = "Add another Subreddit (y/n):"
-                        toolTip.replace([prompt])
-                        page.print()
-                        placeCursor(screen, x=(len(prompt) + 1), y=curses.LINES - 1)
-                        answer = screen.getch()
-                        if answer == ord("n"):
-                            quit = True
-                            break
-                        else:
-                            questionIndex = 1
-                            break
-                elif c == ord("y"):  # Otherwise
-                    # Update prompt to remove option to quit
-                    prompt = f"{questions[questionIndex]}"
-                    string = getInput(
-                        prompt=prompt, screen=screen, page=page, tooltip=toolTip
-                    )
-                    if not string.strip() == "":
-                        temp.append(string)
-                        if questionIndex == 2:
-                            returnSearch.subreddits[-1].update(titleWL=temp)
-                        elif questionIndex == 3:
-                            returnSearch.subreddits[-1].update(titleBL=temp)
-                        elif questionIndex == 4:
-                            returnSearch.subreddits[-1].update(flairWL=temp)
-                        elif questionIndex == 5:
-                            returnSearch.subreddits[-1].update(flairBL=temp)
-                        elif questionIndex == 6:
-                            returnSearch.subreddits[-1].update(postWL=temp)
-                        elif questionIndex == 7:
-                            returnSearch.subreddits[-1].update(postBL=temp)
-                        stringList = searchTree(
-                            returnSearch, curses.COLS, config.fancy_characters
-                        )
-                        page.updateStrings(screen, stringList, 0, toolTip)
-
-    return returnSearch
 
 
 def completeSearch(reddit,searches,searchIndex,posts=None,screen=None,minCols=80,minLines=24,save=True,searchesPath=None):
