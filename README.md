@@ -149,7 +149,7 @@ Search objects are stored using Javascript Object Notation (JSON), and are store
         "searches": [
             {
                 "name": "food",
-                lastsearchTime: null,
+                "lastsearchTime": null,
                 "subreddits": [
                     {
 
@@ -167,7 +167,7 @@ Search objects are stored using Javascript Object Notation (JSON), and are store
             "searches": [
                 {
                     "name": "food",
-                    lastsearchTime: null,
+                    "lastsearchTime": null,
                     "subreddits": [
                         {
                         "name": ,
@@ -193,7 +193,7 @@ Search objects are stored using Javascript Object Notation (JSON), and are store
             "searches": [
                 {
                     "name": "food",
-                    lastsearchTime: null,
+                    "lastsearchTime": null,
                     "subreddits": [
                         {
                             "name": "food",
@@ -238,7 +238,7 @@ Search objects are stored using Javascript Object Notation (JSON), and are store
             "searches": [
                 {
                     "name": "food",
-                    lastsearchTime: null,
+                    "lastsearchTime": null,
                     "subreddits": [
                         {
                             "name": "sub1",
@@ -370,4 +370,4 @@ The following shortcuts will open a page on the official Reddit website, in your
 
 ## Known Issues
 
-* Terminal resizing is only supported on the search in progress, browsing, and post viewing screens.
+* Currently none :)
