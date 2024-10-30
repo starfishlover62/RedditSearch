@@ -94,6 +94,14 @@ def getNumPosts(reddit, searchCriteria, numPosts=20):
 
 
 def listSearches(searches):
+    """Returns a list of searches provided, each enumerated
+
+    Args:
+        searches (list): list of Search objects. Each Search object should have a name variable
+
+    Returns:
+        list: a list of strings of the format x.name
+    """
     return [f"{n+1}. {searches[n].name}" for n in range(len(searches))]
 
 
