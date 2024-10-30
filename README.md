@@ -6,6 +6,7 @@ Searches subreddits and filters by flair or title.
 
 This program has only been tested on an Ubuntu-based Linux system. It should work on all Linux systems however.
 
+Will only work on Python versions 3.12 and greater.
 **Tested Python versions**: 3.12-3.13
 
 **Table of Contents**:  
