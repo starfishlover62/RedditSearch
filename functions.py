@@ -106,14 +106,21 @@ def listSearches(searches):
 
 
 def getSearchNum(screen, searches, minCols=80, minLines=24):
-    """
-    Displays a list of searches, and has the user select one to be performed.
+    """Displays a list of searches, and has the user select one to be performed. 
     Also allows the user to create or delete searches.
-    Return Values:
-        -3 : Search was deleted (therefore save)
-        -2 : Searches parameter is empty, or the user selected to create a new search
-        -1 : User pressed q to quit
-        >=0: The index of the searches list that was chosen
+
+    Args:
+        screen (curses.screen): The screen to display output to
+        searches (list): list of search objects that will be chosen from
+        minCols (int, optional): Minimum number of columns to use. Defaults to 80.
+        minLines (int, optional): Minimum number of rows to use. Defaults to 24.
+
+    Returns:
+        int:
+            -3: Search was deleted, therefore save  
+            -2: Searches parameter is empty, or the user selected to create a new search  
+            -1: User pressed q to quit  
+            \>=0: The index of the searches list that was chosen
     """
     if searches is not None:
         # Defines the different tooltips
