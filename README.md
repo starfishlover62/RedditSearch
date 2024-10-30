@@ -1,5 +1,7 @@
 # RedditSearch
 
+[![asciicast](https://asciinema.org/a/Diol3laQUgbUkGypXuJ62v6Lo.svg)](https://asciinema.org/a/Diol3laQUgbUkGypXuJ62v6Lo)
+
 Searches subreddits and filters by flair or title.
 
 This program has only been tested on an Ubuntu-based Linux system. It should work on all Linux systems however.
