@@ -6,6 +6,7 @@ import page as p
 import scroll
 import search
 import tree
+import keybindings as kb
 
 
 class EditSearch:
@@ -91,7 +92,7 @@ class EditSearch:
 
             # Gets input from the user
 
-            input = functions.eventListener(self.screen)
+            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
             resized = False
 
             match input:
@@ -140,12 +141,12 @@ class EditSearch:
                                     if not changes["resized"]:
                                         page.updateContent()
 
-                case "scrollLeft":
+                case "add":
                     page.refreshTooltip("input", print=True)
                     name = functions.getInput(self.screen, col=43)
                     self.search.addSub(search.SubredditSearch(name))
                     page.updateContent()
-                case "scrollRight":
+                case "delete":
                     if (
                         self.search.subreddits is not None
                         and len(self.search.subreddits) > 0
@@ -243,7 +244,7 @@ class EditSearch:
 
             # Gets input from the user
 
-            filterInput = functions.eventListener(self.screen)
+            filterInput = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.editKeys])
 
             match filterInput:
                 case "timeout":
@@ -421,14 +422,14 @@ class EditSearch:
 
             # Gets input from the user
 
-            input = functions.eventListener(self.screen)
+            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.editKeys])
 
             match input:
                 case "timeout":
                     continue
                 case "exit":
                     return {"resized": resized, "updated": updated}
-                case "scrollLeft":
+                case "add":
                     page.refreshTooltip("input", print=True)
                     name = functions.getInput(self.screen, col=36)
                     match filterValue:
@@ -456,7 +457,7 @@ class EditSearch:
                     match filterValue:
                         case 0:
                             pass
-                case "scrollRight":
+                case "delete":
                     # Updates the tooltip and places the cursor for input
                     match filterValue:
                         case 0:

@@ -300,7 +300,7 @@ def viewSearch(screen, search, minCols=80, minLines=24):
             )
 
             # Gets input from user
-            viewChar = eventListener(screen)
+            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
 
             match viewChar:
                 case "exit":  # Returns from function, signalling to exit search view
@@ -506,7 +506,7 @@ def performSearch(reddit, search, screen=None, minCols=80, minLines=24):
 
             if screen is not None:
                 resize = eventListener(
-                    screen, characters=False, timeout=5
+                    screen, bindings=[kb.controlKeys], characters=False, timeout=5
                 )  # Gets input from user. Only listens for terminal resizing
 
                 if resize == "resize":  # Resizes content if terminal was resized
@@ -753,7 +753,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             viewPage.refreshTooltip(
                 "main", [viewPage.currentLine() + 1, page.maxLine + 1], 0, print=True
             )
-            input = eventListener(screen)
+            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollVerticalKeys,kb.postKeys])
         skip = False
 
         match input:
@@ -917,7 +917,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
 
         # Gets input from the user
 
-        input = eventListener(screen)
+        input = eventListener(screen,bindings=[kb.controlKeys,kb.editKeys])
 
         match input:
             case "timeout":
