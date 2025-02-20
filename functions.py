@@ -612,10 +612,10 @@ def getHeaders(posts):
             try:
                 headers += formatString.enbox(  # Enboxes and stores the results
                     [
-                        f"{ticker}). {info["title"]}",
+                        f"{ticker}). {info['title']}",
                         info["author"],
                         info["flair"],
-                        f"Posted in ({info["sub"]}), {info["age"]}",
+                        f"Posted in ({info['sub']}), {info['age']}",
                     ],
                     curses.COLS,
                     fancy=config.fancy_characters,
@@ -656,7 +656,7 @@ def getPostInfo(post):
     age = "<NONE>"
     if post.created_utc is not None:
         age = (
-            f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),"ago")}"
+            f"{formatString.formatAge(int(currentTimestamp()-post.created_utc),'ago')}"
         )
 
     # Subreddit
@@ -706,7 +706,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
         info["title"],
         info["author"],
         info["flair"],
-        f"Posted in ({info["sub"]}), {info["age"]}",
+        f"Posted in ({info['sub']}), {info['age']}",
         "%separator%",
         formatString.removeNonAscii(post.selftext),
         "%separator%",
@@ -839,7 +839,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             case "url":
                 links = findURLs(post.selftext)
                 with open(config.link_output, "a") as f:
-                    f.write(f"{info["title"]}:\n")
+                    f.write(f"{info['title']}:\n")
                     f.write(f"\t{post.url}\n")
                     for link in links:
                         f.write(f"\t{link}\n")

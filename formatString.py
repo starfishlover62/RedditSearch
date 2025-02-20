@@ -214,7 +214,7 @@ def enbox(
     s = []
 
     # Creates the top border of the box
-    s.append(f"{topLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{topRight}")
+    s.append(f"{topLeft}{''.zfill(boxWidth-2).replace('0',horizontal)}{topRight}")
 
     for item in stringList:  # Loops through each item in the content list.
         if item is not None:
@@ -222,7 +222,7 @@ def enbox(
             if item == "%separator%":
                 # Adds a horizontal line
                 s.append(
-                    f"{sideLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{sideRight}"
+                    f"{sideLeft}{''.zfill(boxWidth-2).replace('0',horizontal)}{sideRight}"
                 )
             else:
                 # Breaks the content into lines that will fit in the text box.
@@ -233,5 +233,5 @@ def enbox(
                     s.append(f"{vertical}{line}{vertical}")
 
     # Creates bottom line
-    s.append(f"{bottomLeft}{"".zfill(boxWidth-2).replace("0",horizontal)}{bottomRight}")
+    s.append(f"{bottomLeft}{''.zfill(boxWidth-2).replace('0',horizontal)}{bottomRight}")
     return s

@@ -155,7 +155,7 @@ try:
                     if not valid:  # Closes window, then prints out all valid searches found in the file, and finally exits
                         functions.close(screen)
                         print(
-                            f"No search by the name of '{args["name"]}' exists\nThe following are valid searches:"
+                            f"No search by the name of \'{args['name']}\' exists\nThe following are valid searches:"
                         )
                         for item in searches:
                             print(f"\t{item.name}")
@@ -232,7 +232,7 @@ try:
                     screen.addstr(
                         0,
                         0,
-                        f"This search was last performed {formatString.formatAge(currentTime-searchTime,"ago.")}",
+                        f"This search was last performed {formatString.formatAge(currentTime-searchTime,'ago.')}",
                     )
                     screen.addstr(1, 0, "Press q to quit,")
                     screen.addstr(2, 0, "y to perform the search anyways,")
