@@ -6,3 +6,4 @@ searches_file="searches.json" # Default is searches.json. Change this value to u
 link_output="links.txt" # This is where urls are saved when you request to save them
 
 fancy_characters=True # Default is True. Change to False if there are issues with rendering the following: '┌ ┐ └ ┘ ├ ┤ │ ─'
+praw_check=True # Checking that praw is functioning. Should always be True. Change to False only for debugging

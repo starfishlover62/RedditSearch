@@ -58,15 +58,17 @@ reddit_read_only = praw.Reddit(
 )  # your user agent
 
 # Pulls a post to test that config options are properly set
-try:
-    for post in reddit_read_only.subreddit("reddit").new(limit=1):
-        post = post
-except prawcore.exceptions.ResponseException:
-    print("Bad HTTP Response")
-    print(
-        "Please check that the client id, secret, and user agent are properly configured in config.py"
-    )
-    sys.exit(1)
+if config.praw_check:
+    try:
+        for post in reddit_read_only.subreddit("reddit").new(limit=1):
+            post = post
+    except prawcore.exceptions.ResponseException:
+        print("Bad HTTP Response")
+        print(
+            "Please check that the client id, secret, and user agent are properly configured in config.py"
+        )
+        sys.exit(1)
+
 
 # Ensures that the path to the searches file has been set
 searchesPath = config.searches_file
