@@ -22,6 +22,8 @@ import scroll
 import dump
 import page as p
 import editSearch
+import exceptions
+import keybindings as kb
 
 import config
 
@@ -156,7 +158,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
         mode = {
             "enter": "~Selecting~",
             "view": "~Viewing~",
-            "scrollRight": "~Deleting~",
+            "delete": "~Deleting~",
         }
         toolTip = scroll.ToolTip(toolTipTypes["main"])
 
@@ -180,7 +182,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             page.refreshTooltip("main", page.currentLine() + 1, index=1, print=True)
 
             # Gets single character input from user
-            char = eventListener(screen)
+            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
             match char:
                 case "timeout":
                     continue
@@ -188,11 +190,11 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
                 case "exit":  # Returns from function, signalling to quit program
                     return -1
 
-                case "scrollLeft":  # 'a' was pressed. Adds a search
+                case "add":  # 'a' was pressed. Adds a search
                     return -2
 
                 # User wants to perform, view, or delete a search
-                case "enter" | "scrollRight" | "view":
+                case "enter" | "delete" | "view":
                     # Tells user to press 'q' to exit
                     page.refreshTooltip(
                         "press", page.currentLine() + 1, index=1, print=False
@@ -233,7 +235,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
 
                     # The val must be a valid index in the list of searches
                     if val >= 0 and val < len(searches):
-                        if char == "scrollRight":  # 'd' key for delete
+                        if char == "delete":  # 'd' key for delete
                             del searches[val]
                             return -3
                         elif char == "view":  # Views search
@@ -992,17 +994,47 @@ def isValidSubreddit(userReddit, name):
     return 1
 
 
-def eventListener(screen, characters=True, anyChar=False, timeout=100):
+def eventListener(screen, bindings:list|dict =None, characters=True, anyChar=False, timeout=100):
     """
     Waits for a single character input from the user.
+    bindings: a list of dictionaries containing keys and their output
     characters: is whether it will listen for characters for input, or just terminal resizing.
     anyChar: will return any for any character input.
     timeout: is the number of milliseconds the function will wait for a response before returning timeout
     """
+    
+    if bindings is None and anyChar != True:
+        raise exceptions.NoBindingError
+    if isinstance(bindings,dict):
+        bindings = [bindings]
     try:
         screen.timeout(timeout)
         char = screen.getch()
-        if characters:
+        if char == curses.KEY_RESIZE:
+            screen.timeout(-1)
+            return "resize"
+        elif anyChar:
+            retVal = ""
+            if char == -1:
+                retVal = "timeout"
+            else:
+                retVal = "any"
+            screen.timeout(-1)
+            return retVal
+        elif characters:
+            if not bindings:
+                screen.timeout(-1)
+                raise exceptions.NoBindingError
+            else:
+                retVal = ""
+                for item in bindings:
+                    try:
+                        retVal = item[char]
+                        screen.timeout(-1)
+                        return retVal
+                    except KeyError:
+                        pass
+            """
             charMap = {ord("q"):"exit",
                        ord("w"):"scrollUp",
                        ord("s"):"scrollDown",
@@ -1032,67 +1064,61 @@ def eventListener(screen, characters=True, anyChar=False, timeout=100):
             if retVal is not None:
                 screen.timeout(-1)
                 return retVal
-            # if char == ord("q"):
-            #     screen.timeout(-1)
-            #     return "exit"
-            # elif char == curses.KEY_UP or char == ord("w"):
-            #     screen.timeout(-1)
-            #     return "scrollUp"
-            # elif char == curses.KEY_DOWN or char == ord("s"):
-            #     screen.timeout(-1)
-            #     return "scrollDown"
-            # elif char == curses.KEY_LEFT or char == ord("a"):
-            #     screen.timeout(-1)
-            #     return "scrollLeft"
-            # elif char == curses.KEY_RIGHT or char == ord("d"):
-            #     screen.timeout(-1)
-            #     return "scrollRight"
-            # elif char == ord("t"):
-            #     screen.timeout(-1)
-            #     return "scrollTop"
-            # elif char == ord("b"):
-            #     screen.timeout(-1)
-            #     return "scrollBottom"
-            # elif char == ord("r"):
-            #     screen.timeout(-1)
-            #     return "refresh"
-            # elif char == ord("e"):
-            #     screen.timeout(-1)
-            #     return "enter"
-            # elif char == ord("v"):
-            #     screen.timeout(-1)
-            #     return "view"
-            # elif char == ord("h"):
-            #     screen.timeout(-1)
-            #     return "help"
-            # elif char == ord("o"):
-            #     screen.timeout(-1)
-            #     return "open"
-            # elif char == ord("c"):
-            #     screen.timeout(-1)
-            #     return "copy"
-            # elif char == ord("m"):
-            #     screen.timeout(-1)
-            #     return "message"
-            # elif char == ord("u"):
-            #     screen.timeout(-1)
-            #     return "url"
-            # elif char == ord("i"):
-            #     screen.timeout(-1)
-            #     return "image"
-        if char == curses.KEY_RESIZE:
-            screen.timeout(-1)
-            return "resize"
-        else:
-            if anyChar:
-                if char == -1:
-                    screen.timeout(-1)
-                    return "timeout"
-                else:
-                    screen.timeout(-1)
-                    return "any"
-            else:
+            """
+            """
+            if char == ord("q"):
                 screen.timeout(-1)
-                return "timeout"
+                return "exit"
+            elif char == curses.KEY_UP or char == ord("w"):
+                screen.timeout(-1)
+                return "scrollUp"
+            elif char == curses.KEY_DOWN or char == ord("s"):
+                screen.timeout(-1)
+                return "scrollDown"
+            elif char == curses.KEY_LEFT or char == ord("a"):
+                screen.timeout(-1)
+                return "scrollLeft"
+            elif char == curses.KEY_RIGHT or char == ord("d"):
+                screen.timeout(-1)
+                return "scrollRight"
+            elif char == ord("t"):
+                screen.timeout(-1)
+                return "scrollTop"
+            elif char == ord("b"):
+                screen.timeout(-1)
+                return "scrollBottom"
+            elif char == ord("r"):
+                screen.timeout(-1)
+                return "refresh"
+            elif char == ord("e"):
+                screen.timeout(-1)
+                return "enter"
+            elif char == ord("v"):
+                screen.timeout(-1)
+                return "view"
+            elif char == ord("h"):
+                screen.timeout(-1)
+                return "help"
+            elif char == ord("o"):
+                screen.timeout(-1)
+                return "open"
+            elif char == ord("c"):
+                screen.timeout(-1)
+                return "copy"
+            elif char == ord("m"):
+                screen.timeout(-1)
+                return "message"
+            elif char == ord("u"):
+                screen.timeout(-1)
+                return "url"
+            elif char == ord("i"):
+                screen.timeout(-1)
+                return "image"
+            """
+        
+        else:
+            screen.timeout(-1)
+            return "timeout"
     except curses.error:
+        screen.timeout(-1)
         return "timeout"
