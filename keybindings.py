@@ -16,6 +16,7 @@ scrollVerticalKeys={
     curses.KEY_UP:"scrollUp",
     curses.KEY_DOWN:"scrollDown"
 }
+
 # Used for scrolling between posts
 scrollHorizontalKeys={
     ord("a"):"scrollLeft",
