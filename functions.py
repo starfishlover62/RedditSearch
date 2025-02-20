@@ -1003,6 +1003,35 @@ def eventListener(screen, characters=True, anyChar=False, timeout=100):
         screen.timeout(timeout)
         char = screen.getch()
         if characters:
+            charMap = {ord("q"):"exit",
+                       ord("w"):"scrollUp",
+                       ord("s"):"scrollDown",
+                       ord("a"):"scrollLeft",
+                       ord("d"):"scrollRight",
+                       ord("t"):"scrollTop",
+                       ord("b"):"scrollBottom",
+                       ord("r"):"refresh",
+                       ord("e"):"enter",
+                       ord("v"):"view",
+                       ord("h"):"help",
+                       ord("o"):"open",
+                       ord("c"):"copy",
+                       ord("m"):"message",
+                       ord("u"):"url",
+                       ord("i"):"image",
+                       curses.KEY_UP:"scrollUp",
+                       curses.KEY_DOWN:"scrollDown",
+                       curses.KEY_LEFT:"scrollLeft",
+                       curses.KEY_RIGHT:"scrollRight"}
+            retVal = ""
+            try:
+                retVal = charMap[char]
+            except KeyError:
+                retVal = None
+            
+            if retVal is not None:
+                screen.timeout(-1)
+                return retVal
             if char == ord("q"):
                 screen.timeout(-1)
                 return "exit"
