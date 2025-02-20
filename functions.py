@@ -182,7 +182,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             page.refreshTooltip("main", page.currentLine() + 1, index=1, print=True)
 
             # Gets single character input from user
-            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
             match char:
                 case "timeout":
                     continue
@@ -300,7 +300,7 @@ def viewSearch(screen, search, minCols=80, minLines=24):
             )
 
             # Gets input from user
-            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
 
             match viewChar:
                 case "exit":  # Returns from function, signalling to exit search view
@@ -753,7 +753,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             viewPage.refreshTooltip(
                 "main", [viewPage.currentLine() + 1, page.maxLine + 1], 0, print=True
             )
-            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollVerticalKeys,kb.postKeys])
+            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollHorizontalKeysDefault,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.postKeys])
         skip = False
 
         match input:
@@ -776,6 +776,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             # Displays a help screen
             case "help":
                 screen.clear()
+
                 helpPage = scroll.ScrollingList(
                     screen,
                     [

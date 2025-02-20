@@ -8,19 +8,24 @@ Example:
 """
 import curses
 # Used for scrolling through post headers and a post
+scrollVerticalKeysDefault={
+    curses.KEY_UP:"scrollUp",
+    curses.KEY_DOWN:"scrollDown"
+}
+
 scrollVerticalKeys={
     ord("w"):"scrollUp",
     ord("s"):"scrollDown",
     ord("t"):"scrollTop",
     ord("b"):"scrollBottom",
-    curses.KEY_UP:"scrollUp",
-    curses.KEY_DOWN:"scrollDown"
 }
 
 # Used for scrolling between posts
 scrollHorizontalKeys={
     ord("a"):"scrollLeft",
-    ord("d"):"scrollRight",
+    ord("d"):"scrollRight"
+}
+scrollHorizontalKeysDefault={
     curses.KEY_LEFT:"scrollLeft",
     curses.KEY_RIGHT:"scrollRight"
 }
