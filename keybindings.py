@@ -1,3 +1,11 @@
+"""
+Keybindings to be used by different functions. Update the part before the
+colon to change the binding. The key must be placed inside double quotes
+inside of ord(). Keys must also be the lowercase version.
+Example:
+    Good            Bad
+    ord("w"):       ord("W")
+"""
 import curses
 # Used for scrolling through post headers and a post
 scrollVerticalKeys={
