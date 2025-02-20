@@ -1032,54 +1032,54 @@ def eventListener(screen, characters=True, anyChar=False, timeout=100):
             if retVal is not None:
                 screen.timeout(-1)
                 return retVal
-            if char == ord("q"):
-                screen.timeout(-1)
-                return "exit"
-            elif char == curses.KEY_UP or char == ord("w"):
-                screen.timeout(-1)
-                return "scrollUp"
-            elif char == curses.KEY_DOWN or char == ord("s"):
-                screen.timeout(-1)
-                return "scrollDown"
-            elif char == curses.KEY_LEFT or char == ord("a"):
-                screen.timeout(-1)
-                return "scrollLeft"
-            elif char == curses.KEY_RIGHT or char == ord("d"):
-                screen.timeout(-1)
-                return "scrollRight"
-            elif char == ord("t"):
-                screen.timeout(-1)
-                return "scrollTop"
-            elif char == ord("b"):
-                screen.timeout(-1)
-                return "scrollBottom"
-            elif char == ord("r"):
-                screen.timeout(-1)
-                return "refresh"
-            elif char == ord("e"):
-                screen.timeout(-1)
-                return "enter"
-            elif char == ord("v"):
-                screen.timeout(-1)
-                return "view"
-            elif char == ord("h"):
-                screen.timeout(-1)
-                return "help"
-            elif char == ord("o"):
-                screen.timeout(-1)
-                return "open"
-            elif char == ord("c"):
-                screen.timeout(-1)
-                return "copy"
-            elif char == ord("m"):
-                screen.timeout(-1)
-                return "message"
-            elif char == ord("u"):
-                screen.timeout(-1)
-                return "url"
-            elif char == ord("i"):
-                screen.timeout(-1)
-                return "image"
+            # if char == ord("q"):
+            #     screen.timeout(-1)
+            #     return "exit"
+            # elif char == curses.KEY_UP or char == ord("w"):
+            #     screen.timeout(-1)
+            #     return "scrollUp"
+            # elif char == curses.KEY_DOWN or char == ord("s"):
+            #     screen.timeout(-1)
+            #     return "scrollDown"
+            # elif char == curses.KEY_LEFT or char == ord("a"):
+            #     screen.timeout(-1)
+            #     return "scrollLeft"
+            # elif char == curses.KEY_RIGHT or char == ord("d"):
+            #     screen.timeout(-1)
+            #     return "scrollRight"
+            # elif char == ord("t"):
+            #     screen.timeout(-1)
+            #     return "scrollTop"
+            # elif char == ord("b"):
+            #     screen.timeout(-1)
+            #     return "scrollBottom"
+            # elif char == ord("r"):
+            #     screen.timeout(-1)
+            #     return "refresh"
+            # elif char == ord("e"):
+            #     screen.timeout(-1)
+            #     return "enter"
+            # elif char == ord("v"):
+            #     screen.timeout(-1)
+            #     return "view"
+            # elif char == ord("h"):
+            #     screen.timeout(-1)
+            #     return "help"
+            # elif char == ord("o"):
+            #     screen.timeout(-1)
+            #     return "open"
+            # elif char == ord("c"):
+            #     screen.timeout(-1)
+            #     return "copy"
+            # elif char == ord("m"):
+            #     screen.timeout(-1)
+            #     return "message"
+            # elif char == ord("u"):
+            #     screen.timeout(-1)
+            #     return "url"
+            # elif char == ord("i"):
+            #     screen.timeout(-1)
+            #     return "image"
         if char == curses.KEY_RESIZE:
             screen.timeout(-1)
             return "resize"
