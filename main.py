@@ -109,36 +109,37 @@ choosingSearches = True  # True if the user has yet to choose a search to perfor
 searchIndex = 0  # Index of the search to be performed
 posts = []  # List of all the posts meeting criteria
 
+"""
+page = scroll.ScrollingList(screen, [""])
+toolTipType = "main"
+toolTipTypes = {
+    "main": [
+        scroll.Line(
+            ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
+            [0, "max-38"],
+            curses.COLS,
+        )
+    ],
+    "press": [
+        scroll.Line(
+            ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
+            [0, "max-18"],
+            curses.COLS,
+        )
+    ],
+    "enter": [
+        scroll.Line(
+            ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
+            [0, "max-18"],
+            curses.COLS,
+        )
+    ],
+}
+toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
 
-# page = scroll.ScrollingList(screen, [""])
-# toolTipType = "main"
-# toolTipTypes = {
-#     "main": [
-#         scroll.Line(
-#             ["<-- Line %i/%i -- >", "(press e to view a post or q to quit)"],
-#             [0, "max-38"],
-#             curses.COLS,
-#         )
-#     ],
-#     "press": [
-#         scroll.Line(
-#             ["Enter a post number (1-%i), then press enter:", "(press q to exit)"],
-#             [0, "max-18"],
-#             curses.COLS,
-#         )
-#     ],
-#     "enter": [
-#         scroll.Line(
-#             ["Enter a post number (1-%i), then press enter:", "(enter q to exit)"],
-#             [0, "max-18"],
-#             curses.COLS,
-#         )
-#     ],
-# }
-# toolTip = scroll.ToolTip(toolTipTypes[toolTipType])
-
-# browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
-# browsePage.switchTooltip("main")
+browsePage = p.Page(screen=screen,scrollingList=page,tooltip=toolTip,tooltipTypes=toolTipTypes,onUpdate=functions.getHeaders,minRows=minTermLines,minCols=minTermCols)
+browsePage.switchTooltip("main")
+"""
 
 try:
     while True:
