@@ -182,7 +182,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             page.refreshTooltip("main", page.currentLine() + 1, index=1, print=True)
 
             # Gets single character input from user
-            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
+            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
             match char:
                 case "timeout":
                     continue
@@ -300,7 +300,7 @@ def viewSearch(screen, search, minCols=80, minLines=24):
             )
 
             # Gets input from user
-            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
+            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
 
             match viewChar:
                 case "exit":  # Returns from function, signalling to exit search view
@@ -696,21 +696,17 @@ def viewPostUpdate(content):
         fancy=config.fancy_characters,
     )
     
-    
-def reverseAndFilterDict(bindings,targets):
-    if isinstance(bindings, dict):
-        bindings = [bindings]
-    if isinstance(targets,str):
-        targets = [targets]
-        
-    d = {}
-    for item in bindings:
-        d = d | item
-    keys = [key for key, val in d.items() if val in targets]
-    subset = {key: d[key] for key in keys}
-    reverse = {v:k for k,v in subset.items()}
-    return reverse
 
+
+def bindingLookup(bindingSet: list[kb.Keybind],targets: list[str]):
+    matches = [None] * len(targets)
+    for item in bindingSet:
+        if item.description in targets:
+            matches[targets.index(item.description)] = item
+    return matches
+
+def showKeyBind(bind : kb.Keybind | None) -> str:
+    return 'undefined' if bind is None else chr(bind.keys[0])
 
 def viewPost(post, screen, minCols=80, minLines=24):
     """
@@ -768,7 +764,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
             viewPage.refreshTooltip(
                 "main", [viewPage.currentLine() + 1, page.maxLine + 1], 0, print=True
             )
-            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollHorizontalKeysDefault,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.postKeys])
+            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollVerticalKeys,kb.postKeys])
         skip = False
 
         match input:
@@ -792,22 +788,27 @@ def viewPost(post, screen, minCols=80, minLines=24):
             case "help":
                 screen.clear()
                 tar = ["scrollUp","scrollDown","scrollLeft","scrollRight","help","image","open","copy","url","message"]
-                reverse = reverseAndFilterDict([kb.editKeys,kb.postKeys,kb.scrollVerticalKeys,kb.scrollHorizontalKeys],tar)
+                bindingSet = kb.editKeys + kb.postKeys + kb.scrollVerticalKeys + kb.scrollHorizontalKeys
+                
+                bindings = [bind for bind in bindingSet if bind.description in tar]
+                
+                matches = bindingLookup(bindings,tar)
+                
 
                 helpPage = scroll.ScrollingList(
                     screen,
                     [
                         "Press the button in () to execute its command",
-                        f"({chr(reverse['scrollUp'])}) or (up arrow) scroll up",
-                        f"({chr(reverse['scrollDown'])}) or (down arrow) scroll down",
-                        f"({chr(reverse['scrollLeft'])}) or (left arrow) view previous post",
-                        f"({chr(reverse['scrollRight'])}) or (right arrow) view next post",
-                        f"({chr(reverse['help'])}) Displays this menu",
-                        f"({chr(reverse['image'])}) If post is an image, opens image",
-                        f"({chr(reverse['open'])}) Opens the post in a new tab of the default web browser",
-                        f"({chr(reverse['copy'])}) Copies the post url to the clipboard",
-                        f"({chr(reverse['url'])}) Prints the post urls to a file. (link_output in config.py)",
-                        f"({chr(reverse['message'])}) Opens the author's page in a new tab of the default web browser",
+                        f"({showKeyBind(matches[0])}) or (up arrow) scroll up",
+                        f"({showKeyBind(matches[1])}) or (down arrow) scroll down",
+                        f"({showKeyBind(matches[2])}) or (left arrow) view previous post",
+                        f"({showKeyBind(matches[3])}) or (right arrow) view next post",
+                        f"({showKeyBind(matches[4])}) Displays this menu",
+                        f"({showKeyBind(matches[5])}) If post is an image, opens image",
+                        f"({showKeyBind(matches[6])}) Opens the post in a new tab of the default web browser",
+                        f"({showKeyBind(matches[7])}) Copies the post url to the clipboard",
+                        f"({showKeyBind(matches[8])}) Prints the post urls to a file. (link_output in config.py)",
+                        f"({showKeyBind(matches[9])}) Opens the author's page in a new tab of the default web browser",
                         "Press any key to exit this screen",
                     ],
                     0,
@@ -935,7 +936,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
 
         # Gets input from the user
 
-        input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
+        input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
 
         match input:
             case "timeout":
@@ -1014,11 +1015,11 @@ def isValidSubreddit(userReddit, name):
 
 def eventListener(screen, bindings:list|dict =None, characters=True, anyChar=False, timeout=100):
     """
-    Waits for a single character input from the user.
-    bindings: a list of dictionaries containing keys and their output
-    characters: is whether it will listen for characters for input, or just terminal resizing.
-    anyChar: will return any for any character input.
-    timeout: is the number of milliseconds the function will wait for a response before returning timeout
+    Waits for a single character input from the user.  
+    bindings: a list of lists of Keybind objects. Returns the first match.  
+    characters: is whether it will listen for characters for input, or just terminal resizing.  
+    anyChar: will return any for any character input.  
+    timeout: is the number of milliseconds the function will wait for a response before returning timeout.  
     """
     
     if bindings is None and anyChar != True:
@@ -1044,14 +1045,11 @@ def eventListener(screen, bindings:list|dict =None, characters=True, anyChar=Fal
                 screen.timeout(-1)
                 raise exceptions.NoBindingError
             else:
-                retVal = ""
                 for item in bindings:
-                    try:
-                        retVal = item[char]
-                        screen.timeout(-1)
-                        return retVal
-                    except KeyError:
-                        pass
+                    for binding in item:
+                        if char in binding.keys:
+                            screen.timeout(-1)
+                            return binding.description
             """
             charMap = {ord("q"):"exit",
                        ord("w"):"scrollUp",
