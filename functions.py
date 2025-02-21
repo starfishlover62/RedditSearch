@@ -695,6 +695,21 @@ def viewPostUpdate(content):
         curses.COLS,
         fancy=config.fancy_characters,
     )
+    
+    
+def reverseAndFilterDict(bindings,targets):
+    if isinstance(bindings, dict):
+        bindings = [bindings]
+    if isinstance(targets,str):
+        targets = [targets]
+        
+    d = {}
+    for item in bindings:
+        d = d | item
+    keys = [key for key, val in d.items() if val in targets]
+    subset = {key: d[key] for key in keys}
+    reverse = {v:k for k,v in subset.items()}
+    return reverse
 
 
 def viewPost(post, screen, minCols=80, minLines=24):
@@ -776,21 +791,23 @@ def viewPost(post, screen, minCols=80, minLines=24):
             # Displays a help screen
             case "help":
                 screen.clear()
+                tar = ["scrollUp","scrollDown","scrollLeft","scrollRight","help","image","open","copy","url","message"]
+                reverse = reverseAndFilterDict([kb.editKeys,kb.postKeys,kb.scrollVerticalKeys,kb.scrollHorizontalKeys],tar)
 
                 helpPage = scroll.ScrollingList(
                     screen,
                     [
                         "Press the button in () to execute its command",
-                        "(w) or (up arrow) scroll up",
-                        "(s) or (down arrow) scroll down",
-                        "(a) or (left arrow) view previous post",
-                        "(d) or (right arrow) view next post",
-                        "(h) Displays this menu",
-                        "(i) If post is an image, opens image",
-                        "(o) Opens the post in a new tab of the default web browser",
-                        "(c) Copies the post url to the clipboard",
-                        "(u) Prints the post urls to a file. (link_output in config.py)",
-                        "(m) Opens the author's page in a new tab of the default web browser",
+                        f"({chr(reverse['scrollUp'])}) or (up arrow) scroll up",
+                        f"({chr(reverse['scrollDown'])}) or (down arrow) scroll down",
+                        f"({chr(reverse['scrollLeft'])}) or (left arrow) view previous post",
+                        f"({chr(reverse['scrollRight'])}) or (right arrow) view next post",
+                        f"({chr(reverse['help'])}) Displays this menu",
+                        f"({chr(reverse['image'])}) If post is an image, opens image",
+                        f"({chr(reverse['open'])}) Opens the post in a new tab of the default web browser",
+                        f"({chr(reverse['copy'])}) Copies the post url to the clipboard",
+                        f"({chr(reverse['url'])}) Prints the post urls to a file. (link_output in config.py)",
+                        f"({chr(reverse['message'])}) Opens the author's page in a new tab of the default web browser",
                         "Press any key to exit this screen",
                     ],
                     0,
