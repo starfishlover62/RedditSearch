@@ -108,7 +108,7 @@ def listSearches(searches):
 
 
 def getSearchNum(screen, searches, minCols=80, minLines=24):
-    """Displays a list of searches, and has the user select one to be performed. 
+    """Displays a list of searches, and has the user select one to be performed.
     Also allows the user to create or delete searches.
 
     Args:
@@ -122,7 +122,7 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             -3: Search was deleted, therefore save  
             -2: Searches parameter is empty, or the user selected to create a new search  
             -1: User pressed q to quit  
-            \>=0: The index of the searches list that was chosen
+            \\>=0: The index of the searches list that was chosen
     """
     if searches is not None:
         # Defines the different tooltips
@@ -800,7 +800,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
                 helpPage.print()
                 while True:
                     char = eventListener(
-                        screen, anyChar=True
+                        screen, bindings=[kb.controlKeys], anyChar=True
                     )  # Screen stays up until user does some action
                     if not (char == "timeout"):
                         if char == "resize":
@@ -856,7 +856,7 @@ def viewPost(post, screen, minCols=80, minLines=24):
                 screen.refresh()
                 while True:
                     char = eventListener(
-                        screen, anyChar=True
+                        screen, bindings=[kb.controlKeys], anyChar=True
                     )  # Screen stays up until user does some action
                     if not (char == "timeout"):
                         if char == "resize":
@@ -918,7 +918,7 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
 
         # Gets input from the user
 
-        input = eventListener(screen,bindings=[kb.controlKeys,kb.editKeys])
+        input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
 
         match input:
             case "timeout":
