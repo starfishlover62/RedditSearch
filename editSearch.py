@@ -92,7 +92,7 @@ class EditSearch:
 
             # Gets input from the user
 
-            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.scrollVerticalKeysDefault,kb.editKeys])
+            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
             resized = False
 
             match input:
