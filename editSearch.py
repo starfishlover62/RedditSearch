@@ -34,7 +34,10 @@ class EditSearch:
         toolTipTypes = {
             "main": [
                 scroll.Line(
-                    ["<-- Line %i/%i -- >", "(a) add, (e) select, (d) delete, or (q) quit"],
+                    [
+                        "<-- Line %i/%i -- >",
+                        "(a) add, (e) select, (d) delete, or (q) quit",
+                    ],
                     [0, "max-45"],
                     curses.COLS,
                 )
@@ -92,7 +95,10 @@ class EditSearch:
 
             # Gets input from the user
 
-            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+            input = functions.eventListener(
+                self.screen,
+                bindings=[kb.controlKeys, kb.scrollVerticalKeys, kb.editKeys],
+            )
             resized = False
 
             match input:
@@ -244,7 +250,9 @@ class EditSearch:
 
             # Gets input from the user
 
-            filterInput = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.editKeys])
+            filterInput = functions.eventListener(
+                self.screen, bindings=[kb.controlKeys, kb.editKeys]
+            )
 
             match filterInput:
                 case "timeout":
@@ -422,7 +430,9 @@ class EditSearch:
 
             # Gets input from the user
 
-            input = functions.eventListener(self.screen,bindings=[kb.controlKeys,kb.editKeys])
+            input = functions.eventListener(
+                self.screen, bindings=[kb.controlKeys, kb.editKeys]
+            )
 
             match input:
                 case "timeout":

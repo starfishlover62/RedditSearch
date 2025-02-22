@@ -119,9 +119,9 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
 
     Returns:
         int:
-            -3: Search was deleted, therefore save  
-            -2: Searches parameter is empty, or the user selected to create a new search  
-            -1: User pressed q to quit  
+            -3: Search was deleted, therefore save
+            -2: Searches parameter is empty, or the user selected to create a new search
+            -1: User pressed q to quit
             \\>=0: The index of the searches list that was chosen
     """
     if searches is not None:
@@ -182,7 +182,9 @@ def getSearchNum(screen, searches, minCols=80, minLines=24):
             page.refreshTooltip("main", page.currentLine() + 1, index=1, print=True)
 
             # Gets single character input from user
-            char = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+            char = eventListener(
+                screen, bindings=[kb.controlKeys, kb.scrollVerticalKeys, kb.editKeys]
+            )
             match char:
                 case "timeout":
                     continue
@@ -300,7 +302,9 @@ def viewSearch(screen, search, minCols=80, minLines=24):
             )
 
             # Gets input from user
-            viewChar = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+            viewChar = eventListener(
+                screen, bindings=[kb.controlKeys, kb.scrollVerticalKeys, kb.editKeys]
+            )
 
             match viewChar:
                 case "exit":  # Returns from function, signalling to exit search view
@@ -695,18 +699,19 @@ def viewPostUpdate(content):
         curses.COLS,
         fancy=config.fancy_characters,
     )
-    
 
 
-def bindingLookup(bindingSet: list[kb.Keybind],targets: list[str]):
+def bindingLookup(bindingSet: list[kb.Keybind], targets: list[str]):
     matches = [None] * len(targets)
     for item in bindingSet:
         if item.description in targets:
             matches[targets.index(item.description)] = item
     return matches
 
-def showKeyBind(bind : kb.Keybind | None) -> str:
-    return 'undefined' if bind is None else chr(bind.keys[0])
+
+def showKeyBind(bind: kb.Keybind | None) -> str:
+    return "undefined" if bind is None else chr(bind.keys[0])
+
 
 def viewPost(post, screen, minCols=80, minLines=24):
     """
@@ -764,7 +769,15 @@ def viewPost(post, screen, minCols=80, minLines=24):
             viewPage.refreshTooltip(
                 "main", [viewPage.currentLine() + 1, page.maxLine + 1], 0, print=True
             )
-            input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollHorizontalKeys,kb.scrollVerticalKeys,kb.postKeys])
+            input = eventListener(
+                screen,
+                bindings=[
+                    kb.controlKeys,
+                    kb.scrollHorizontalKeys,
+                    kb.scrollVerticalKeys,
+                    kb.postKeys,
+                ],
+            )
         skip = False
 
         match input:
@@ -787,13 +800,28 @@ def viewPost(post, screen, minCols=80, minLines=24):
             # Displays a help screen
             case "help":
                 screen.clear()
-                tar = ["scrollUp","scrollDown","scrollLeft","scrollRight","help","image","open","copy","url","message"]
-                bindingSet = kb.editKeys + kb.postKeys + kb.scrollVerticalKeys + kb.scrollHorizontalKeys
-                
+                tar = [
+                    "scrollUp",
+                    "scrollDown",
+                    "scrollLeft",
+                    "scrollRight",
+                    "help",
+                    "image",
+                    "open",
+                    "copy",
+                    "url",
+                    "message",
+                ]
+                bindingSet = (
+                    kb.editKeys
+                    + kb.postKeys
+                    + kb.scrollVerticalKeys
+                    + kb.scrollHorizontalKeys
+                )
+
                 bindings = [bind for bind in bindingSet if bind.description in tar]
-                
-                matches = bindingLookup(bindings,tar)
-                
+
+                matches = bindingLookup(bindings, tar)
 
                 helpPage = scroll.ScrollingList(
                     screen,
@@ -936,7 +964,9 @@ def browsePosts(posts, screen, minCols=80, minLines=24):
 
         # Gets input from the user
 
-        input = eventListener(screen,bindings=[kb.controlKeys,kb.scrollVerticalKeys,kb.editKeys])
+        input = eventListener(
+            screen, bindings=[kb.controlKeys, kb.scrollVerticalKeys, kb.editKeys]
+        )
 
         match input:
             case "timeout":
@@ -1013,18 +1043,20 @@ def isValidSubreddit(userReddit, name):
     return 1
 
 
-def eventListener(screen, bindings:list|dict =None, characters=True, anyChar=False, timeout=100):
+def eventListener(
+    screen, bindings: list | dict = None, characters=True, anyChar=False, timeout=100
+):
     """
-    Waits for a single character input from the user.  
-    bindings: a list of lists of Keybind objects. Returns the first match.  
-    characters: is whether it will listen for characters for input, or just terminal resizing.  
-    anyChar: will return any for any character input.  
-    timeout: is the number of milliseconds the function will wait for a response before returning timeout.  
+    Waits for a single character input from the user.
+    bindings: a list of lists of Keybind objects. Returns the first match.
+    characters: is whether it will listen for characters for input, or just terminal resizing.
+    anyChar: will return any for any character input.
+    timeout: is the number of milliseconds the function will wait for a response before returning timeout.
     """
-    
-    if bindings is None and anyChar != True:
+
+    if bindings is None and not anyChar:
         raise exceptions.NoBindingError
-    if isinstance(bindings,dict):
+    if isinstance(bindings, dict):
         bindings = [bindings]
     try:
         screen.timeout(timeout)
@@ -1131,7 +1163,7 @@ def eventListener(screen, bindings:list|dict =None, characters=True, anyChar=Fal
                 screen.timeout(-1)
                 return "image"
             """
-        
+
         else:
             screen.timeout(-1)
             return "timeout"

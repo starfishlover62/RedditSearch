@@ -159,7 +159,7 @@ try:
                     if not valid:  # Closes window, then prints out all valid searches found in the file, and finally exits
                         functions.close(screen)
                         print(
-                            f"No search by the name of \'{args['name']}\' exists\nThe following are valid searches:"
+                            f"No search by the name of '{args['name']}' exists\nThe following are valid searches:"
                         )
                         for item in searches:
                             print(f"\t{item.name}")
